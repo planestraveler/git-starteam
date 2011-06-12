@@ -3,8 +3,8 @@ package org.sync;
 import java.io.File;
 import java.io.IOException;
 
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 public class MainEntry {
 
@@ -16,12 +16,8 @@ public class MainEntry {
 
 		File testFolder = new File("/tmp/gitTest");
 		if(testFolder.exists() && testFolder.isDirectory()) {
-			FileRepositoryBuilder repBuilder = new FileRepositoryBuilder();
-			repBuilder.setGitDir(testFolder);
-			repBuilder.readEnvironment();
-			repBuilder.findGitDir();
 			try {
-				repBuilder.build();
+				Git aGitDB = Git.open(testFolder);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
