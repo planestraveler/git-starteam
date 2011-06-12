@@ -5,20 +5,19 @@ import java.io.OutputStream;
 
 public class Mark implements FastImportObject {
 
-	private static long MarkID = 0;
-	private long ID;
+	private MarkID ID;
 	
-	private Mark(long id) {
-		ID = id;
-	}
-	
-	public static Mark getMark() {
-		return new Mark(MarkID++);
+	public Mark() {
+		ID = MarkID.getNextMarkID();
 	}
 	
 	public void writeTo(OutputStream out) throws IOException {
-		StringBuilder markString = new StringBuilder();
-		markString.append("mark :").append(ID).append('\n');
-		out.write(markString.toString().getBytes());
+		out.write("mark ".getBytes());
+		ID.writeTo(out);
+		out.write('\n');
+	}
+
+	public MarkID getID() {
+		return ID;
 	}
 }
