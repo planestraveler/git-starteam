@@ -20,5 +20,10 @@ public class MarkID implements FastImportObject {
 	public void writeTo(OutputStream out) throws IOException {
 		out.write(Id.getBytes());
 	}
+	
+	@Override
+	public String toString() {
+		return Id;
+	}
 
 }
