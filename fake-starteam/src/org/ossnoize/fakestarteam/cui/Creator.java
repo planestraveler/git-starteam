@@ -6,6 +6,7 @@ import java.util.zip.ZipException;
 
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.SerializableProject;
+import org.ossnoize.fakestarteam.UserProvider;
 
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
@@ -21,7 +22,13 @@ public class Creator {
 	 */
 	public static void main(String[] args) {
 		CmdLineParser parser = new CmdLineParser();
-		CmdLineParser.Option createProject = parser.addStringOption('P', "project");
+		CmdLineParser.Option createProject = parser.addStringOption("newProject");
+		CmdLineParser.Option createView = parser.addStringOption("newView");
+		CmdLineParser.Option parentView = parser.addStringOption("parentView");
+		CmdLineParser.Option createUser = parser.addStringOption("createUser");
+		CmdLineParser.Option user = parser.addStringOption('U', "user");
+		CmdLineParser.Option password = parser.addStringOption("passwd");
+		CmdLineParser.Option userFullName = parser.addStringOption("fullName");
 		
 		try {
 			parser.parse(args);
@@ -35,22 +42,14 @@ public class Creator {
 			System.exit(2);
 		}
 		String projectName = (String) parser.getOptionValue(createProject);
-		String[] remainder = parser.getRemainingArgs();
-		if(remainder.length > 0) {
-			try {
-				InternalPropertiesProvider.getInstance().setFileName(remainder[0]);
-			} catch (ZipException e) {
-				System.err.println(e.getMessage());
-				System.exit(3);
-			} catch (IOException e) {
-				System.err.println(e.getMessage());
-				System.exit(4);
-			}
-		}
 		Server server = new Server("localhost", 23456);
 		if(null != projectName) {
 			Project prj = new SerializableProject(server, projectName, File.separator);
 			prj.update();
+		}
+		String username = (String) parser.getOptionValue(createUser);
+		if(null != username) {
+			UserProvider.getInstance().createNewUser(username);
 		}
 	}
 

@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.starbase.starteam.Project;
+
 public class ProjectProvider {
 
 	private static ProjectProvider Reference = null;
@@ -31,7 +33,7 @@ public class ProjectProvider {
 		return projects.containsKey(project.getName());
 	}
 
-	public void readProjectList() {
+	private void readProjectList() {
 		projects.clear();
 		ObjectInputStream in = null;
 		
@@ -83,5 +85,10 @@ public class ProjectProvider {
 		}
 		projects.put(project.getName(), project);
 		writeProjectList();
+	}
+
+	public Project[] listProject() {
+		Project[] ret = new Project[projects.size()];
+		return projects.keySet().toArray(ret);
 	}
 }

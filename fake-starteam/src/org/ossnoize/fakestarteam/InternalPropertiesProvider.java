@@ -20,6 +20,10 @@ public class InternalPropertiesProvider {
 	
 	private InternalPropertiesProvider() {
 		Archive = new File("localhost");
+		validateArchive();
+	}
+
+	private void validateArchive() {
 		if(Archive.isFile()) {
 			Archive.delete();
 			Archive.mkdir();
@@ -32,16 +36,11 @@ public class InternalPropertiesProvider {
 	public File getFile() {
 		return Archive;
 	}
-	
-	public void setFileName(String filename) throws IOException {
-		Archive = new File(filename);
-		if(!Archive.exists()) {
-			Archive.mkdirs();
-		}
-	}
 
 	public void setCurrentServer(Server server) {
 		this.server = server;
+		Archive = new File(server.getAddress() + "." + server.getPort());
+		validateArchive();
 	}
 	
 	public Server getCurrentServer() {

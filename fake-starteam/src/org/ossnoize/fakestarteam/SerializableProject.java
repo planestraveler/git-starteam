@@ -7,17 +7,17 @@ import com.starbase.starteam.Server;
 
 public class SerializableProject extends Project implements Serializable {
 
-	protected SerializableProject() {
-	}
-	
-	public SerializableProject(Server server, String name, String rootDirectory) {
-		super(server, name, rootDirectory);
-	}
-
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3283403336147311883L;
+	
+	protected SerializableProject() {
+	}
+
+	public SerializableProject(Server server, String name, String rootDirectory) {
+		super(server, name, rootDirectory);
+	}
 	
 	@Override
 	public void update() {
