@@ -40,8 +40,10 @@ public class Creator {
 	public static void main(String[] args) {
 		CmdLineParser parser = new CmdLineParser();
 		CmdLineParser.Option createProject = parser.addStringOption("create-project");
+		CmdLineParser.Option listProjects = parser.addBooleanOption('l', "list-projects");
 		CmdLineParser.Option createView = parser.addStringOption("create-view");
 		CmdLineParser.Option parentView = parser.addStringOption("parent-view");
+		CmdLineParser.Option listViews = parser.addStringOption('L', "list-views");
 		CmdLineParser.Option createUser = parser.addStringOption("create-user");
 		CmdLineParser.Option user = parser.addStringOption('U', "user");
 		CmdLineParser.Option password = parser.addStringOption('P', "password");
@@ -70,6 +72,11 @@ public class Creator {
 			UserProvider.getInstance().createNewUser(createUserName);
 		}
 		String loginName = (String) parser.getOptionValue(user);
+		String passwd = (String) parser.getOptionValue(password);
+		server.connect();
+		if(0 < server.logOn(loginName, passwd)) {
+			System.out.println("Connected to the fake server");
+		}
 		String setUserPassword = (String) parser.getOptionValue(setPassword);
 		String fullName = (String) parser.getOptionValue(userFullName);
 		if(null != loginName && (null != setUserPassword || null != fullName)) {
@@ -84,7 +91,12 @@ public class Creator {
 				System.err.println("Could not find the user named " + loginName);
 			}
 		}
-		String passwd = (String) parser.getOptionValue(password);
+		Boolean listProject = (Boolean) parser.getOptionValue(listProjects);
+		if(listProject) {
+			for(Project p : server.getProjects()) {
+				System.out.println("* " + p.getName());
+			}
+		}
 	}
 
 	private static void printHelp() {

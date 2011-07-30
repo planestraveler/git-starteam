@@ -104,8 +104,8 @@ public class ProjectProvider {
 	}
 
 	public Project[] listProject() {
-		Project[] ret = new Project[projects.size()];
-		return projects.keySet().toArray(ret);
+		SerializableProject[] ret = new SerializableProject[projects.size()];
+		return projects.values().toArray(ret);
 	}
 
 	public void createNewProject(Server server, String projectName, String rootDirectory) {
