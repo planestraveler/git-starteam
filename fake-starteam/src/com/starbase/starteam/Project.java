@@ -21,8 +21,6 @@ import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 public class Project extends SimpleTypedResource implements ISecurableObject, ISecurableContainer {
 
 	private volatile Server server;
-	private String name;
-	private String rootDir;
 	private boolean isNew;
 
 	protected Project() {
@@ -30,13 +28,11 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 	
 	public Project(Server server, String name, String rootDirectory) {
 		this.server = server;
-		this.name = name;
-		this.rootDir = rootDirectory;
 		this.isNew = true;
 	}
 	
 	public String getName() {
-		return name;
+		return null;
 	}
 	
 	public Server getServer() {

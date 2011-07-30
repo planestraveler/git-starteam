@@ -27,12 +27,16 @@ public class SerializableProject extends Project implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -3283403336147311883L;
+	private String name;
+	private String rootDir;
 	
 	protected SerializableProject() {
 	}
 
 	public SerializableProject(Server server, String name, String rootDirectory) {
 		super(server, name, rootDirectory);
+		this.name = name;
+		this.rootDir = rootDirectory;
 	}
 	
 	@Override
@@ -46,6 +50,11 @@ public class SerializableProject extends Project implements Serializable {
 		} else {
 			ProjectProvider.getInstance().writeProjectList();
 		}
+	}
+	
+	@Override
+	public String getName() {
+		return name;
 	}
 
 }
