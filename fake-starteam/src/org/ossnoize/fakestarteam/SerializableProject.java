@@ -37,7 +37,15 @@ public class SerializableProject extends Project implements Serializable {
 	
 	@Override
 	public void update() {
-		ProjectProvider.getInstance().writeProjectList();
+		if(ProjectProvider.getInstance().exist(this)) {
+			throw new Error("Duplicate project ID");
+		}
+		if(isNew()) {
+			super.update();
+			ProjectProvider.getInstance().addNewProject(this);
+		} else {
+			ProjectProvider.getInstance().writeProjectList();
+		}
 	}
 
 }

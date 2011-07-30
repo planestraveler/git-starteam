@@ -109,6 +109,6 @@ public class ProjectProvider {
 	}
 
 	public void createNewProject(Server server, String projectName, String rootDirectory) {
-		addNewProject(new SerializableProject(server, projectName, rootDirectory));
+		new SerializableProject(server, projectName, rootDirectory).update();
 	}
 }

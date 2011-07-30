@@ -23,6 +23,7 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 	private volatile Server server;
 	private String name;
 	private String rootDir;
+	private boolean isNew;
 
 	protected Project() {
 	}
@@ -31,6 +32,7 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 		this.server = server;
 		this.name = name;
 		this.rootDir = rootDirectory;
+		this.isNew = true;
 	}
 	
 	public String getName() {
@@ -45,5 +47,10 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 	}
 
 	public void update() {
+		isNew = false;
+	}
+	
+	public boolean isNew() {
+		return isNew;
 	}
 }

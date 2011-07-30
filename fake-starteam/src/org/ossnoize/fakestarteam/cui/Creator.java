@@ -88,7 +88,7 @@ public class Creator {
 	}
 
 	private static void printHelp() {
-		System.out.println("-P <project name>");
+		System.out.println("-p <project name>");
 	}
 
 }
