@@ -20,10 +20,12 @@ import java.io.File;
 
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.SerializableProject;
+import org.ossnoize.fakestarteam.SerializableUser;
 import org.ossnoize.fakestarteam.UserProvider;
 
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.User;
 
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
@@ -36,13 +38,15 @@ public class Creator {
 	 */
 	public static void main(String[] args) {
 		CmdLineParser parser = new CmdLineParser();
-		CmdLineParser.Option createProject = parser.addStringOption("newProject");
-		CmdLineParser.Option createView = parser.addStringOption("newView");
-		CmdLineParser.Option parentView = parser.addStringOption("parentView");
-		CmdLineParser.Option createUser = parser.addStringOption("createUser");
+		CmdLineParser.Option createProject = parser.addStringOption("create-project");
+		CmdLineParser.Option createView = parser.addStringOption("create-view");
+		CmdLineParser.Option parentView = parser.addStringOption("parent-view");
+		CmdLineParser.Option createUser = parser.addStringOption("create-user");
 		CmdLineParser.Option user = parser.addStringOption('U', "user");
-		CmdLineParser.Option password = parser.addStringOption("passwd");
-		CmdLineParser.Option userFullName = parser.addStringOption("fullName");
+		CmdLineParser.Option password = parser.addStringOption('P', "password");
+		CmdLineParser.Option project = parser.addStringOption('p', "project");
+		CmdLineParser.Option setPassword = parser.addStringOption("set-password");
+		CmdLineParser.Option userFullName = parser.addStringOption("fullname");
 		
 		try {
 			parser.parse(args);
@@ -61,10 +65,26 @@ public class Creator {
 			Project prj = new SerializableProject(server, projectName, File.separator);
 			prj.update();
 		}
-		String username = (String) parser.getOptionValue(createUser);
-		if(null != username) {
-			UserProvider.getInstance().createNewUser(username);
+		String createUserName = (String) parser.getOptionValue(createUser);
+		if(null != createUserName) {
+			UserProvider.getInstance().createNewUser(createUserName);
 		}
+		String loginName = (String) parser.getOptionValue(user);
+		String setUserPassword = (String) parser.getOptionValue(setPassword);
+		String fullName = (String) parser.getOptionValue(userFullName);
+		if(null != loginName && (null != setUserPassword || null != fullName)) {
+			SerializableUser userObject = UserProvider.getInstance().findUser(loginName);
+			if(null != userObject) {
+				if(null != setUserPassword)
+					userObject.setPassword(setUserPassword);
+				if(null != fullName)
+					userObject.setName(fullName);
+				UserProvider.getInstance().applyChanges();
+			} else {
+				System.err.println("Could not find the user named " + loginName);
+			}
+		}
+		String passwd = (String) parser.getOptionValue(password);
 	}
 
 	private static void printHelp() {

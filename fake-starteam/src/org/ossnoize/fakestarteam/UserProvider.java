@@ -107,4 +107,17 @@ public class UserProvider {
 		users.put(lastUserID, new SerializableUser(uid, lastUserID));
 		writeUserList();
 	}
+
+	public SerializableUser findUser(String uid) {
+		for(Entry<Integer, SerializableUser> user : users.entrySet()) {
+			if(uid.equals(user.getValue().getUID())) {
+				return user.getValue();
+			}
+		}
+		return null;
+	}
+
+	public void applyChanges() {
+		writeUserList();
+	}
 }
