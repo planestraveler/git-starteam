@@ -109,6 +109,8 @@ public class UserProvider {
 	}
 
 	public SerializableUser findUser(String uid) {
+		if(null == uid)
+			return null;
 		for(Entry<Integer, SerializableUser> user : users.entrySet()) {
 			if(uid.equals(user.getValue().getUID())) {
 				return user.getValue();
