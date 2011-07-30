@@ -1,0 +1,17 @@
+This project aim to bring a interface layer between Git and Starteam.
+
+Current Goal:
+Bring the capacity of converting Starteam project to Git with the help
+of the fast-import capacity. 
+
+Futur Goal:
+Give the capacity of making git a Starteam compatible client with the
+added value of using Git.
+
+License:
+Git-Starteam is convered under the General Public License Version 3.
+Fake-Starteam is convered under a personnal license and is included 
+only for testing purpose. The project shall not be used for any other
+purpose than easly testing your interaction with a fake starteam server.
+
+
