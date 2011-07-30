@@ -18,13 +18,15 @@ package com.starbase.starteam;
 
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.ProjectProvider;
+import org.ossnoize.fakestarteam.SerializableUser;
+import org.ossnoize.fakestarteam.UserProvider;
 
 public class Server {
 
 	private String Address;
 	private int Port;
 	private boolean connected;
-	private boolean loggedOn;
+	private User loggedUser;
 
 	public Server(String address, int port) {
 		Address = address;
@@ -49,17 +51,24 @@ public class Server {
 	}
 	
 	public boolean isLoggedOn() {
-		return loggedOn;
+		return (null != loggedUser);
 	}
 	
 	public Project[] getProjects() {
-		if(connected && loggedOn) {
+		if(connected && (null != loggedUser)) {
 			return ProjectProvider.getInstance().listProject();
 		}
 		return new Project[0];
 	}
 	
 	public int logOn(java.lang.String logOnName, java.lang.String password) {
+		SerializableUser u = UserProvider.getInstance().findUser(logOnName);
+		if(null != u) {
+			if(u.isCorrectPassword(password)) {
+				loggedUser = u;
+				return u.getID();	
+			}
+		}
 		return 0;
 	}
 }
