@@ -19,6 +19,7 @@ package org.ossnoize.fakestarteam.cui;
 import java.io.File;
 
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
+import org.ossnoize.fakestarteam.ProjectProvider;
 import org.ossnoize.fakestarteam.SerializableProject;
 import org.ossnoize.fakestarteam.SerializableUser;
 import org.ossnoize.fakestarteam.UserProvider;
@@ -62,8 +63,7 @@ public class Creator {
 		String projectName = (String) parser.getOptionValue(createProject);
 		Server server = new Server("localhost", 23456);
 		if(null != projectName) {
-			Project prj = new SerializableProject(server, projectName, File.separator);
-			prj.update();
+			ProjectProvider.getInstance().createNewProject(server, projectName, File.separator);
 		}
 		String createUserName = (String) parser.getOptionValue(createUser);
 		if(null != createUserName) {

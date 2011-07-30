@@ -37,11 +37,7 @@ public class SerializableProject extends Project implements Serializable {
 	
 	@Override
 	public void update() {
-		if(ProjectProvider.getInstance().exist(this)) {
-			ProjectProvider.getInstance().writeProjectList();
-		} else {
-			ProjectProvider.getInstance().addNewProject(this);
-		}
+		ProjectProvider.getInstance().writeProjectList();
 	}
 
 }

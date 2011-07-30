@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.starbase.starteam.Project;
+import com.starbase.starteam.Server;
 
 public class ProjectProvider {
 
@@ -95,7 +96,6 @@ public class ProjectProvider {
 	}
 
 	public void addNewProject(SerializableProject project) {
-		readProjectList();
 		if(exist(project)) {
 			throw new Error("duplicate project name");
 		}
@@ -106,5 +106,9 @@ public class ProjectProvider {
 	public Project[] listProject() {
 		Project[] ret = new Project[projects.size()];
 		return projects.keySet().toArray(ret);
+	}
+
+	public void createNewProject(Server server, String projectName, String rootDirectory) {
+		addNewProject(new SerializableProject(server, projectName, rootDirectory));
 	}
 }
