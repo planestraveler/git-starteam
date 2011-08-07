@@ -34,7 +34,7 @@ public class SerializableProject extends Project implements Serializable {
 	private String name;
 	private String rootDir;
 	private Integer defaultViewId;
-	private Map<Integer, View> views = new HashMap<Integer, View>();
+	private Map<Integer, SerializableView> views;
 	
 	protected SerializableProject() {
 	}
@@ -47,17 +47,30 @@ public class SerializableProject extends Project implements Serializable {
 	}
 	
 	private void createDefaultView() {
-		View main = new SerializableView(null, "MAIN", "Main view", File.separator);
+		if(views == null) {
+			views = new HashMap<Integer, SerializableView>();
+		}
+		SerializableView main = new SerializableView(null, "MAIN", "Main view", File.separator);
+		main.setProject(this);
 		defaultViewId = main.getID();
 		views.put(main.getID(), main);
 	}
 	
+	void initProject() {
+		if(views == null || defaultViewId == 0) {
+			createDefaultView();
+		}
+		for(Map.Entry<Integer, SerializableView> e : views.entrySet()) {
+			e.getValue().setProject(this);
+		}
+	}
+	
 	@Override
 	public void update() {
-		if(ProjectProvider.getInstance().exist(this)) {
-			throw new Error("Duplicate project ID");
-		}
 		if(isNew()) {
+			if(ProjectProvider.getInstance().exist(this)) {
+				throw new Error("Duplicate project ID");
+			}
 			super.update();
 			ProjectProvider.getInstance().addNewProject(this);
 		} else {
@@ -72,7 +85,9 @@ public class SerializableProject extends Project implements Serializable {
 	
 	@Override
 	public View[] getViews() {
-		return new View[0];
+		View[] ret = new View[views.size()];
+		views.values().toArray(ret);
+		return ret;
 	}
 
 	@Override

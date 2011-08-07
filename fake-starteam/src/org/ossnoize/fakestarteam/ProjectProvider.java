@@ -60,6 +60,9 @@ public class ProjectProvider {
 			if(path.exists()) {
 				in = new ObjectInputStream(new FileInputStream(path));
 				projects = (Map<String, SerializableProject>) in.readObject();
+				for(Map.Entry<String, SerializableProject> e : projects.entrySet()) {
+					e.getValue().initProject();
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

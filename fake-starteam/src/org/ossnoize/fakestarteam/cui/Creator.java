@@ -45,7 +45,7 @@ public class Creator {
 		CmdLineParser.Option listProjects = parser.addBooleanOption('l', "list-projects");
 		CmdLineParser.Option createView = parser.addStringOption("create-view");
 		CmdLineParser.Option parentView = parser.addStringOption("parent-view");
-		CmdLineParser.Option listViews = parser.addStringOption('L', "list-views");
+		CmdLineParser.Option listViews = parser.addBooleanOption('L', "list-views");
 		CmdLineParser.Option createUser = parser.addStringOption("create-user");
 		CmdLineParser.Option user = parser.addStringOption('U', "user");
 		CmdLineParser.Option password = parser.addStringOption('P', "password");
@@ -112,7 +112,7 @@ public class Creator {
 				System.out.println("Could not find project named :" + projectName);
 			}
 			Boolean listView = (Boolean) parser.getOptionValue(listViews);
-			if(listView && null != selected) {
+			if(null != listView && listView && null != selected) {
 				System.out.println(selected.getName());
 				for(View v : selected.getViews()) {
 					System.out.println("- " + v.getName());

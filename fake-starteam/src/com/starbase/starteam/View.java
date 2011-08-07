@@ -18,6 +18,9 @@ package com.starbase.starteam;
 
 public class View extends SimpleTypedResource implements ISecurableContainer, ISecurableObject {
 	
+	protected View() {
+	}
+	
 	public View(View parent, java.lang.String name, java.lang.String description, java.lang.String defaultWorkingFolder) {
 		
 	}
@@ -32,6 +35,10 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public void update() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public Project getProject() {
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 }

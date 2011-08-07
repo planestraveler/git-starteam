@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -41,6 +43,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 	private static SimpleTypedResourceIDProvider provider = null;
 	
 	private Set<Integer> assignedResourceID = new HashSet<Integer>();
+	private volatile Map<Integer, SimpleTypedResource> existingResource; 
 
 	private Random generator = new Random(); 
 	
@@ -51,9 +54,14 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 		if(null == provider) {
 			if(!readFromFile()) {
 				provider = new SimpleTypedResourceIDProvider();
+				provider.postInit();
 			}
 		}
 		return provider;
+	}
+	
+	private void postInit() {
+		existingResource = new HashMap<Integer, SimpleTypedResource>();
 	}
 	
 	private static boolean readFromFile() {
@@ -70,6 +78,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 				Object obj = in.readObject();
 				if(obj instanceof SimpleTypedResourceIDProvider) {
 					provider = (SimpleTypedResourceIDProvider) obj;
+					provider.postInit();
 					ret = true;
 				}
 			}
@@ -94,13 +103,14 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 
 	public int registerNew(SimpleTypedResource resource) {
 		int id = generator.nextInt();
-		if(assignedResourceID.contains(id))
+		if(assignedResourceID.contains(id) || 0 == id)
 		{
 			return registerNew(resource);
 		}
 		else
 		{
 			assignedResourceID.add(id);
+			existingResource.put(id, resource);
 			saveNewID();
 		}
 		return id;
@@ -117,6 +127,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 			gzout = new GZIPOutputStream(new FileOutputStream(path));
 			out = new ObjectOutputStream(gzout);
 			out.writeObject(this);
+			System.out.println("Saved " + assignedResourceID.size() + " ressource ID");
 		} catch (IOException ie) {
 			ie.printStackTrace();
 		} finally {
@@ -131,6 +142,10 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 				} catch (IOException e) {}
 			}
 		}
+	}
+
+	public void registerExisting(int id, SimpleTypedResource resource) {
+		existingResource.put(id, resource);
 	}
 	
 }
