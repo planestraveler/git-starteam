@@ -47,6 +47,9 @@ public class SerializableView extends View implements Serializable {
 		this.id = SimpleTypedResourceIDProvider.getProvider().registerNew(this);
 		if(null != parent) {
 			project = parent.getProject();
+			if(project instanceof SerializableProject) {
+				((SerializableProject)project).addNewView(this);
+			}
 		}
 	}
 
@@ -76,5 +79,10 @@ public class SerializableView extends View implements Serializable {
 	@Override
 	public Project getProject() {
 		return project;
+	}
+	
+	@Override
+	public View getParentView() {
+		return parent;
 	}
 }

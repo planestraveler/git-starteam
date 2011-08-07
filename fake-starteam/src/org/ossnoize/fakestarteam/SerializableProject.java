@@ -94,4 +94,13 @@ public class SerializableProject extends Project implements Serializable {
 	public View getDefaultView() {
 		return views.get(defaultViewId);
 	}
+
+	void addNewView(SerializableView serializableView) {
+		for(View v : views.values()) {
+			if(v.getName().equalsIgnoreCase(serializableView.getName())) {
+				throw new Error("Cannot create this view, there is already one with the same name");
+			}
+		}
+		views.put(serializableView.getID(), serializableView);
+	}
 }

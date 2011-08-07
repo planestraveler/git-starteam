@@ -41,4 +41,8 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	public Project getProject() {
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
+	
+	public View getParentView() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
 }
