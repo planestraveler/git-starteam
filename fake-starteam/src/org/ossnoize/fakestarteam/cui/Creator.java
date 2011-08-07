@@ -22,11 +22,13 @@ import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.ProjectProvider;
 import org.ossnoize.fakestarteam.SerializableProject;
 import org.ossnoize.fakestarteam.SerializableUser;
+import org.ossnoize.fakestarteam.SerializableView;
 import org.ossnoize.fakestarteam.UserProvider;
 
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.User;
+import com.starbase.starteam.View;
 
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
@@ -95,6 +97,42 @@ public class Creator {
 		if(listProject) {
 			for(Project p : server.getProjects()) {
 				System.out.println("* " + p.getName());
+			}
+		}
+		String projectName = (String) parser.getOptionValue(project);
+		if(null != projectName) {
+			Project selected = null;
+			for(Project p : server.getProjects()) {
+				if(p.getName().equalsIgnoreCase(projectName)) {
+					selected = p;
+					break;
+				}
+			}
+			if(null == selected) {
+				System.out.println("Could not find project named :" + projectName);
+			}
+			Boolean listView = (Boolean) parser.getOptionValue(listViews);
+			if(listView && null != selected) {
+				System.out.println(selected.getName());
+				for(View v : selected.getViews()) {
+					System.out.println("- " + v.getName());
+				}
+			}
+			String createViewNamed = (String) parser.getOptionValue(createView);
+			String parentViewNamed = (String) parser.getOptionValue(parentView);
+			View from = null;
+			if(null == parentViewNamed) {
+				from = selected.getDefaultView();
+			} else {
+				for(View v : selected.getViews()) {
+					if(v.getName().equalsIgnoreCase(parentViewNamed)) {
+						from = v;
+						break;
+					}
+				}
+			}
+			if(null != createViewNamed) {
+				new SerializableView(from, createViewNamed, createViewNamed, File.separator).update();
 			}
 		}
 	}
