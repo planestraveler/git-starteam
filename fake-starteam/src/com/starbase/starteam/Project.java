@@ -27,6 +27,9 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 	}
 	
 	public Project(Server server, String name, String rootDirectory) {
+		if(null == server) {
+			throw new NullPointerException("Server cannot be null");
+		}
 		this.server = server;
 		this.isNew = true;
 	}
@@ -37,7 +40,8 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 	
 	public Server getServer() {
 		if(null == server) {
-			InternalPropertiesProvider.getInstance().getCurrentServer();
+			/// on load of the fake server the property will surly be null, get it back just to be sure.
+			server = InternalPropertiesProvider.getInstance().getCurrentServer();
 		}
 		return server;
 	}
