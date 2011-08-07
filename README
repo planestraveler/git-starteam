@@ -14,4 +14,6 @@ Fake-Starteam is convered under a personnal license and is included
 only for testing purpose. The project shall not be used for any other
 purpose than easly testing your interaction with a fake starteam server.
 
-
+TODO:
+* Finish basic support of file query in the Fake Starteam API.
+* Create the fast-export based on the Starteam API
