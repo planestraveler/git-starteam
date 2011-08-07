@@ -24,13 +24,14 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 
 	@Override
 	public int getID() {
-		return super.getID();
+		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public java.lang.String getName() {
-		return "FAKE";
+		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public void update() {
+		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 }
