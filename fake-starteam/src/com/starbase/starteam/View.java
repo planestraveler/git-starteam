@@ -16,10 +16,21 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
-public class SimpleTypedResource extends TypedResource implements Cloneable {
+public class View extends SimpleTypedResource implements ISecurableContainer, ISecurableObject {
+	
+	public View(View parent, java.lang.String name, java.lang.String description, java.lang.String defaultWorkingFolder) {
+		
+	}
 
+	@Override
 	public int getID() {
-		return 0;
+		return super.getID();
 	}
 	
+	public java.lang.String getName() {
+		return "FAKE";
+	}
+	
+	public void update() {
+	}
 }

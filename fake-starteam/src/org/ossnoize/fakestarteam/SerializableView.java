@@ -14,12 +14,42 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *****************************************************************************/
-package com.starbase.starteam;
+package org.ossnoize.fakestarteam;
 
-public class SimpleTypedResource extends TypedResource implements Cloneable {
+import java.io.Serializable;
 
+import com.starbase.starteam.View;
+
+public class SerializableView extends View implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4548267790199736069L;
+	
+	private View parent;
+	private String name;
+	private String description;
+	private String defaultWorkingFolder;
+	private int id;
+
+	public SerializableView(View parent, String name, String description, String defaultWorkingFolder) {
+		super(parent, name, description, defaultWorkingFolder);
+		this.parent = parent;
+		this.name = name;
+		this.description = description;
+		this.defaultWorkingFolder = defaultWorkingFolder;
+		this.id = SimpleTypedResourceIDProvider.getProvider().registerNew(this);
+	}
+
+	@Override
 	public int getID() {
-		return 0;
+		return id;
 	}
 	
+	@Override
+	public String getName() {
+		return name;
+	}
+
 }

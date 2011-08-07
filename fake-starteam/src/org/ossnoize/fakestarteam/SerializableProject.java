@@ -16,10 +16,14 @@
  *****************************************************************************/
 package org.ossnoize.fakestarteam;
 
+import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.View;
 
 public class SerializableProject extends Project implements Serializable {
 
@@ -29,6 +33,8 @@ public class SerializableProject extends Project implements Serializable {
 	private static final long serialVersionUID = -3283403336147311883L;
 	private String name;
 	private String rootDir;
+	private Integer defaultViewId;
+	private Map<Integer, View> views = new HashMap<Integer, View>();
 	
 	protected SerializableProject() {
 	}
@@ -37,6 +43,13 @@ public class SerializableProject extends Project implements Serializable {
 		super(server, name, rootDirectory);
 		this.name = name;
 		this.rootDir = rootDirectory;
+		createDefaultView();
+	}
+	
+	private void createDefaultView() {
+		View main = new SerializableView(null, "MAIN", "Main view", File.separator);
+		defaultViewId = main.getID();
+		views.put(main.getID(), main);
 	}
 	
 	@Override
@@ -56,5 +69,14 @@ public class SerializableProject extends Project implements Serializable {
 	public String getName() {
 		return name;
 	}
+	
+	@Override
+	public View[] getViews() {
+		return new View[0];
+	}
 
+	@Override
+	public View getDefaultView() {
+		return views.get(defaultViewId);
+	}
 }

@@ -62,10 +62,10 @@ public class Creator {
 			printHelp();
 			System.exit(2);
 		}
-		String projectName = (String) parser.getOptionValue(createProject);
+		String createProjectName = (String) parser.getOptionValue(createProject);
 		Server server = new Server("localhost", 23456);
-		if(null != projectName) {
-			ProjectProvider.getInstance().createNewProject(server, projectName, File.separator);
+		if(null != createProjectName) {
+			ProjectProvider.getInstance().createNewProject(server, createProjectName, File.separator);
 		}
 		String createUserName = (String) parser.getOptionValue(createUser);
 		if(null != createUserName) {

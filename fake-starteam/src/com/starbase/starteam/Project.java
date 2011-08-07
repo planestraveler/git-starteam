@@ -20,7 +20,7 @@ import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 
 public class Project extends SimpleTypedResource implements ISecurableObject, ISecurableContainer {
 
-	private volatile Server server;
+	private Server server;
 	private boolean isNew;
 
 	protected Project() {
@@ -52,5 +52,14 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 	
 	public boolean isNew() {
 		return isNew;
+	}
+	
+	public View[] getViews() {
+		// This need to be overriden by the SerializableProject
+		return new View[0];
+	}
+	
+	public View getDefaultView() {
+		return null;
 	}
 }
