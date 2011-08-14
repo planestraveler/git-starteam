@@ -18,16 +18,13 @@ package org.ossnoize.fakestarteam.cui;
 
 import java.io.File;
 
-import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.ProjectProvider;
-import org.ossnoize.fakestarteam.SerializableProject;
 import org.ossnoize.fakestarteam.SerializableUser;
 import org.ossnoize.fakestarteam.SerializableView;
 import org.ossnoize.fakestarteam.UserProvider;
 
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
-import com.starbase.starteam.User;
 import com.starbase.starteam.View;
 
 import jargs.gnu.CmdLineParser;
