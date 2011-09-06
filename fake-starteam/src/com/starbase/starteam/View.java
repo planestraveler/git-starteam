@@ -61,4 +61,12 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	public void setDefaultPath(String path) {
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
+	
+	public void refresh() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public void populate() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
 }
