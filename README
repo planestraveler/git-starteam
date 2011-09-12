@@ -1,12 +1,15 @@
-This project aim to bring a interface layer between Git and Starteam.
+This project aim to bring an interface layer between Git and Starteam.
 
 Current Goal:
 Bring the capacity of converting Starteam project to Git with the help
-of the fast-import capacity. 
+of the fast-import capacity. I'll be doing this with the help of a 
+fake layer that emulate the behavior of the StarteamSDK. This layer 
+could be used as a test platform.
 
 Futur Goal:
 Give the capacity of making git a Starteam compatible client with the
-added value of using Git.
+added value of using Git. This could also be used for Mercurial and 
+Bazaar with the help of the fast-export capacity.
 
 License:
 Git-Starteam is convered under the General Public License Version 3.
