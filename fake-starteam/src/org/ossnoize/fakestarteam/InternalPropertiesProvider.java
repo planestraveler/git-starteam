@@ -1,9 +1,3 @@
-package org.ossnoize.fakestarteam;
-
-import java.io.File;
-import java.io.IOException;
-import com.starbase.starteam.Server;
-
 /*****************************************************************************
  * All public interface based on Starteam API are a property of Borland, 
  * those interface are reproduced here only for testing purpose. You should
@@ -20,6 +14,11 @@ import com.starbase.starteam.Server;
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *****************************************************************************/
+package org.ossnoize.fakestarteam;
+
+import java.io.File;
+import com.starbase.starteam.Server;
+
 public class InternalPropertiesProvider {
 
 	private static InternalPropertiesProvider Reference = null;
