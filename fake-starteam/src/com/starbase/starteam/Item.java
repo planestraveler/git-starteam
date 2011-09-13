@@ -16,20 +16,33 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
+import java.util.Properties;
+
 public class Item extends SimpleTypedResource implements ISecurableObject {
 
-	public int id;
-	public boolean isNew;
+	private int id;
+	private boolean isNew;
+	private Properties itemProperties;
 	
 	protected Item() {
 	}
 	
 	public String getComment() {
-		return null;
+		//return itemProperties.getProperty(PropertyNames.COMMENT);
+		return "";
+	}
+	
+	public void setComment(String comment) {
+		//itemProperties.setProperty(PropertyNames.COMMENT, comment);
+	}
+	
+	@Override
+	public int getID() {
+		return id;
 	}
 	
 	public Item[] getHistory() {
-		return new Item[0];
+		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public boolean isNew() {
@@ -38,6 +51,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public void update() {
 		// Save in the File Database.
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public void refresh() {
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 }
