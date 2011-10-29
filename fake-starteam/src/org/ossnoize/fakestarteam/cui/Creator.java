@@ -91,7 +91,7 @@ public class Creator {
 			}
 		}
 		Boolean listProject = (Boolean) parser.getOptionValue(listProjects);
-		if(listProject) {
+		if(null != listProject && listProject) {
 			for(Project p : server.getProjects()) {
 				System.out.println("* " + p.getName());
 			}
