@@ -18,6 +18,8 @@ package com.starbase.starteam;
 
 public class View extends SimpleTypedResource implements ISecurableContainer, ISecurableObject {
 	
+	private Folder rootFolder;
+	
 	protected View() {
 	}
 	
@@ -68,5 +70,12 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	
 	public void populate() {
 		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public Folder getRootFolder() {
+		if(rootFolder == null) {
+			rootFolder = new Folder(this);
+		}
+		return rootFolder;
 	}
 }

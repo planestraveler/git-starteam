@@ -16,14 +16,17 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
+import java.io.File;
 import java.util.Properties;
 
 public class Item extends SimpleTypedResource implements ISecurableObject {
-
+	
+	protected static PropertyNames propertyKeys = new PropertyNames();
+	
 	private int id;
 	private boolean isNew;
-	private Properties itemProperties;
-	private static PropertyNames propertyKeys = new PropertyNames();
+	protected Properties itemProperties;
+	protected File holdingPlace;
 	
 	protected Item() {
 	}
