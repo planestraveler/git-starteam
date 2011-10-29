@@ -18,4 +18,7 @@ package com.starbase.starteam;
 
 public class Folder extends Item {
 
+	public Folder(Server server) {
+		
+	}
 }
