@@ -23,17 +23,17 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	private int id;
 	private boolean isNew;
 	private Properties itemProperties;
+	private static PropertyNames propertyKeys = new PropertyNames();
 	
 	protected Item() {
 	}
 	
 	public String getComment() {
-		//return itemProperties.getProperty(PropertyNames.COMMENT);
-		return "";
+		return itemProperties.getProperty(propertyKeys.COMMENT);
 	}
 	
 	public void setComment(String comment) {
-		//itemProperties.setProperty(PropertyNames.COMMENT, comment);
+		itemProperties.setProperty(propertyKeys.COMMENT, comment);
 	}
 	
 	@Override
