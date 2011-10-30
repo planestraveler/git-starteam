@@ -55,6 +55,11 @@ public class SerializableUser extends User implements Serializable {
 	}
 	
 	public boolean isCorrectPassword(String passwd) {
+		if(null == passwd && null == this.passwd) {
+			return true;
+		} else if (null == this.passwd) {
+			return false;
+		}
 		return this.passwd.equals(passwd);
 	}
 	
