@@ -40,7 +40,8 @@ public class Folder extends Item {
 			throw new UnsupportedOperationException("The archive need to be a directory.");
 		}
 		try {
-			String rootFolder = serverArchive.getCanonicalPath() + File.separator + currentView.getName();
+			String rootFolder = serverArchive.getCanonicalPath() + File.separator +
+					currentView.getProject().getName() + File.separator + currentView.getName();
 			holdingPlace = new File(rootFolder);
 			if(holdingPlace.exists()) {
 				if(holdingPlace.isFile()) {
