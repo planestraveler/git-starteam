@@ -43,7 +43,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 	private static SimpleTypedResourceIDProvider provider = null;
 	
 	private Set<Integer> assignedResourceID = new HashSet<Integer>();
-	private volatile Map<Integer, SimpleTypedResource> existingResource; 
+	private transient Map<Integer, SimpleTypedResource> existingResource; 
 
 	private Random generator = new Random(); 
 	
@@ -146,6 +146,10 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 
 	public void registerExisting(int id, SimpleTypedResource resource) {
 		existingResource.put(id, resource);
+		if(!assignedResourceID.contains(id)) {
+			assignedResourceID.add(id);
+			saveNewID();
+		}
 	}
 	
 }
