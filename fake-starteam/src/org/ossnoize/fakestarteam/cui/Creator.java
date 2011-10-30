@@ -23,6 +23,7 @@ import org.ossnoize.fakestarteam.SerializableUser;
 import org.ossnoize.fakestarteam.SerializableView;
 import org.ossnoize.fakestarteam.UserProvider;
 
+import com.starbase.starteam.Folder;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
@@ -40,15 +41,17 @@ public class Creator {
 		CmdLineParser parser = new CmdLineParser();
 		CmdLineParser.Option createProject = parser.addStringOption("create-project");
 		CmdLineParser.Option listProjects = parser.addBooleanOption('l', "list-projects");
+		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option createView = parser.addStringOption("create-view");
 		CmdLineParser.Option parentView = parser.addStringOption("parent-view");
 		CmdLineParser.Option listViews = parser.addBooleanOption('L', "list-views");
+		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
 		CmdLineParser.Option createUser = parser.addStringOption("create-user");
 		CmdLineParser.Option user = parser.addStringOption('U', "user");
 		CmdLineParser.Option password = parser.addStringOption('P', "password");
-		CmdLineParser.Option project = parser.addStringOption('p', "project");
 		CmdLineParser.Option setPassword = parser.addStringOption("set-password");
 		CmdLineParser.Option userFullName = parser.addStringOption("fullname");
+		CmdLineParser.Option createFolders = parser.addStringOption("create-folders");
 		
 		try {
 			parser.parse(args);
@@ -96,32 +99,36 @@ public class Creator {
 				System.out.println("* " + p.getName());
 			}
 		}
-		String projectName = (String) parser.getOptionValue(project);
+		String projectName = (String) parser.getOptionValue(selectProject);
 		if(null != projectName) {
-			Project selected = null;
+			Project selectedProject = null;
 			for(Project p : server.getProjects()) {
 				if(p.getName().equalsIgnoreCase(projectName)) {
-					selected = p;
+					selectedProject = p;
 					break;
 				}
 			}
-			if(null == selected) {
+			if(null == selectedProject) {
 				System.out.println("Could not find project named :" + projectName);
 			}
 			Boolean listView = (Boolean) parser.getOptionValue(listViews);
-			if(null != listView && listView && null != selected) {
-				System.out.println(selected.getName());
-				for(View v : selected.getViews()) {
-					System.out.println("- " + v.getName());
+			if(null != listView && listView && null != selectedProject) {
+				System.out.println(selectedProject.getName());
+				for(View v : selectedProject.getViews()) {
+					String line = "- " + v.getName();
+					if(null != v.getParentView()) {
+						line += "(Child of:" + v.getParentView() + ")";
+					}
+					System.out.println(line);
 				}
 			}
 			String createViewNamed = (String) parser.getOptionValue(createView);
 			String parentViewNamed = (String) parser.getOptionValue(parentView);
 			View from = null;
 			if(null == parentViewNamed) {
-				from = selected.getDefaultView();
+				from = selectedProject.getDefaultView();
 			} else {
-				for(View v : selected.getViews()) {
+				for(View v : selectedProject.getViews()) {
 					if(v.getName().equalsIgnoreCase(parentViewNamed)) {
 						from = v;
 						break;
@@ -130,6 +137,36 @@ public class Creator {
 			}
 			if(null != createViewNamed) {
 				new SerializableView(from, createViewNamed, createViewNamed, File.separator).update();
+			}
+			String selectedViewNamed = (String) parser.getOptionValue(selectView);
+			if(null != selectedViewNamed) {
+				View selectedView = null;
+				for(View v : selectedProject.getViews()) {
+					if(v.getName().equalsIgnoreCase(selectedViewNamed)) {
+						selectedView = v;
+					}
+				}
+				if(selectedView == null) {
+					System.out.println("Could not find the view named " + selectedViewNamed);
+				} else {
+					String folderToCreate = (String) parser.getOptionValue(createFolders);
+					if(null != folderToCreate) {
+						String path[] = folderToCreate.split("/");
+						Folder stFolder = selectedView.getRootFolder();
+						for(String folder : path) {
+							boolean found = false;
+							for(Folder f : stFolder.getSubFolders()) {
+								if(f.getName().equalsIgnoreCase(folder)) {
+									stFolder = f;
+									found = true;
+								}
+							}
+							if(!found) {
+								stFolder = new Folder(stFolder, folder, "");
+							}
+						}
+					}
+				}
 			}
 		}
 	}
