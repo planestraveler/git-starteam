@@ -23,7 +23,6 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	protected static PropertyNames propertyKeys = new PropertyNames();
 	
-	private int id;
 	private boolean isNew;
 	protected Properties itemProperties;
 	protected File holdingPlace;
@@ -41,7 +40,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	@Override
 	public int getID() {
-		return id;
+		return Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 	}
 	
 	public Item[] getHistory() {
