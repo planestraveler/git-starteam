@@ -21,9 +21,9 @@ import java.util.Properties;
 
 public class Item extends SimpleTypedResource implements ISecurableObject {
 	
-	protected static PropertyNames propertyKeys = new PropertyNames();
+	protected static final PropertyNames propertyKeys = new PropertyNames();
 	
-	private boolean isNew;
+	protected boolean isNew;
 	protected Properties itemProperties;
 	protected File holdingPlace;
 	
