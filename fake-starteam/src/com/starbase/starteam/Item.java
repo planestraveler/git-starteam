@@ -51,6 +51,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		return isNew;
 	}
 	
+	public Folder getParentFolder() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
 	public void update() {
 		// Save in the File Database.
 		throw new UnsupportedOperationException("Not implemented at this level");

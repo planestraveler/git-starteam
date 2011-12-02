@@ -39,11 +39,13 @@ public class Folder extends Item {
 		}
 	};
 
+	private Folder parent = null;
 	public Folder(Server server) {
 		throw new UnsupportedOperationException("Unknown goal for this constructor");
 	}
 	
 	public Folder(Folder parent, String name, String workingFolder) {
+		this.parent = parent;
 		try {
 			String folder = parent.holdingPlace.getCanonicalPath() + File.separator + name;
 			holdingPlace = new File(folder);
@@ -114,6 +116,11 @@ public class Folder extends Item {
 		}
 		Folder[] buffer = new Folder[generatedList.size()];
 		return generatedList.toArray(buffer);
+	}
+	
+	@Override
+	public Folder getParentFolder() {
+		return parent;
 	}
 	
 	@Override
