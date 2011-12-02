@@ -21,4 +21,5 @@ public class PropertyNames {
 	public final java.lang.String FOLDER_NAME = "Name";
 	public final java.lang.String OBJECT_ID = "Object ID";
 	public final java.lang.String FILE_DESCRIPTION = "Description";
+	public final java.lang.String FILE_NAME = "Name";
 }
