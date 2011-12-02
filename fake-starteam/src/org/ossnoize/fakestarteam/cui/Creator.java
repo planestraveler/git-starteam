@@ -52,6 +52,8 @@ public class Creator {
 		CmdLineParser.Option setPassword = parser.addStringOption("set-password");
 		CmdLineParser.Option userFullName = parser.addStringOption("fullname");
 		CmdLineParser.Option createFolders = parser.addStringOption("create-folders");
+		CmdLineParser.Option addFileInPath = parser.addStringOption("path");
+		CmdLineParser.Option comment = parser.addStringOption('m', "comment");
 		
 		try {
 			parser.parse(args);
@@ -164,6 +166,40 @@ public class Creator {
 							if(!found) {
 								stFolder = new Folder(stFolder, folder, "");
 							}
+						}
+					}
+					String addInPath = (String) parser.getOptionValue(addFileInPath);
+					if(null != addInPath) {
+						String path[] = addInPath.split("/");
+						Folder stFolder = selectedView.getRootFolder();
+						boolean found = false;
+						for(String folder : path) {
+							for(Folder f : stFolder.getSubFolders()) {
+								found = false;
+								if(f.getName().equalsIgnoreCase(folder)) {
+									stFolder = f;
+									found = true;
+								}
+							}
+						}
+						if(found) {
+							String commentToModification = (String) parser.getOptionValue(comment);
+							if(null == commentToModification) {
+								commentToModification = "";
+							}
+							String files[] = parser.getRemainingArgs();
+							for(String filename : files) {
+								File importFile = new File(filename);
+								if(importFile.exists()) {
+									
+								} else {
+									System.out.println("Cannot find the file: " + filename);
+								}
+							}
+						}
+						else
+						{
+							System.out.println("Cannot find the specified path: " + addInPath);
 						}
 					}
 				}
