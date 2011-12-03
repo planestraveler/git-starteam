@@ -20,7 +20,14 @@ import java.io.File;
 import java.util.Properties;
 
 public class Item extends SimpleTypedResource implements ISecurableObject {
-	
+	public static interface LockType {
+		public static final int UNLOCKED = 0;
+		public static final int EXCLUSIVE = 1;
+		public static final int NONEXCLUSIVE = 2;
+		public static final int BREAK_FLAG = 16;
+		public static final int UNCHANGED = 3;
+	}
+
 	protected static final PropertyNames propertyKeys = new PropertyNames();
 	
 	protected boolean isNew;
