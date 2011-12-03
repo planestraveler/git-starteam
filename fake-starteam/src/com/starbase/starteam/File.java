@@ -19,7 +19,9 @@ package com.starbase.starteam;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.Properties;
+import java.util.zip.GZIPOutputStream;
 
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
@@ -27,6 +29,7 @@ import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 public class File extends Item {
 
 	private static final String FILE_PROPERTIES = "file.properties";
+	private static final String FILE_STORED = "stored.gz";
 	private Folder parent;
 
 	public File(Folder parent) {
@@ -64,10 +67,52 @@ public class File extends Item {
 			setComment(reason);
 			setDescription(desc);
 			setName(name);
+			copyToGz(file);
 			isNew = false;
 			update();
 		} else {
 			throw new InvalidOperationException("Cannot add a file that is already existing");
+		}
+	}
+
+	private void copyToGz(java.io.File file) {
+		GZIPOutputStream gzout = null;
+		FileOutputStream fout = null;
+		FileInputStream fin = null;
+		try {
+			if(!holdingPlace.exists())
+				holdingPlace.mkdirs();
+			fout = new FileOutputStream(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_STORED);
+			gzout = new GZIPOutputStream(fout);
+			fin = new FileInputStream(file);
+			
+			byte[] buffer = new byte[1024*64];
+			int read = fin.read(buffer);
+			while(read >= 0) {
+				gzout.write(buffer, 0, read);
+				read = fin.read(buffer);
+			}
+		} catch (IOException io) {
+			io.printStackTrace();
+		} finally {
+			if(fin != null) {
+				try {
+					fin.close();
+				} catch (IOException e) {
+				}
+			}
+			if(gzout != null) {
+				try {
+					gzout.close();
+				} catch (IOException io) {
+				}
+			}
+			if(fout != null) {
+				try {
+					fout.close();
+				} catch (IOException io) {
+				}
+			}
 		}
 	}
 
@@ -110,6 +155,8 @@ public class File extends Item {
 		}
 		FileOutputStream fout = null;
 		try {
+			if(!holdingPlace.exists())
+				holdingPlace.mkdirs();
 			fout = new FileOutputStream(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_PROPERTIES);
 			itemProperties.store(fout, "File properties");
 		} catch (IOException e) {

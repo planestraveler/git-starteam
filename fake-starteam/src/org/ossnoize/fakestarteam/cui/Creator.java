@@ -17,6 +17,7 @@
 package org.ossnoize.fakestarteam.cui;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.ossnoize.fakestarteam.ProjectProvider;
 import org.ossnoize.fakestarteam.SerializableUser;
@@ -24,8 +25,10 @@ import org.ossnoize.fakestarteam.SerializableView;
 import org.ossnoize.fakestarteam.UserProvider;
 
 import com.starbase.starteam.Folder;
+import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.TypeNames;
 import com.starbase.starteam.View;
 
 import jargs.gnu.CmdLineParser;
@@ -174,8 +177,8 @@ public class Creator {
 						Folder stFolder = selectedView.getRootFolder();
 						boolean found = false;
 						for(String folder : path) {
+							found = false;
 							for(Folder f : stFolder.getSubFolders()) {
-								found = false;
 								if(f.getName().equalsIgnoreCase(folder)) {
 									stFolder = f;
 									found = true;
@@ -187,11 +190,31 @@ public class Creator {
 							if(null == commentToModification) {
 								commentToModification = "";
 							}
+							TypeNames typeNames = new TypeNames();
 							String files[] = parser.getRemainingArgs();
 							for(String filename : files) {
 								File importFile = new File(filename);
 								if(importFile.exists()) {
-									
+									Item[] fileItems = stFolder.getItems(typeNames.FILE);
+									boolean foundFile = false;
+									for(Item i : fileItems) {
+										if(i instanceof com.starbase.starteam.File) {
+											com.starbase.starteam.File f = (com.starbase.starteam.File) i;
+											if(null != f && f.getName().equals(importFile.getName())) {
+												foundFile = true;
+												///f.checkinFrom()
+											}
+										}
+									}
+									if(!foundFile) {
+										try {
+											com.starbase.starteam.File f = new com.starbase.starteam.File(stFolder);
+											f.add(importFile, importFile.getName(), "", commentToModification, Item.LockType.UNLOCKED, true);
+										} catch (IOException e) {
+											System.out.println("Could not add file " + importFile);
+											e.printStackTrace();
+										}
+									}
 								} else {
 									System.out.println("Cannot find the file: " + filename);
 								}
