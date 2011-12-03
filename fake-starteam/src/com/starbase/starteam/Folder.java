@@ -30,12 +30,25 @@ import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
 public class Folder extends Item {
-	
+	private static final TypeNames TYPE_NAMES = new TypeNames();
 	private static final String FOLDER_PROPERTIES = "folder.properties";
 	private static final FilenameFilter FOLDER_TESTER = new FilenameFilter() {
 		@Override
 		public boolean accept(File dir, String name) {
 			return name.equalsIgnoreCase(FOLDER_PROPERTIES);
+		}
+	};
+
+	private static final FilenameFilter FILE_TESTER = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			boolean valid = true;
+			for(char c : name.toCharArray()) {
+				if(!Character.isDigit(c)) {
+					valid = false;
+				}
+			}
+			return valid;
 		}
 	};
 
@@ -116,6 +129,29 @@ public class Folder extends Item {
 		}
 		Folder[] buffer = new Folder[generatedList.size()];
 		return generatedList.toArray(buffer);
+	}
+	
+	private com.starbase.starteam.File[] getFiles() {
+		List<com.starbase.starteam.File> generatedList = new ArrayList<com.starbase.starteam.File>();
+		for(File f : holdingPlace.listFiles()) {
+			if(f.isDirectory()) {
+				String[] fileRevision = f.list(FILE_TESTER);
+				if(null != fileRevision && fileRevision.length >= 1) {
+					generatedList.add(new com.starbase.starteam.File(f.getName(), this));
+				}
+			}
+		}
+		com.starbase.starteam.File[] buffer = new com.starbase.starteam.File[generatedList.size()];
+		return generatedList.toArray(buffer);
+	}
+	
+	public Item[] getItems(java.lang.String typeName) {
+		if(typeName.equalsIgnoreCase(TYPE_NAMES.FOLDER))
+			return getSubFolders();
+		else if (typeName.equalsIgnoreCase(TYPE_NAMES.FILE)) {
+			return getFiles();
+		}
+		return new Item[0];
 	}
 	
 	@Override
