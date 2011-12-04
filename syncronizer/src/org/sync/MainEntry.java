@@ -16,13 +16,40 @@
 ******************************************************************************/
 package org.sync;
 
+import jargs.gnu.CmdLineParser;
+import jargs.gnu.CmdLineParser.IllegalOptionValueException;
+import jargs.gnu.CmdLineParser.UnknownOptionException;
+
 public class MainEntry {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		CmdLineParser parser = new CmdLineParser();
+		CmdLineParser.Option selectHost = parser.addStringOption('h', "host");
+		CmdLineParser.Option selectPort = parser.addIntegerOption('P', "port");
+		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
+		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
+		CmdLineParser.Option user = parser.addStringOption('U', "user");
 
+		try {
+			parser.parse(args);
+		} catch (IllegalOptionValueException e) {
+			System.err.println(e.getMessage());
+			printHelp();
+			System.exit(1);
+		} catch (UnknownOptionException e) {
+			System.err.println(e.getMessage());
+			printHelp();
+			System.exit(2);
+		}
 	}
 
+	public static void printHelp() {
+		System.out.println("-p <project>");
+		System.out.println("-v <view>");
+		System.out.println("[-U <user>]");
+		System.out.println("[-P <password>]");
+	}
 }
