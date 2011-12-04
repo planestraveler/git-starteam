@@ -16,7 +16,6 @@
 ******************************************************************************/
 package org.sync;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -63,6 +62,7 @@ public class MainEntry {
 		try {
 			BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
 			Server starteam = new Server(host, port);
+			starteam.connect();
 			if(null == user) {
 				System.out.print("Username:");
 				user = inputReader.readLine();
