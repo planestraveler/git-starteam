@@ -23,4 +23,5 @@ public class PropertyNames {
 	public final java.lang.String FILE_DESCRIPTION = "Description";
 	public final java.lang.String FILE_NAME = "Name";
 	public final java.lang.String REVISION_NUMBER = "Version";
+	public final java.lang.String MODIFIED_USER_ID = "Modified By";
 }
