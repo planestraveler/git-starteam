@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.ossnoize.fakestarteam.FileUtility;
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
@@ -173,12 +174,7 @@ public class Folder extends Item {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(fout != null) {
-				try {
-					fout.close();
-				} catch(IOException e) {
-				}
-			}
+			FileUtility.close(fout);
 		}
 	}
 	
@@ -202,12 +198,7 @@ public class Folder extends Item {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(fin != null) {
-				try {
-					fin.close();
-				} catch (IOException e) {
-				}
-			}
+			FileUtility.close(fin);
 		}
 	}
 }

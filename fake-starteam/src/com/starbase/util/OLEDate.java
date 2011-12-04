@@ -14,17 +14,34 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *****************************************************************************/
-package com.starbase.starteam;
+package com.starbase.util;
 
-public class PropertyNames {
-	public final java.lang.String COMMENT = "Comment";
-	public final java.lang.String FOLDER_NAME = "Name";
-	public final java.lang.String OBJECT_ID = "Object ID";
-	public final java.lang.String FILE_DESCRIPTION = "Description";
-	public final java.lang.String FILE_NAME = "Name";
-	public final java.lang.String REVISION_NUMBER = "Version";
-	public final java.lang.String MODIFIED_USER_ID = "Modified By";
-	public final java.lang.String CREATED_USER_ID = "Created By";
-	public final java.lang.String MODIFIED_TIME = "Modified Time";
-	public final java.lang.String CREATED_TIME = "Created Time";
+public class OLEDate {
+	
+	private Long javaTime;
+	public static OLEDate CURRENT_SERVER_TIME = new OLEDate(true); 
+	
+	public OLEDate() {
+		this.javaTime = System.currentTimeMillis();
+	}
+	
+	private OLEDate(boolean serverTime) {
+		if(!serverTime) {
+			this.javaTime = System.currentTimeMillis();
+		} else {
+			this.javaTime = null;
+		}
+	}
+	
+	public OLEDate(long javaTime) {
+		this.javaTime = javaTime;
+	}
+	
+	public long getLongValue() {
+		if(null != javaTime) {
+			return javaTime;
+		} else {
+			return System.currentTimeMillis();
+		}
+	}
 }

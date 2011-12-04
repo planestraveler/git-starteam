@@ -35,6 +35,7 @@ public class File extends Item {
 	public File(Folder parent) {
 		super();
 		this.parent = parent;
+		this.view = parent.getView();
 		isNew = true;
 	}
 
@@ -71,6 +72,8 @@ public class File extends Item {
 			setDescription(desc);
 			setName(name);
 			setModifiedBy();
+			setCreatedTime();
+			setModifiedTime();
 			copyToGz(file);
 			isNew = false;
 			update();
@@ -78,7 +81,7 @@ public class File extends Item {
 			throw new InvalidOperationException("Cannot add a file that is already existing");
 		}
 	}
-	
+
 	public void checkinFrom(java.io.File file, String reason, int lockStatus, boolean forceCheckin, boolean updateStatus) throws java.io.IOException {
 		if(!isNew()) {
 			int newRevision = getRevisionNumber() + 1;
@@ -95,6 +98,7 @@ public class File extends Item {
 			setRevisionNumber(newRevision);
 			setComment(reason);
 			setModifiedBy();
+			setModifiedTime();
 			registerNewID();
 			copyToGz(file);
 			update();

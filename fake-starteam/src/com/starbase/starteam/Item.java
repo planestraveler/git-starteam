@@ -21,6 +21,8 @@ import java.util.Properties;
 
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
+import com.starbase.util.OLEDate;
+
 public class Item extends SimpleTypedResource implements ISecurableObject {
 	public static interface LockType {
 		public static final int UNLOCKED = 0;
@@ -76,6 +78,30 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 			itemProperties.setProperty(propertyKeys.MODIFIED_USER_ID, Integer.toString(myUserID));
 		} else {
 			throw new InvalidOperationException("The item is not part of a view");
+		}
+	}
+	
+	protected void setCreatedTime() {
+		itemProperties.setProperty(propertyKeys.CREATED_TIME, Long.toString(System.currentTimeMillis()));
+	}
+	
+	public OLEDate getCreatedTime() {
+		try {
+			return new OLEDate(Long.parseLong(itemProperties.getProperty(propertyKeys.CREATED_TIME)));
+		} catch (NumberFormatException nfe) {
+			throw new InvalidOperationException("The item as a invalid java time: " + itemProperties.getProperty(propertyKeys.CREATED_TIME));
+		}
+	}
+	
+	protected void setModifiedTime() {
+		itemProperties.setProperty(propertyKeys.MODIFIED_TIME, Long.toString(System.currentTimeMillis()));
+	}
+	
+	public OLEDate getModifiedTime() {
+		try {
+			return new OLEDate(Long.parseLong(itemProperties.getProperty(propertyKeys.MODIFIED_TIME)));
+		} catch (NumberFormatException nfe) {
+			throw new InvalidOperationException("The item as a invalid java time: " + itemProperties.getProperty(propertyKeys.MODIFIED_TIME));
 		}
 	}
 	
