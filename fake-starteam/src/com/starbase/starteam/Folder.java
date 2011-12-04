@@ -53,7 +53,6 @@ public class Folder extends Item {
 		}
 	};
 
-	private Folder parent = null;
 	public Folder(Server server) {
 		throw new UnsupportedOperationException("Unknown goal for this constructor");
 	}
@@ -88,6 +87,7 @@ public class Folder extends Item {
 		// We don't want the root folder to have any default name.
 		// so overwrite the view name with a blank one and update.
 		setName("");
+		this.parent = null;
 		view = currentView;
 		update();
 	}
@@ -176,6 +176,11 @@ public class Folder extends Item {
 		} finally {
 			FileUtility.close(fout);
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return getName();
 	}
 	
 	private void loadFolderProperties() {

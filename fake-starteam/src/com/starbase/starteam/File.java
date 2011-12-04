@@ -33,7 +33,6 @@ public class File extends Item {
 
 	private static final String FILE_PROPERTIES = "file.properties";
 	private static final String FILE_STORED = "stored.gz";
-	private Folder parent;
 
 	public File(Folder parent) {
 		super();
@@ -280,6 +279,7 @@ public class File extends Item {
 		return ret;
 	}
 
+	@Override
 	public String toString() {
 		return getName();
 	}

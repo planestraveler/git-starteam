@@ -40,7 +40,8 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	protected Properties itemProperties;
 	protected File holdingPlace;
 	protected View view;
-	
+	protected Folder parent;
+
 	protected Item() {
 	}
 	
@@ -117,7 +118,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	public Folder getParentFolder() {
-		throw new UnsupportedOperationException("Not implemented at this level");
+		return parent;
 	}
 	
 	public void update() {
@@ -142,5 +143,13 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		Item[] ret = new Item[history.size()];
 		history.toArray(ret);
 		return ret;
+	}
+	
+	public String getParentFolderHierarchy() {
+		if(null == parent.getParentFolder()) {
+			return "";
+		} else {
+			return parent.getParentFolderHierarchy() + File.separator + parent;
+		}
 	}
 }
