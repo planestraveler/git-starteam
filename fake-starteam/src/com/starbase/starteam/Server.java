@@ -71,4 +71,8 @@ public class Server {
 		}
 		return 0;
 	}
+	
+	public MyUserAccount getMyUserAccount() {
+		return new MyUserAccount(loggedUser);
+	}
 }
