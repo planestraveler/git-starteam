@@ -202,7 +202,11 @@ public class Creator {
 											com.starbase.starteam.File f = (com.starbase.starteam.File) i;
 											if(null != f && f.getName().equals(importFile.getName())) {
 												foundFile = true;
-												///f.checkinFrom()
+												try {
+													f.checkinFrom(importFile, commentToModification, Item.LockType.UNCHANGED, false, true);
+												} catch (IOException e) {
+													e.printStackTrace();
+												}
 											}
 										}
 									}
