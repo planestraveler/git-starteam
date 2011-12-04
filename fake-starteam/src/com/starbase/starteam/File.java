@@ -19,6 +19,8 @@ package com.starbase.starteam;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -236,7 +238,7 @@ public class File extends Item {
 			FileUtility.close(fin);
 		}
 	}
-	
+
 	private void registerNewID() {
 		if(null != itemProperties) {
 			itemProperties.setProperty(propertyKeys.OBJECT_ID, 
@@ -266,6 +268,16 @@ public class File extends Item {
 			e.printStackTrace();
 		}
 		return max;
+	}
+	
+	@Override
+	protected List<Item> loadHistory() {
+		int lastRevision = findLastRevision(getName());
+		List<Item> ret = new ArrayList<Item>(lastRevision);
+		for(int i=0; i<lastRevision; i++) {
+			ret.add(new File(getName(), i, parent));
+		}
+		return ret;
 	}
 
 	public String toString() {

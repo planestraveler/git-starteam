@@ -17,6 +17,7 @@
 package com.starbase.starteam;
 
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
 
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
@@ -35,6 +36,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	protected static final PropertyNames propertyKeys = new PropertyNames();
 	
 	protected boolean isNew;
+	protected boolean isFromHistory;
 	protected Properties itemProperties;
 	protected File holdingPlace;
 	protected View view;
@@ -110,10 +112,6 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		return Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 	}
 	
-	public Item[] getHistory() {
-		throw new UnsupportedOperationException("Not implemented at this level");
-	}
-	
 	public boolean isNew() {
 		return isNew;
 	}
@@ -133,5 +131,16 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public View getView() {
 		return view;
+	}
+	
+	protected List<Item> loadHistory() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public Item[] getHistory() {
+		List<Item> history = loadHistory();
+		Item[] ret = new Item[history.size()];
+		history.toArray(ret);
+		return ret;
 	}
 }
