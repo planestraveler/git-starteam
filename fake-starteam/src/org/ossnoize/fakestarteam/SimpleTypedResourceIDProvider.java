@@ -131,16 +131,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 		} catch (IOException ie) {
 			ie.printStackTrace();
 		} finally {
-			if(gzout != null) {
-				try {
-					gzout.close();
-				} catch (IOException e) {}
-			}
-			if(out != null) {
-				try {
-					out.close();
-				} catch (IOException e) {}
-			}
+			FileUtility.close(gzout, out);
 		}
 	}
 
