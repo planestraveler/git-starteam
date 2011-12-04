@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.ossnoize.fakestarteam.FileUtility;
@@ -106,6 +107,24 @@ public class File extends Item {
 			throw new InvalidOperationException("Cannot check-in a file that was not added");
 		}
 	}
+	
+	public boolean checkoutByVersion(java.io.File checkoutTo, int viewVersion, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
+		holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + getName() + java.io.File.separator + viewVersion);
+		if(holdingPlace.exists()) {
+			loadFileProperties();
+			if(null == checkoutTo) {
+				//TODO: build the default checkout directory location
+				throw new InvalidOperationException("Does not yet support null checkoutTo parameter");
+			}
+			copyFromGz(holdingPlace, checkoutTo);
+			if(!timeStampNow) {
+				checkoutTo.setLastModified(getModifiedTime().getLongValue());
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	private void copyToGz(java.io.File file) throws IOException {
 		GZIPOutputStream gzout = null;
@@ -126,6 +145,27 @@ public class File extends Item {
 		FileUtility.close(fin, gzout, fout);
 	}
 
+	private void copyFromGz(java.io.File source, java.io.File target) throws IOException {
+		GZIPInputStream gzin = null;
+		FileInputStream fin = null;
+		FileOutputStream fout = null;
+		
+		if(!source.exists()) {
+			throw new InvalidOperationException("Could not find the storing folder");
+		}
+		fin = new FileInputStream(source.getCanonicalPath() + java.io.File.separator + FILE_STORED);
+		gzin = new GZIPInputStream(fin);
+		fout = new FileOutputStream(target);
+		
+		byte[] buffer = new byte[1024 * 64];
+		int read = gzin.read(buffer);
+		while(read >= 0) {
+			fout.write(buffer, 0, read);
+			read = gzin.read(buffer);
+		}
+		FileUtility.close(fout, gzin, fin);
+	}
+	
 	public void setDescription(String description) {
 		if(null != itemProperties) {
 			itemProperties.setProperty(propertyKeys.FILE_DESCRIPTION, description);
