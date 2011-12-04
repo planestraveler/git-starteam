@@ -17,6 +17,15 @@ Fake-Starteam is convered under a personnal license and is included
 only for testing purpose. The project shall not be used for any other
 purpose than easly testing your interaction with a fake starteam server.
 
+Building:
+Git-Starteam use a sconscript to build it's respective jar file. This
+is to help people that don't have Eclipse installed at their deployment
+location. You can use the latest version of scons at : 
+http://www.scons.org/
+
+To build just call scons in the root directory where you have clone the
+repository.
+
 TODO:
 * Finish basic support of file query in the Fake Starteam API.
  - Support for folder creation [DONE]
