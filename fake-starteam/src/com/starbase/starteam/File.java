@@ -70,6 +70,7 @@ public class File extends Item {
 			setComment(reason);
 			setDescription(desc);
 			setName(name);
+			setModifiedBy();
 			copyToGz(file);
 			isNew = false;
 			update();
@@ -83,8 +84,17 @@ public class File extends Item {
 			int newRevision = getRevisionNumber() + 1;
 			loadFileProperties();
 			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + getName() + java.io.File.separator + newRevision);
+			if(holdingPlace.exists()) {
+				if(forceCheckin) {
+					newRevision = findLastRevision(getName()) + 1;
+					holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + getName() + java.io.File.separator + newRevision);
+				} else {
+					throw new InvalidOperationException("Cannot check-in a past version of a file, do a force check-in to force the update");
+				}
+			}
 			setRevisionNumber(newRevision);
 			setComment(reason);
+			setModifiedBy();
 			registerNewID();
 			copyToGz(file);
 			update();
@@ -192,10 +202,10 @@ public class File extends Item {
 		}
 	}
 
-	private String findLastRevision(String name) {
+	private int findLastRevision(String name) {
 		int max = 0;
 		try {
-			java.io.File nameDir = new java.io.File(parent.holdingPlace.getCanonicalPath() + name + java.io.File.separator + name);
+			java.io.File nameDir = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name);
 			if(nameDir.exists()) {
 				for(String aRevision : nameDir.list()) {
 					try {
@@ -211,7 +221,7 @@ public class File extends Item {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return Integer.toString(max);
+		return max;
 	}
 
 	public String toString() {
