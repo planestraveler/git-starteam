@@ -59,6 +59,7 @@ public class Folder extends Item {
 	
 	public Folder(Folder parent, String name, String workingFolder) {
 		this.parent = parent;
+		view = parent.getView();
 		try {
 			String folder = parent.holdingPlace.getCanonicalPath() + File.separator + name;
 			holdingPlace = new File(folder);
@@ -86,6 +87,7 @@ public class Folder extends Item {
 		// We don't want the root folder to have any default name.
 		// so overwrite the view name with a blank one and update.
 		setName("");
+		view = currentView;
 		update();
 	}
 

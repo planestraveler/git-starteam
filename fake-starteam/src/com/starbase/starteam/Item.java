@@ -19,6 +19,8 @@ package com.starbase.starteam;
 import java.io.File;
 import java.util.Properties;
 
+import org.ossnoize.fakestarteam.exception.InvalidOperationException;
+
 public class Item extends SimpleTypedResource implements ISecurableObject {
 	public static interface LockType {
 		public static final int UNLOCKED = 0;
@@ -33,6 +35,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	protected boolean isNew;
 	protected Properties itemProperties;
 	protected File holdingPlace;
+	protected View view;
 	
 	protected Item() {
 	}
@@ -43,6 +46,37 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public void setComment(String comment) {
 		itemProperties.setProperty(propertyKeys.COMMENT, comment);
+	}
+	
+	public int getRevisionNumber() {
+		try {
+			return Integer.parseInt(itemProperties.getProperty(propertyKeys.REVISION_NUMBER));
+		} catch (NumberFormatException ne) {
+			throw new InvalidOperationException("The REVISION_NUMBER Property is not a number: " + 
+					itemProperties.getProperty(propertyKeys.REVISION_NUMBER));
+		}
+	}
+	
+	protected void setRevisionNumber(int rev) {
+		itemProperties.setProperty(propertyKeys.REVISION_NUMBER, Integer.toString(rev));
+	}
+	
+	public int getModifiedBy() {
+		try {
+			return Integer.parseInt(itemProperties.getProperty(propertyKeys.MODIFIED_USER_ID));
+		} catch (NumberFormatException ne) {
+			throw new InvalidOperationException("The MODIFIED_USER_ID Property is not a number: " + 
+					itemProperties.getProperty(propertyKeys.MODIFIED_USER_ID));
+		}
+	}
+	
+	protected void setModifiedBy() {
+		if(null != view) {
+			int myUserID = view.getProject().getServer().getMyUserAccount().getID();
+			itemProperties.setProperty(propertyKeys.MODIFIED_USER_ID, Integer.toString(myUserID));
+		} else {
+			throw new InvalidOperationException("The item is not part of a view");
+		}
 	}
 	
 	@Override
@@ -69,5 +103,9 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public void refresh() {
 		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public View getView() {
+		return view;
 	}
 }

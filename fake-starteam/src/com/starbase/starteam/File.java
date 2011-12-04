@@ -19,10 +19,10 @@ package com.starbase.starteam;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
+import org.ossnoize.fakestarteam.FileUtility;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
@@ -41,6 +41,7 @@ public class File extends Item {
 	protected File(String name, Folder parent) {
 		super();
 		this.parent = parent;
+		this.view = parent.getView();
 		try {
 			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + findLastRevision(name));
 		} catch (IOException e) {
@@ -52,6 +53,7 @@ public class File extends Item {
 	protected File(String name, int revision, Folder parent) {
 		super();
 		this.parent = parent;
+		this.view = parent.getView();
 		try {
 			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + revision);
 		} catch (IOException e) {
@@ -62,8 +64,9 @@ public class File extends Item {
 
 	public void add(java.io.File file, String name, String desc, String reason, int lockStatus, boolean updateStatus) throws java.io.IOException {
 		if(isNew()) {
-			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + "1");
+			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + "0");
 			loadFileProperties();
+			setRevisionNumber(0);
 			setComment(reason);
 			setDescription(desc);
 			setName(name);
@@ -74,46 +77,39 @@ public class File extends Item {
 			throw new InvalidOperationException("Cannot add a file that is already existing");
 		}
 	}
+	
+	public void checkinFrom(java.io.File file, String reason, int lockStatus, boolean forceCheckin, boolean updateStatus) throws java.io.IOException {
+		if(!isNew()) {
+			int newRevision = getRevisionNumber() + 1;
+			loadFileProperties();
+			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + getName() + java.io.File.separator + newRevision);
+			setRevisionNumber(newRevision);
+			setComment(reason);
+			registerNewID();
+			copyToGz(file);
+			update();
+		} else {
+			throw new InvalidOperationException("Cannot check-in a file that was not added");
+		}
+	}
 
-	private void copyToGz(java.io.File file) {
+	private void copyToGz(java.io.File file) throws IOException {
 		GZIPOutputStream gzout = null;
 		FileOutputStream fout = null;
 		FileInputStream fin = null;
-		try {
-			if(!holdingPlace.exists())
-				holdingPlace.mkdirs();
-			fout = new FileOutputStream(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_STORED);
-			gzout = new GZIPOutputStream(fout);
-			fin = new FileInputStream(file);
-			
-			byte[] buffer = new byte[1024*64];
-			int read = fin.read(buffer);
-			while(read >= 0) {
-				gzout.write(buffer, 0, read);
-				read = fin.read(buffer);
-			}
-		} catch (IOException io) {
-			io.printStackTrace();
-		} finally {
-			if(fin != null) {
-				try {
-					fin.close();
-				} catch (IOException e) {
-				}
-			}
-			if(gzout != null) {
-				try {
-					gzout.close();
-				} catch (IOException io) {
-				}
-			}
-			if(fout != null) {
-				try {
-					fout.close();
-				} catch (IOException io) {
-				}
-			}
+		if(!holdingPlace.exists())
+			holdingPlace.mkdirs();
+		fout = new FileOutputStream(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_STORED);
+		gzout = new GZIPOutputStream(fout);
+		fin = new FileInputStream(file);
+		
+		byte[] buffer = new byte[1024*64];
+		int read = fin.read(buffer);
+		while(read >= 0) {
+			gzout.write(buffer, 0, read);
+			read = fin.read(buffer);
 		}
+		FileUtility.close(fin, gzout, fout);
 	}
 
 	public void setDescription(String description) {
@@ -162,12 +158,7 @@ public class File extends Item {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(fout != null) {
-				try {
-					fout.close();
-				} catch(IOException e) {
-				}
-			}
+			FileUtility.close(fout);
 		}
 	}
 
@@ -182,20 +173,22 @@ public class File extends Item {
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
 			} else {
-				// initialize the basic properties of the file.
-				itemProperties.setProperty(propertyKeys.OBJECT_ID, 
-						Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
+				registerNewID();
 				isNew = true;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(null != fin) {
-				try {
-					fin.close();
-				} catch (IOException e) {
-				}
-			}
+			FileUtility.close(fin);
+		}
+	}
+	
+	private void registerNewID() {
+		if(null != itemProperties) {
+			itemProperties.setProperty(propertyKeys.OBJECT_ID, 
+					Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
+		} else {
+			throw new InvalidOperationException("itemProperties is not yet initialized");
 		}
 	}
 
