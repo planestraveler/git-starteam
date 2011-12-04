@@ -16,6 +16,15 @@
 ******************************************************************************/
 package org.sync;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import com.starbase.starteam.Project;
+import com.starbase.starteam.Server;
+import com.starbase.starteam.View;
+
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
@@ -31,7 +40,7 @@ public class MainEntry {
 		CmdLineParser.Option selectPort = parser.addIntegerOption('P', "port");
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
-		CmdLineParser.Option user = parser.addStringOption('U', "user");
+		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 
 		try {
 			parser.parse(args);
@@ -43,6 +52,42 @@ public class MainEntry {
 			System.err.println(e.getMessage());
 			printHelp();
 			System.exit(2);
+		}
+		
+		String host = (String) parser.getOptionValue(selectHost);
+		Integer port = (Integer) parser.getOptionValue(selectPort);
+		String project = (String) parser.getOptionValue(selectProject);
+		String view = (String) parser.getOptionValue(selectView);
+		String user = (String) parser.getOptionValue(selectUser);
+		
+		try {
+			BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
+			Server starteam = new Server(host, port);
+			if(null == user) {
+				System.out.print("Username:");
+				user = inputReader.readLine();
+			}
+			System.out.print("Password:");
+			String password = inputReader.readLine();
+			int userid = starteam.logOn(user, password);
+			if(userid > 0) {
+				for(Project p : starteam.getProjects()) {
+					if(p.getName().equalsIgnoreCase(project)) {
+						for(View v : p.getViews()) {
+							if(v.getName().equalsIgnoreCase(view)) {
+								GitImporter g = new GitImporter(p, v);
+								g.generateFastImportStream();
+								break;
+							}
+						}
+						break;
+					}
+				}
+			} else {
+				System.err.println("Could not log in user: " + user);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
