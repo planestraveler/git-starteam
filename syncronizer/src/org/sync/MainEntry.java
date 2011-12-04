@@ -59,6 +59,11 @@ public class MainEntry {
 		String view = (String) parser.getOptionValue(selectView);
 		String user = (String) parser.getOptionValue(selectUser);
 		
+		if(host == null || port == null || project == null || view == null) {
+			printHelp();
+			System.exit(3);
+		}
+		
 		try {
 			BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
 			Server starteam = new Server(host, port);
@@ -75,7 +80,7 @@ public class MainEntry {
 					if(p.getName().equalsIgnoreCase(project)) {
 						for(View v : p.getViews()) {
 							if(v.getName().equalsIgnoreCase(view)) {
-								GitImporter g = new GitImporter(p, v);
+								GitImporter g = new GitImporter(starteam, p, v);
 								g.generateFastImportStream();
 								break;
 							}
