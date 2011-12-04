@@ -19,4 +19,12 @@ purpose than easly testing your interaction with a fake starteam server.
 
 TODO:
 * Finish basic support of file query in the Fake Starteam API.
-* Create the fast-export based on the Starteam API
+ - Support for folder creation [DONE]
+ - Support for file creation [DONE]
+ - Support for label creation
+ - Support for file deletion
+ - Support for folder moving
+ - Support for file renaming
+* Create the fast-export based on the Starteam API.
+ - Create basic object for fast-export stream. [DONE]
+ - Create CLI for importing from a Project / View.
