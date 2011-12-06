@@ -69,10 +69,10 @@ public class MainEntry {
 			Server starteam = new Server(host, port);
 			starteam.connect();
 			if(null == user) {
-				System.out.print("Username:");
+				System.err.print("Username:");
 				user = inputReader.readLine();
 			}
-			System.out.print("Password:");
+			System.err.print("Password:");
 			String password = inputReader.readLine();
 			int userid = starteam.logOn(user, password);
 			if(userid > 0) {
