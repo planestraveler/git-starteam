@@ -11,6 +11,8 @@ public class Commit implements Markable {
 	private final static String COMMIT = "commit";
 	private final static String AUTHOR = "author";
 	private final static String COMMITTER = "committer";
+	private final static String FROM_SP = "from ";
+	private final static String MERGE_SP = "merge ";
 	private final static SimpleDateFormat DATEFORMAT = new SimpleDateFormat("Z");
 
 	private Mark mark;
@@ -75,6 +77,20 @@ public class Commit implements Markable {
 				 .append('\n');
 		out.write(commitMsg.toString().getBytes());
 		comment.writeTo(out);
+		if(null != from) {
+			out.write(FROM_SP.getBytes());
+			from.getMarkID().writeTo(out);
+			out.write('\n');
+		}
+		if(null != merge) {
+			out.write(MERGE_SP.getBytes());
+			merge.getMarkID().writeTo(out);
+			out.write('\n');
+		}
+		for(FileOperation ops : listOfOperation) {
+			ops.writeTo(out);
+		}
+		out.write('\n');
 	}
 
 	@Override
