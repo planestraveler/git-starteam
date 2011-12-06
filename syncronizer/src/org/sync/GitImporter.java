@@ -44,7 +44,7 @@ public class GitImporter {
 	public void generateFastImportStream() {
 		Folder root = view.getRootFolder();
 		recursiveFilePopulation(root);
-		
+
 		String lastComment = "";
 		int lastUID = -1;
 		for(Map.Entry<String, File> e : sortedFileList.entrySet()) {
@@ -54,17 +54,15 @@ public class GitImporter {
 
 	private void recursiveFilePopulation(Folder f) {
 		for(Item i : f.getItems(typeNames.FILE)) {
-			for(Item hi : i.getHistory()) {
-				if(hi instanceof File) {
-					File historyFile = (File) hi;
-					long modifiedTime = hi.getModifiedTime().getLongValue();
-					int userid = hi.getModifiedBy();
-					String path = hi.getParentFolderHierarchy() + java.io.File.separator + historyFile.getName();
-					String comment = hi.getComment();
-					String key = MessageFormat.format("{0,number,000000000000000}|{1,number,000000}|{2}|{3}", modifiedTime, userid, comment, path);
-					sortedFileList.put(key, historyFile);
-					System.err.println("Found file marked as: " + key);
-				}
+			if(i instanceof File) {
+				File historyFile = (File) i;
+				long modifiedTime = i.getModifiedTime().getLongValue();
+				int userid = i.getModifiedBy();
+				String path = i.getParentFolderHierarchy() + java.io.File.separator + historyFile.getName();
+				String comment = i.getComment();
+				String key = MessageFormat.format("{0,number,000000000000000}|{1,number,000000}|{2}|{3}", modifiedTime, userid, comment, path);
+				sortedFileList.put(key, historyFile);
+				System.err.println("Found file marked as: " + key);
 			}
 		}
 		for(Folder subfolder : f.getSubFolders()) {
