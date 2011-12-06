@@ -16,6 +16,28 @@
     along with Git-Starteam.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 """
-SConscript(['fake-starteam/SConscript',
-            'syncronizer/SConscript'])
 
+AddOption('--jargs', dest='jargs', type='string', nargs=1, action='store', metavar='DIR', help='jargs jar path')
+AddOption('--starteam', dest='starteam', type='string', nargs=1, action='store', metavar='DIR', help='starteam sdk location (default to fake-starteam if not specified)')
+
+JARGS = GetOption('jargs')
+STARTEAM = GetOption('starteam')
+
+ToBuild = ['syncronizer/SConscript']
+
+if not JARGS:
+    print "Need --jargs arguments"
+    exit(1)
+
+env = Environment(JAVACLASSPATH = [JARGS])
+Export('env')
+
+if not STARTEAM:
+    fakeclasses = env.Java(target = 'fake-starteam/classes', source = 'fake-starteam/src')
+    env.Jar(target = 'bin/fake-starteam.jar', source = fakeclasses)
+    env.Append(JAVACLASSPATH = ['bin/fake-starteam.jar'])
+else:
+    env.Append(JAVACLASSPATH = [STARTEAM])
+
+syncclasses = env.Java(target = 'syncronizer/classes', source = 'syncronizer/src')
+env.Jar(target = 'bin/syncronizer.jar', source = syncclasses)
