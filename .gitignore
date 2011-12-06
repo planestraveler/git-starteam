@@ -1,3 +1,6 @@
 */bin
+bin/
 .metadata
 localhost.*/
+*/classes/
+.sconsign.dblite
