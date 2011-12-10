@@ -40,6 +40,7 @@ public class MainEntry {
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
+		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 
 		try {
 			parser.parse(args);
@@ -58,6 +59,7 @@ public class MainEntry {
 		String project = (String) parser.getOptionValue(selectProject);
 		String view = (String) parser.getOptionValue(selectView);
 		String user = (String) parser.getOptionValue(selectUser);
+		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -81,6 +83,7 @@ public class MainEntry {
 						for(View v : p.getViews()) {
 							if(v.getName().equalsIgnoreCase(view)) {
 								GitImporter g = new GitImporter(starteam, p, v);
+								g.setResume(resume);
 								g.generateFastImportStream();
 								break;
 							}
@@ -97,11 +100,12 @@ public class MainEntry {
 	}
 
 	public static void printHelp() {
-		System.out.println("-h <host>");
-		System.out.println("-P <port>");
-		System.out.println("-p <project>");
-		System.out.println("-v <view>");
-		System.out.println("[-U <user>]");
+		System.out.println("-h <host>\tDefine on which host the server is hosted");
+		System.out.println("-P <port>\tDefine the port used to connect to the starteam server");
+		System.out.println("-p <project>\tSelect the project to import from");
+		System.out.println("-v <view>\tSelect the view used for importation");
+		System.out.println("[-U <user>]\tPreselect the user login");
+		System.out.println("[-R]\t\tResume the file history importation");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
 	}

@@ -16,15 +16,21 @@
 ******************************************************************************/
 package org.sync;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.ossnoize.git.fastimport.Commit;
+import org.ossnoize.git.fastimport.Data;
+import org.ossnoize.git.fastimport.FileModification;
+import org.ossnoize.git.fastimport.enumeration.GitFileType;
+import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
-import com.starbase.starteam.TypeNames;
 import com.starbase.starteam.View;
 import com.starbase.starteam.File;
 
@@ -33,6 +39,9 @@ public class GitImporter {
 	private Project project;
 	private View view;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
+	private final String headFormat = "refs/heads/{0}";
+	private final String resumeFormat = "refs/heads/{0}^0";
+	private boolean isResume = false;
 	
 	public GitImporter(Server s, Project p, View v) {
 		server = s;
@@ -46,9 +55,61 @@ public class GitImporter {
 
 		String lastComment = "";
 		int lastUID = -1;
+		Commit lastcommit = null;
 		for(Map.Entry<String, File> e : sortedFileList.entrySet()) {
-			System.err.println(e.getKey());
+			File f = e.getValue();
+			String cmt = f.getComment();
+			String userName = server.getUser(f.getModifiedBy()).getName();
+			String userEmail = userName.replaceAll(" ", ".");
+			userEmail += "@" + "cie.com";
+			String path = f.getParentFolderHierarchy() + java.io.File.separator + f.getName();
+			/* TODO: need to validate this with the real thing */
+			path = path.replace('\\', '/');
+			path = path.substring(1);
+			
+			try {
+				java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
+				aFile.deleteOnExit();
+				f.checkoutTo(aFile, 0, true, false, false);
+				
+				FileModification fm = new FileModification(new Data(aFile));
+				fm.setFileType(GitFileType.Normal);
+				fm.setPath(path);
+				if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
+					lastcommit.addFileOperation(fm);
+				} else {
+					String ref = MessageFormat.format(headFormat, view.getName());
+					if(null != lastcommit) {
+						lastcommit.writeTo(System.out);
+					} else {
+						if (isResume) {
+							ref = MessageFormat.format(resumeFormat, view.getName());
+						}
+					}
+					Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
+					commit.addFileOperation(fm);
+					commit.setFromCommit(lastcommit);
+					
+					/** Keep last for information **/
+					lastComment = cmt;
+					lastUID = f.getModifiedBy();
+					lastcommit = commit;
+				}
+			} catch (IOException io) {
+				io.printStackTrace();
+			} catch (InvalidPathException e1) {
+				e1.printStackTrace();
+			}
 		}
+		try {
+			lastcommit.writeTo(System.out);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	public void setResume(boolean b) {
+		isResume = b;
 	}
 
 	private void recursiveFilePopulation(Folder f) {
