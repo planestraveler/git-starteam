@@ -75,4 +75,8 @@ public class Server {
 	public MyUserAccount getMyUserAccount() {
 		return new MyUserAccount(loggedUser);
 	}
+	
+	public User getUser(int id) {
+		return UserProvider.getInstance().getUser(id);
+	}
 }

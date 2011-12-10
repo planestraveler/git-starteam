@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.starbase.starteam.User;
+
 public class UserProvider {
 
 	private static UserProvider Reference = null;
@@ -121,5 +123,9 @@ public class UserProvider {
 
 	public void applyChanges() {
 		writeUserList();
+	}
+
+	public User getUser(int id) {
+		return users.get(id);
 	}
 }
