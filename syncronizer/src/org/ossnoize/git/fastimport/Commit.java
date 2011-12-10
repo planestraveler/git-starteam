@@ -22,8 +22,8 @@ public class Commit implements Markable {
 	private String commiterEmail;
 	private String reference;
 	private Data comment;
-	private Commit from;
-	private Commit merge;
+	private MarkID from;
+	private MarkID merge;
 	private List<FileOperation> listOfOperation;
 	private Date commitDate;
 
@@ -47,11 +47,11 @@ public class Commit implements Markable {
 	}
 	
 	public void setFromCommit(Commit previous) {
-		from = previous;
+		from = previous.getMarkID();
 	}
 	
 	public void setMergeCommit(Commit previous) {
-		merge = previous;
+		merge = previous.getMarkID();
 	}
 	
 	public void addFileOperation(FileOperation ops) {
@@ -79,12 +79,12 @@ public class Commit implements Markable {
 		comment.writeTo(out);
 		if(null != from) {
 			out.write(FROM_SP.getBytes());
-			from.getMarkID().writeTo(out);
+			from.writeTo(out);
 			out.write('\n');
 		}
 		if(null != merge) {
 			out.write(MERGE_SP.getBytes());
-			merge.getMarkID().writeTo(out);
+			merge.writeTo(out);
 			out.write('\n');
 		}
 		for(FileOperation ops : listOfOperation) {
