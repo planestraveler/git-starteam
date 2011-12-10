@@ -126,6 +126,17 @@ public class File extends Item {
 			return false;
 		}
 	}
+	
+	public void checkoutTo(java.io.File checkoutTo, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
+		if(holdingPlace.exists()) {
+			copyFromGz(holdingPlace, checkoutTo);
+			if(!timeStampNow) {
+				checkoutTo.setLastModified(getModifiedTime().getLongValue());
+			}
+		} else {
+			throw new InvalidOperationException("The file does not exist in the repository");
+		}
+	}
 
 	private void copyToGz(java.io.File file) throws IOException {
 		GZIPOutputStream gzout = null;
