@@ -190,12 +190,11 @@ public class Creator {
 							if(null == commentToModification) {
 								commentToModification = "";
 							}
-							TypeNames typeNames = new TypeNames();
 							String files[] = parser.getRemainingArgs();
 							for(String filename : files) {
 								File importFile = new File(filename);
 								if(importFile.exists()) {
-									Item[] fileItems = stFolder.getItems(typeNames.FILE);
+									Item[] fileItems = stFolder.getItems(stFolder.getTypeNames().FILE);
 									boolean foundFile = false;
 									for(Item i : fileItems) {
 										if(i instanceof com.starbase.starteam.File) {

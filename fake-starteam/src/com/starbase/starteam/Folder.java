@@ -31,7 +31,6 @@ import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
 public class Folder extends Item {
-	private static final TypeNames TYPE_NAMES = new TypeNames();
 	private static final String FOLDER_PROPERTIES = "folder.properties";
 	private static final FilenameFilter FOLDER_TESTER = new FilenameFilter() {
 		@Override
@@ -149,9 +148,9 @@ public class Folder extends Item {
 	}
 	
 	public Item[] getItems(java.lang.String typeName) {
-		if(typeName.equalsIgnoreCase(TYPE_NAMES.FOLDER))
+		if(typeName.equalsIgnoreCase(getTypeNames().FOLDER))
 			return getSubFolders();
-		else if (typeName.equalsIgnoreCase(TYPE_NAMES.FILE)) {
+		else if (typeName.equalsIgnoreCase(getTypeNames().FILE)) {
 			return getFiles();
 		}
 		return new Item[0];

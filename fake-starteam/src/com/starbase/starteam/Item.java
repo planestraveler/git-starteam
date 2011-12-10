@@ -152,4 +152,9 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 			return parent.getParentFolderHierarchy() + File.separator + parent;
 		}
 	}
+	
+	@Override
+	public TypeNames getTypeNames() {
+		return super.getTypeNames();
+	}
 }

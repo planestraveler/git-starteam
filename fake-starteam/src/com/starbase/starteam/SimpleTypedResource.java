@@ -18,6 +18,11 @@ package com.starbase.starteam;
 
 public class SimpleTypedResource extends TypedResource implements Cloneable {
 
+	@Override
+	public TypeNames getTypeNames() {
+		return super.getTypeNames();
+	}
+	
 	public int getID() {
 		return 0;
 	}

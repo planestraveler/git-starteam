@@ -17,6 +17,7 @@
 package com.starbase.starteam;
 
 public class TypeNames {
+	protected TypeNames() {}
 	public final String	AUDIT = "Audit";
 	public final String CHANGEREQUEST = "ChangeRequest";
 	public final String FILE = "File";

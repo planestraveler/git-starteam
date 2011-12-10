@@ -29,7 +29,6 @@ import com.starbase.starteam.View;
 import com.starbase.starteam.File;
 
 public class GitImporter {
-	private static final TypeNames typeNames = new TypeNames();
 	private Server server;
 	private Project project;
 	private View view;
@@ -53,7 +52,7 @@ public class GitImporter {
 	}
 
 	private void recursiveFilePopulation(Folder f) {
-		for(Item i : f.getItems(typeNames.FILE)) {
+		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
 				long modifiedTime = i.getModifiedTime().getLongValue();

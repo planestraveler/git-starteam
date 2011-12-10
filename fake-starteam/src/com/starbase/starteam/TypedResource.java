@@ -17,5 +17,8 @@
 package com.starbase.starteam;
 
 public class TypedResource extends NamedCacheRef {
-
+	private final static TypeNames typeNames = new TypeNames();
+	public TypeNames getTypeNames() {
+		return typeNames;
+	}
 }
