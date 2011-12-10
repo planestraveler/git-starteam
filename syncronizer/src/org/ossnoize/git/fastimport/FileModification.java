@@ -46,10 +46,16 @@ public class FileModification implements FileOperation {
 	
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
+		if(null == FileType) {
+			throw new NullPointerException("File type cannot be null");
+		}
+		if(null == Path) {
+			throw new NullPointerException("Path cannot be null");
+		}
 		StringBuilder builder = new StringBuilder();
 		builder.append('M').append(' ').append(FileType.getOctalRepresentation());
 		if(Type == FileModificationType.Inline) {
-			builder.append(' ').append("'inline'");
+			builder.append(' ').append("inline");
 			builder.append(' ').append(Path).append("\n");
 			out.write(builder.toString().getBytes());
 			Content.writeTo(out);
