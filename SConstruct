@@ -19,25 +19,31 @@
 
 AddOption('--jargs', dest='jargs', type='string', nargs=1, action='store', metavar='DIR', help='jargs jar path')
 AddOption('--starteam', dest='starteam', type='string', nargs=1, action='store', metavar='DIR', help='starteam sdk location (default to fake-starteam if not specified)')
+AddOption('--javasdkhome', dest='javasdkhome', type='string', nargs=1, action='store', metavar='DIR', help='Java SE SDK Home')
 
 JARGS = GetOption('jargs')
 STARTEAM = GetOption('starteam')
+JAVASDKHOME = GetOption('javasdkhome')
 
-ToBuild = ['syncronizer/SConscript']
-
-if not JARGS:
-    print "Need --jargs arguments"
-    exit(1)
+if not GetOption('clean'):
+    if not GetOption('help'):
+        if not JARGS:
+            print "Need --jargs arguments"
+            exit(1)
 
 env = Environment(JAVACLASSPATH = [JARGS])
-Export('env')
+if JAVASDKHOME:
+    env.Append(PATH = [JAVASDKHOME + "/bin"])
 
+env.Append(JAVACFLAGS = ['-Xlint:unchecked'])
 if not STARTEAM:
+    fakeStarteamTarget = 'bin/fake-starteam.jar'
     fakeclasses = env.Java(target = 'fake-starteam/classes', source = 'fake-starteam/src')
-    env.Jar(target = 'bin/fake-starteam.jar', source = fakeclasses)
-    env.Append(JAVACLASSPATH = ['bin/fake-starteam.jar'])
+    env.Jar(target = fakeStarteamTarget, source = fakeclasses)
+    env.Append(JAVACLASSPATH = [fakeStarteamTarget])
 else:
     env.Append(JAVACLASSPATH = [STARTEAM])
 
 syncclasses = env.Java(target = 'syncronizer/classes', source = 'syncronizer/src')
 env.Jar(target = 'bin/syncronizer.jar', source = syncclasses)
+
