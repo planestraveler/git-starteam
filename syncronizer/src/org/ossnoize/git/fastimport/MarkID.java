@@ -21,7 +21,10 @@ import java.io.OutputStream;
 
 public class MarkID implements FastImportObject {
 
-	private static long MarkID = 0;
+	/**
+	 * Mark ID 0 is reserved so start at 1
+	 */
+	private static long MarkID = 1;
 	public static MarkID getNextMarkID() {
 		return new MarkID(MarkID++);
 	}
