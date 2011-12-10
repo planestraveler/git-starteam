@@ -19,6 +19,9 @@ package com.starbase.starteam;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.DigestException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -33,6 +36,8 @@ public class File extends Item {
 
 	private static final String FILE_PROPERTIES = "file.properties";
 	private static final String FILE_STORED = "stored.gz";
+
+	private int status = Status.UNKNOWN;
 
 	public File(Folder parent) {
 		super();
@@ -139,6 +144,12 @@ public class File extends Item {
 	}
 
 	private void copyToGz(java.io.File file) throws IOException {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException("Could not find digest type MD5: " + e.getMessage());
+		}
 		GZIPOutputStream gzout = null;
 		FileOutputStream fout = null;
 		FileInputStream fin = null;
@@ -152,8 +163,12 @@ public class File extends Item {
 		int read = fin.read(buffer);
 		while(read >= 0) {
 			gzout.write(buffer, 0, read);
+			digest.update(buffer, 0, read);
 			read = fin.read(buffer);
 		}
+		byte[] md5Array = digest.digest();
+		String md5sum = toHexString(md5Array);
+		itemProperties.setProperty(propertyKeys.FILE_MD5_CHECKSUM, md5sum);
 		FileUtility.close(fin, gzout, fout);
 	}
 
@@ -293,5 +308,73 @@ public class File extends Item {
 	@Override
 	public String toString() {
 		return getName();
+	}
+	
+	public int getStatus() {
+		return status;
+	}
+	
+	public byte[] getMD5() {
+		if(null != itemProperties) {
+			if(itemProperties.containsKey(propertyKeys.FILE_MD5_CHECKSUM)) {
+				String md5sum = itemProperties.getProperty(propertyKeys.FILE_MD5_CHECKSUM);
+				byte md5Array[] = new byte[32];
+				for(int i=0; i<md5Array.length; i++) {
+					try {
+						md5Array[i] = Byte.parseByte(md5sum.substring(i*2, i*2+1), 16);
+					} catch (NumberFormatException ne) {
+						ne.printStackTrace();
+					}
+				}
+				return md5Array;
+			} else {
+				byte md5Array[];
+				FileInputStream fin = null;
+				GZIPInputStream gzin = null;
+				try {
+					MessageDigest digest = MessageDigest.getInstance("MD5");
+					fin = new FileInputStream(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_STORED);
+					gzin = new GZIPInputStream(fin);
+					
+					byte buffer[] = new byte[64*1024];
+					int read = gzin.read(buffer);
+					while(read >= 0) {
+						digest.update(buffer, 0, read);
+						read = gzin.read(buffer);
+					}
+					md5Array = digest.digest();
+					String md5sum = toHexString(md5Array);
+					itemProperties.setProperty(propertyKeys.FILE_MD5_CHECKSUM, md5sum);
+				} catch (IOException e) {
+					throw new InvalidOperationException("could not generate md5 because of " + e.getMessage());
+				} catch (NoSuchAlgorithmException e) {
+					throw new InvalidOperationException("could not generate md5 because of " + e.getMessage());
+				} finally {
+					FileUtility.close(gzin, fin);
+				}
+				return md5Array;
+			}
+		} else {
+			throw new InvalidOperationException("Item Properties was never initialized");
+		}
+	}
+
+	private String toHexString(byte[] md5Array) {
+		StringBuilder md5sum = new StringBuilder();
+		for(int i=0; i<md5Array.length; i++) {
+			int byteVal;
+			if((0x80 & md5Array[i]) != 0) {
+				byteVal = md5Array[i] & 0x7f;
+				byteVal += 0x80;
+			} else {
+				byteVal = md5Array[i];
+			}
+			String number = Integer.toString(byteVal, 16);
+			if(number.length() == 1) {
+				number = "0" + number;
+			}
+			md5sum.append(number);
+		}
+		return md5sum.toString();
 	}
 }
