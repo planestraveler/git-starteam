@@ -28,7 +28,6 @@ import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
-import com.starbase.starteam.TypeNames;
 import com.starbase.starteam.View;
 
 import jargs.gnu.CmdLineParser;
