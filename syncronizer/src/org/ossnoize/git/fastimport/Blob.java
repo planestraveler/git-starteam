@@ -29,6 +29,11 @@ public class Blob implements Markable {
 		MarkId = new Mark();
 	}
 	
+	public Blob(Data data) {
+		this();
+		Content = data;
+	}
+
 	public void setData(Data data) {
 		Content = data;
 	}
