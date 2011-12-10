@@ -68,12 +68,12 @@ public class Commit implements Markable {
 		if(null != authorName  && null != authorEmail) {
 			commitMsg.append(AUTHOR).append(' ').append(authorName).append(' ')
 					 .append('<').append(authorEmail).append('>').append(' ')
-					 .append(commitDate.getTime()).append(' ').append(DATEFORMAT.format(commitDate))
+					 .append(commitDate.getTime() / 1000).append(' ').append(DATEFORMAT.format(commitDate))
 					 .append('\n');
 		}
 		commitMsg.append(COMMITTER).append(' ').append(commiterName).append(' ')
 				 .append('<').append(commiterEmail).append('>').append(' ')
-				 .append(commitDate.getTime()).append(' ').append(DATEFORMAT.format(commitDate))
+				 .append(commitDate.getTime() / 1000).append(' ').append(DATEFORMAT.format(commitDate))
 				 .append('\n');
 		out.write(commitMsg.toString().getBytes());
 		comment.writeTo(out);
