@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import org.ossnoize.fakestarteam.FileUtility;
 
 public class MD5 {
-	byte[] md5Sum = new byte[32];
+	byte[] md5Sum = new byte[16];
 
 	public MD5() {
 	}
@@ -34,7 +34,7 @@ public class MD5 {
 	public MD5(String stringMD5) {
 		for(int i=0; i<md5Sum.length; i++) {
 			try {
-				md5Sum[i] = Byte.parseByte(stringMD5.substring(i, i+1), 16);
+				md5Sum[i] = Byte.parseByte(stringMD5.substring(i*2, i*2+1), 16);
 			} catch (NumberFormatException ne) {
 				ne.printStackTrace();
 			}
