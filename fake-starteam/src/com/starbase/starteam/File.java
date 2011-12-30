@@ -32,6 +32,7 @@ import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
 import com.starbase.util.MD5;
+import com.starbase.util.OLEDate;
 
 public class File extends Item {
 
@@ -165,7 +166,9 @@ public class File extends Item {
 		
 		byte[] buffer = new byte[1024*64];
 		int read = fin.read(buffer);
+		long size = 0;
 		while(read >= 0) {
+			size += read;
 			gzout.write(buffer, 0, read);
 			digest.update(buffer, 0, read);
 			read = fin.read(buffer);
@@ -174,6 +177,7 @@ public class File extends Item {
 		MD5 fileChecksum = new MD5(md5Array);
 		
 		itemProperties.setProperty(propertyKeys.FILE_MD5_CHECKSUM, fileChecksum.toHexString());
+		itemProperties.setProperty(propertyKeys.FILE_SIZE, Long.toString(size));
 		FileUtility.close(fin, gzout, fout);
 	}
 
@@ -225,6 +229,18 @@ public class File extends Item {
 	public String getName() {
 		if(null != itemProperties) {
 			return itemProperties.getProperty(propertyKeys.FILE_NAME);
+		} else {
+			throw new InvalidOperationException("Item properties are not initialized");
+		}
+	}
+	
+	public long getSizeEx() {
+		if(null != itemProperties) {
+			try {
+				return Long.parseLong(itemProperties.getProperty(propertyKeys.FILE_SIZE));
+			} catch (NumberFormatException e) {
+				return -1L;
+			}
 		} else {
 			throw new InvalidOperationException("Item properties are not initialized");
 		}
@@ -316,11 +332,33 @@ public class File extends Item {
 	}
 	
 	public int getStatus() throws IOException {
-		return status;
+		return getStatus(getWorkingFile());
+	}
+	
+	public int getStatus(java.io.File file) throws IOException {
+		OLEDate time = getModifiedTime();
+		long size = getSizeEx();
+		if(!file.isFile()) {
+			return Status.MISSING;
+		}
+		if(file.lastModified() > time.getLongValue()) {
+			return Status.MODIFIED;
+		}
+		if(file.lastModified() == time.getLongValue()) {
+			if(file.length() == size) {
+				return Status.CURRENT;
+			}
+		}
+		if(file.lastModified() < time.getLongValue()) {
+			if(file.length() != size) {
+				return Status.OUTOFDATE;
+			}
+		}
+		return Status.UNKNOWN;
 	}
 	
 	public int getStatusNow() throws IOException {
-		return Status.UNKNOWN;
+		return getStatus();
 	}
 
 	private java.io.File getWorkingFile() {
@@ -328,6 +366,10 @@ public class File extends Item {
 	}
 
 	public int getStatusByMD5(MD5 md5) {
+		String md5sum = itemProperties.getProperty(propertyKeys.FILE_MD5_CHECKSUM);
+		if(md5sum.equalsIgnoreCase(md5.toHexString())) {
+			return Status.CURRENT;
+		}
 		return Status.UNKNOWN;
 	}
 
