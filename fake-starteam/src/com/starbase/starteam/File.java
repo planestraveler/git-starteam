@@ -19,7 +19,6 @@ package com.starbase.starteam;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -31,6 +30,8 @@ import java.util.zip.GZIPOutputStream;
 import org.ossnoize.fakestarteam.FileUtility;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
+
+import com.starbase.util.MD5;
 
 public class File extends Item {
 
@@ -83,6 +84,7 @@ public class File extends Item {
 			setModifiedTime();
 			copyToGz(file);
 			isNew = false;
+			status = Status.CURRENT;
 			update();
 		} else {
 			throw new InvalidOperationException("Cannot add a file that is already existing");
@@ -108,6 +110,7 @@ public class File extends Item {
 			setModifiedTime();
 			registerNewID();
 			copyToGz(file);
+			status = Status.CURRENT;
 			update();
 		} else {
 			throw new InvalidOperationException("Cannot check-in a file that was not added");
@@ -135,6 +138,7 @@ public class File extends Item {
 	public void checkoutTo(java.io.File checkoutTo, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
 		if(holdingPlace.exists()) {
 			copyFromGz(holdingPlace, checkoutTo);
+			status = Status.CURRENT;
 			if(!timeStampNow) {
 				checkoutTo.setLastModified(getModifiedTime().getLongValue());
 			}
@@ -167,8 +171,9 @@ public class File extends Item {
 			read = fin.read(buffer);
 		}
 		byte[] md5Array = digest.digest();
-		String md5sum = toHexString(md5Array);
-		itemProperties.setProperty(propertyKeys.FILE_MD5_CHECKSUM, md5sum);
+		MD5 fileChecksum = new MD5(md5Array);
+		
+		itemProperties.setProperty(propertyKeys.FILE_MD5_CHECKSUM, fileChecksum.toHexString());
 		FileUtility.close(fin, gzout, fout);
 	}
 
@@ -310,71 +315,49 @@ public class File extends Item {
 		return getName();
 	}
 	
-	public int getStatus() {
+	public int getStatus() throws IOException {
 		return status;
 	}
 	
+	public int getStatusNow() throws IOException {
+		return Status.UNKNOWN;
+	}
+
+	private java.io.File getWorkingFile() {
+		return new java.io.File(System.getProperty("user.dir") + java.io.File.separator + getParentFolderHierarchy() + java.io.File.separator + getName());
+	}
+
+	public int getStatusByMD5(MD5 md5) {
+		return Status.UNKNOWN;
+	}
+
 	public byte[] getMD5() {
 		if(null != itemProperties) {
 			if(itemProperties.containsKey(propertyKeys.FILE_MD5_CHECKSUM)) {
 				String md5sum = itemProperties.getProperty(propertyKeys.FILE_MD5_CHECKSUM);
-				byte md5Array[] = new byte[32];
-				for(int i=0; i<md5Array.length; i++) {
-					try {
-						md5Array[i] = Byte.parseByte(md5sum.substring(i*2, i*2+1), 16);
-					} catch (NumberFormatException ne) {
-						ne.printStackTrace();
-					}
-				}
-				return md5Array;
+				MD5 fileChecksum = new MD5(md5sum);
+				return fileChecksum.getData();
 			} else {
-				byte md5Array[];
+				MD5 fileChecksum = new MD5();
 				FileInputStream fin = null;
 				GZIPInputStream gzin = null;
 				try {
-					MessageDigest digest = MessageDigest.getInstance("MD5");
 					fin = new FileInputStream(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_STORED);
 					gzin = new GZIPInputStream(fin);
-					
-					byte buffer[] = new byte[64*1024];
-					int read = gzin.read(buffer);
-					while(read >= 0) {
-						digest.update(buffer, 0, read);
-						read = gzin.read(buffer);
-					}
-					md5Array = digest.digest();
-					String md5sum = toHexString(md5Array);
+
+					fileChecksum.computeStreamMD5Ex(gzin);
+
+					String md5sum = fileChecksum.toHexString();
 					itemProperties.setProperty(propertyKeys.FILE_MD5_CHECKSUM, md5sum);
 				} catch (IOException e) {
-					throw new InvalidOperationException("could not generate md5 because of " + e.getMessage());
-				} catch (NoSuchAlgorithmException e) {
 					throw new InvalidOperationException("could not generate md5 because of " + e.getMessage());
 				} finally {
 					FileUtility.close(gzin, fin);
 				}
-				return md5Array;
+				return fileChecksum.getData();
 			}
 		} else {
 			throw new InvalidOperationException("Item Properties was never initialized");
 		}
-	}
-
-	private String toHexString(byte[] md5Array) {
-		StringBuilder md5sum = new StringBuilder();
-		for(int i=0; i<md5Array.length; i++) {
-			int byteVal;
-			if((0x80 & md5Array[i]) != 0) {
-				byteVal = md5Array[i] & 0x7f;
-				byteVal += 0x80;
-			} else {
-				byteVal = md5Array[i];
-			}
-			String number = Integer.toString(byteVal, 16);
-			if(number.length() == 1) {
-				number = "0" + number;
-			}
-			md5sum.append(number);
-		}
-		return md5sum.toString();
 	}
 }
