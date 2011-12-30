@@ -83,7 +83,9 @@ public class MainEntry {
 						for(View v : p.getViews()) {
 							if(v.getName().equalsIgnoreCase(view)) {
 								GitImporter g = new GitImporter(starteam, p, v);
-								g.setResume(resume);
+								if(null != resume) {
+									g.setResume(resume);
+								}
 								g.generateFastImportStream();
 								break;
 							}
