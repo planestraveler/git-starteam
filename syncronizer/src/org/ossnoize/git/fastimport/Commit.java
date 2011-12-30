@@ -26,6 +26,7 @@ public class Commit implements Markable {
 	private MarkID merge;
 	private List<FileOperation> listOfOperation;
 	private Date commitDate;
+	private boolean resumeFastImport;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -89,6 +90,11 @@ public class Commit implements Markable {
 			out.write(FROM_SP.getBytes());
 			from.writeTo(out);
 			out.write('\n');
+		} else if(resumeFastImport) {
+			out.write(FROM_SP.getBytes());
+			out.write(reference.getBytes());
+			out.write("^0".getBytes());
+			out.write('\n');
 		}
 		if(null != merge) {
 			out.write(MERGE_SP.getBytes());
@@ -104,5 +110,9 @@ public class Commit implements Markable {
 	@Override
 	public MarkID getMarkID() {
 		return mark.getID();
+	}
+
+	public void resumeOnTopOfRef() {
+		resumeFastImport = true;
 	}
 }
