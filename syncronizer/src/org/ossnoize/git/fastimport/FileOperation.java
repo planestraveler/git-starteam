@@ -18,6 +18,20 @@ package org.ossnoize.git.fastimport;
 
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
-public interface FileOperation extends FastImportObject {
-	public void setPath(String path) throws InvalidPathException;
+public abstract class FileOperation implements FastImportObject {
+	protected String Path;
+
+	public void setPath(String path) throws InvalidPathException {
+		if(path.endsWith("/"))
+			throw new InvalidPathException("The path end with '/'.");
+		if(path.startsWith("/"))
+			throw new InvalidPathException("The path start with a '/'.");
+		if(path.startsWith("\""))
+			throw new InvalidPathException("The path start with a '\"'.");
+		if(path.contains("//"))
+			throw new InvalidPathException("The path should not contains double '/'.");
+		if(path.contains("/../") || path.contains("/./"))
+			throw new InvalidPathException("The path should not contains relative reference (.. or .) in it.");
+		Path = path;
+	}
 }

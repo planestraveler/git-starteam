@@ -21,16 +21,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
-import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
-public class FileModification implements FileOperation {
+public class FileModification extends FileOperation {
 	private enum FileModificationType {
 		Inline,
 		Referenced;
 	}
 
 	private FastImportObject Content;
-	private String Path;
 	private FileModificationType Type;
 	private GitFileType FileType;
 
@@ -71,21 +69,6 @@ public class FileModification implements FileOperation {
 		} else {
 			throw new IOException("Unknown File modification type " + Type);
 		}
-	}
-
-	@Override
-	public void setPath(String path) throws InvalidPathException {
-		if(path.endsWith("/"))
-			throw new InvalidPathException("The path end with '/'.");
-		if(path.startsWith("/"))
-			throw new InvalidPathException("The path start with a '/'.");
-		if(path.startsWith("\""))
-			throw new InvalidPathException("The path start with a '\"'.");
-		if(path.contains("//"))
-			throw new InvalidPathException("The path should not contains double '/'.");
-		if(path.contains("/../") || path.contains("/./"))
-			throw new InvalidPathException("The path should not contains relative reference (.. or .) in it.");
-		Path = path;
 	}
 
 	public void setFileType(GitFileType type) {
