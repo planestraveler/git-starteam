@@ -31,8 +31,10 @@ import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.Status;
 import com.starbase.starteam.View;
 import com.starbase.starteam.File;
+import com.starbase.util.MD5;
 
 public class GitImporter {
 	private Server server;
@@ -40,7 +42,6 @@ public class GitImporter {
 	private View view;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
 	private final String headFormat = "refs/heads/{0}";
-	private final String resumeFormat = "refs/heads/{0}^0";
 	private boolean isResume = false;
 	
 	public GitImporter(Server s, Project p, View v) {
@@ -68,32 +69,43 @@ public class GitImporter {
 			path = path.substring(1);
 			
 			try {
-				java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
-				aFile.deleteOnExit();
-				f.checkoutTo(aFile, 0, true, false, false);
 				
-				FileModification fm = new FileModification(new Data(aFile));
-				fm.setFileType(GitFileType.Normal);
-				fm.setPath(path);
-				if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
-					lastcommit.addFileOperation(fm);
-				} else {
-					String ref = MessageFormat.format(headFormat, view.getName());
-					if(null != lastcommit) {
-						lastcommit.writeTo(System.out);
-					} else {
-						if (isResume) {
-							ref = MessageFormat.format(resumeFormat, view.getName());
-						}
-					}
-					Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
-					commit.addFileOperation(fm);
-					commit.setFromCommit(lastcommit);
+				int fileStatus = f.getStatus();
+				if(Status.UNKNOWN == fileStatus || Status.MODIFIED == fileStatus) {
+					// try harder
+					MD5 localChecksum = new MD5();
+					java.io.File aFile = new java.io.File(System.getProperty("user.dir") + java.io.File.separator + f.getParentFolderHierarchy() + java.io.File.separator + f.getName());
+					localChecksum.computeFileMD5Ex(aFile);
+					fileStatus = f.getStatusByMD5(localChecksum);
+				}
+				if(fileStatus != Status.CURRENT && fileStatus != Status.MODIFIED) {
+					java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
+					aFile.deleteOnExit();
+					f.checkoutTo(aFile, 0, true, false, false);
 					
-					/** Keep last for information **/
-					lastComment = cmt;
-					lastUID = f.getModifiedBy();
-					lastcommit = commit;
+					FileModification fm = new FileModification(new Data(aFile));
+					fm.setFileType(GitFileType.Normal);
+					fm.setPath(path);
+					if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
+						lastcommit.addFileOperation(fm);
+					} else {
+						String ref = MessageFormat.format(headFormat, view.getName());
+						Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
+						commit.addFileOperation(fm);
+						if(null == lastcommit) {
+							if(isResume) {
+								commit.resumeOnTopOfRef();
+							}
+						} else {
+							lastcommit.writeTo(System.out);
+							commit.setFromCommit(lastcommit);
+						}
+						
+						/** Keep last for information **/
+						lastComment = cmt;
+						lastUID = f.getModifiedBy();
+						lastcommit = commit;
+					}
 				}
 			} catch (IOException io) {
 				io.printStackTrace();
