@@ -47,11 +47,19 @@ public class Commit implements Markable {
 	}
 	
 	public void setFromCommit(Commit previous) {
-		from = previous.getMarkID();
+		if(null != previous) {
+			from = previous.getMarkID();
+		} else {
+			from = null;
+		}
 	}
 	
 	public void setMergeCommit(Commit previous) {
-		merge = previous.getMarkID();
+		if(null != previous) {
+			merge = previous.getMarkID();
+		} else {
+			merge = null;
+		}
 	}
 	
 	public void addFileOperation(FileOperation ops) {
