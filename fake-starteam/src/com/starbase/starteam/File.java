@@ -367,8 +367,10 @@ public class File extends Item {
 
 	public int getStatusByMD5(MD5 md5) {
 		String md5sum = itemProperties.getProperty(propertyKeys.FILE_MD5_CHECKSUM);
-		if(md5sum.equalsIgnoreCase(md5.toHexString())) {
-			return Status.CURRENT;
+		if(null != md5sum) {
+			if(md5sum.equalsIgnoreCase(md5.toHexString())) {
+				return Status.CURRENT;
+			}
 		}
 		return Status.UNKNOWN;
 	}
