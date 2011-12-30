@@ -34,8 +34,6 @@ public class InternalPropertiesProvider {
 	private Server server;
 	
 	private InternalPropertiesProvider() {
-		Archive = new File("localhost");
-		validateArchive();
 	}
 
 	private void validateArchive() {
