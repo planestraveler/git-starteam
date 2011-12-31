@@ -113,10 +113,19 @@ public class GitImporter {
 				e1.printStackTrace();
 			}
 		}
-		try {
-			lastcommit.writeTo(System.out);
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		if(null != lastcommit) {
+			try {
+				lastcommit.writeTo(System.out);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		} else {
+			if(sortedFileList.size() > 0) {
+				System.err.println("There was no new revision in the starteam view.");
+				System.err.println("All the files in the repository are at theire lastest version");
+			} else {
+				System.err.println("The starteam view specified was empty.");
+			}
 		}
 	}
 	
