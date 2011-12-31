@@ -8,6 +8,9 @@ public class FileDelete extends FileOperation {
 	
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
+		if(null == Path) {
+			throw new NullPointerException("Path cannot be null");
+		}
 		StringBuilder builder = new StringBuilder();
 		builder.append(DELETE_SP);
 		builder.append(Path);
