@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -32,13 +33,10 @@ public class MD5 {
 	}
 	
 	public MD5(String stringMD5) {
-		for(int i=0; i<md5Sum.length; i++) {
-			try {
-				md5Sum[i] = Byte.parseByte(stringMD5.substring(i*2, i*2+1), 16);
-			} catch (NumberFormatException ne) {
-				ne.printStackTrace();
-			}
-		}
+		BigInteger bigInt = new BigInteger(stringMD5, 16);
+		byte[] value = bigInt.toByteArray();
+		int decal = 16 - value.length;
+		System.arraycopy(value, decal, md5Sum, 0, md5Sum.length);
 	}
 	
 	public MD5(byte[] md5Array) {
@@ -57,7 +55,7 @@ public class MD5 {
 				digest.update(buffer, 0, read);
 				read = in.read(buffer);
 			}
-			md5Sum = digest.digest();
+			System.arraycopy(digest.digest(), 0, md5Sum, 0, md5Sum.length);
 		} catch (NoSuchAlgorithmException e) {
 			throw new IOException("Could not find the algorithm: " + e.getMessage());
 		}
@@ -77,7 +75,7 @@ public class MD5 {
 				digest.update(buffer, 0, read);
 				read = in.read(buffer);
 			}
-			md5Sum = digest.digest();
+			System.arraycopy(digest.digest(), 0, md5Sum, 0, md5Sum.length);
 		} catch (NoSuchAlgorithmException e) {
 			FileUtility.close(in);
 			throw new IOException("Could not find the algorithm: " + e.getMessage());
@@ -95,23 +93,12 @@ public class MD5 {
 	}
 	
 	public java.lang.String toHexString() {
-		StringBuilder checkSumString = new StringBuilder();
-		for(int i=0; i<md5Sum.length; i++) {
-			int byteVal;
-			if((0x80 & md5Sum[i]) != 0) {
-				byteVal = md5Sum[i] & 0x7f;
-				byteVal += 0x80;
-			} else {
-				byteVal = md5Sum[i];
-			}
-			String number = Integer.toString(byteVal, 16);
-			if(number.length() == 1) {
-				checkSumString.append(0).append(number);
-			} else {
-				checkSumString.append(number);
-			}
+		BigInteger bigInt = new BigInteger(1, md5Sum);
+		String output = bigInt.toString(16);
+		if(output.length() < 32) {
+			output = "0" + output;
 		}
-		return checkSumString.toString();
+		return output;
 	}
 	
 }
