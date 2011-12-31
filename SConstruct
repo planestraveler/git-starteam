@@ -39,6 +39,7 @@ env.Append(JAVACFLAGS = ['-Xlint:unchecked'])
 if not STARTEAM:
     fakeStarteamTarget = 'bin/fake-starteam.jar'
     fakeclasses = env.Java(target = 'fake-starteam/classes', source = 'fake-starteam/src')
+    fakeclasses.append('syncronizer.mf')
     env.Jar(target = fakeStarteamTarget, source = fakeclasses)
     env.Append(JAVACLASSPATH = [fakeStarteamTarget])
 else:
