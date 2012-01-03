@@ -31,7 +31,7 @@ public class GitHelper implements RepositoryHelper {
 
 	private Thread gitQueryWorker;
 	private Thread gitErrorStreamEater;
-	private HashSet<String> trakedFiles;
+	private HashSet<String> trackedFiles;
 	private int trackedFilesReturnCode;
 	
 	public GitHelper() {
@@ -40,7 +40,7 @@ public class GitHelper implements RepositoryHelper {
 
 	private void grabTrackedFiles() {
 		trackedFilesReturnCode = Integer.MAX_VALUE;
-		trakedFiles = null;
+		trackedFiles = null;
 		ProcessBuilder process = new ProcessBuilder();
 		process.command("git", "ls-files");
 		process.directory(new File(System.getProperty("user.dir")));
@@ -51,6 +51,7 @@ public class GitHelper implements RepositoryHelper {
 			gitQueryWorker.start();
 			gitErrorStreamEater.start();
 			trackedFilesReturnCode = lsFiles.waitFor();
+			gitQueryWorker.join();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -64,7 +65,7 @@ public class GitHelper implements RepositoryHelper {
 		if(Integer.MAX_VALUE == trackedFilesReturnCode) {
 			return null;
 		}
-		return (Set<String>) trakedFiles.clone();
+		return (Set<String>) trackedFiles.clone();
 	}
 
 	private class GitLsFilesReader implements Runnable {
@@ -104,7 +105,7 @@ public class GitHelper implements RepositoryHelper {
 					}
 				}
 			}
-			trakedFiles = listOfTrackedFiles;
+			trackedFiles = listOfTrackedFiles;
 		}
 		
 	}
