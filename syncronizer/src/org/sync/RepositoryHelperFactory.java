@@ -67,4 +67,11 @@ public class RepositoryHelperFactory {
 		// TODO: Add more validation to support more repository type. (Bazaar, Mercurial, ...)
 		return null;
 	}
+	
+	/**
+	 * Clear the cached helper to force it recreation.
+	 */
+	public void clearCachedHelper() {
+		helper = null;
+	}
 }
