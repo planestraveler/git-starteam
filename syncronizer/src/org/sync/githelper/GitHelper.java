@@ -31,7 +31,7 @@ public class GitHelper implements RepositoryHelper {
 
 	private Thread gitQueryWorker;
 	private Thread gitErrorStreamEater;
-	private Set<String> trakedFiles;
+	private HashSet<String> trakedFiles;
 	private int trackedFilesReturnCode;
 	
 	public GitHelper() {
@@ -59,11 +59,12 @@ public class GitHelper implements RepositoryHelper {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set<String> getListOfTrackedFile() {
 		if(Integer.MAX_VALUE == trackedFilesReturnCode) {
 			return null;
 		}
-		return trakedFiles;
+		return (Set<String>) trakedFiles.clone();
 	}
 
 	private class GitLsFilesReader implements Runnable {
@@ -75,7 +76,7 @@ public class GitHelper implements RepositoryHelper {
 		
 		@Override
 		public void run() {
-			Set<String> listOfTrackedFiles = new HashSet<String>();
+			HashSet<String> listOfTrackedFiles = new HashSet<String>();
 			InputStreamReader reader = null;
 			BufferedReader buffer = null;
 			
