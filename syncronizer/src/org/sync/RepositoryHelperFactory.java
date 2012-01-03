@@ -19,9 +19,6 @@ package org.sync;
 import java.io.File;
 import java.io.FilenameFilter;
 
-import org.sync.githelper.GitHelper;
-
-
 public class RepositoryHelperFactory {
 
 	private static RepositoryHelperFactory instance = null;
