@@ -27,6 +27,8 @@ public class PropertyNames {
 	public final java.lang.String REVISION_NUMBER = "Version";
 	public final java.lang.String MODIFIED_USER_ID = "Modified By";
 	public final java.lang.String CREATED_USER_ID = "Created By";
+	public final java.lang.String DELETED_USER_ID = "Deleted By";
 	public final java.lang.String MODIFIED_TIME = "Modified Time";
 	public final java.lang.String CREATED_TIME = "Created Time";
+	public final java.lang.String DELETED_TIME = "Deleted Time";
 }
