@@ -19,11 +19,14 @@ package org.sync;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
+import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileModification;
+import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
@@ -37,22 +40,29 @@ import com.starbase.starteam.File;
 import com.starbase.util.MD5;
 
 public class GitImporter {
+	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
 	private Server server;
 	private Project project;
 	private View view;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
 	private final String headFormat = "refs/heads/{0}";
 	private boolean isResume = false;
+	private RepositoryHelper helper;
+	// Use this set to find all the deleted files.
+	private Set<String> deletedFiles; 
 	
 	public GitImporter(Server s, Project p, View v) {
 		server = s;
 		project = p;
 		view = v;
+		helper = RepositoryHelperFactory.getFactory().createHelper();
+		deletedFiles = helper.getListOfTrackedFile();
 	}
 
 	public void generateFastImportStream() {
 		Folder root = view.getRootFolder();
 		recursiveFilePopulation(root);
+		recoverDeleteInformation(deletedFiles);
 
 		String lastComment = "";
 		int lastUID = -1;
@@ -69,7 +79,6 @@ public class GitImporter {
 			path = path.substring(1);
 			
 			try {
-				
 				int fileStatus = f.getStatus();
 				if(Status.UNKNOWN == fileStatus || Status.MODIFIED == fileStatus) {
 					// try harder
@@ -113,6 +122,34 @@ public class GitImporter {
 				e1.printStackTrace();
 			}
 		}
+		// TODO: Simple hack to make deletion of disapered files. Since starteam does not carry some kind of
+		// TODO: delete event. (as known from now)
+		if(deletedFiles.size() > 0) {
+			try {
+				String ref = MessageFormat.format(headFormat, view.getName());
+				Commit commit = new Commit("File Janitor", "janitor@cie.com", "Cleaning files move along", ref, new java.util.Date(System.currentTimeMillis()));
+				if(null == lastcommit) {
+					if(isResume) {
+						commit.resumeOnTopOfRef();
+					}
+				} else {
+					lastcommit.writeTo(System.out);
+					commit.setFromCommit(lastcommit);
+				}
+				for(String path : deletedFiles) {
+					FileOperation fileDelete = new FileDelete();
+					try {
+						fileDelete.setPath(path);
+						commit.addFileOperation(fileDelete);
+					} catch (InvalidPathException e1) {
+						e1.printStackTrace();
+					}
+				}
+				lastcommit = commit;
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
 		if(null != lastcommit) {
 			try {
 				lastcommit.writeTo(System.out);
@@ -129,6 +166,12 @@ public class GitImporter {
 		}
 	}
 	
+	private void recoverDeleteInformation(Set<String> listOfFiles) {
+		for(String path : listOfFiles) {
+			//TODO: add delete information when figured out how.
+		}
+	}
+
 	public void setResume(boolean b) {
 		isResume = b;
 	}
@@ -140,8 +183,13 @@ public class GitImporter {
 				long modifiedTime = i.getModifiedTime().getLongValue();
 				int userid = i.getModifiedBy();
 				String path = i.getParentFolderHierarchy() + java.io.File.separator + historyFile.getName();
+				path = path.replace('\\', '/');
+				path = path.substring(1);
+				if(deletedFiles.contains(path)) {
+					deletedFiles.remove(path);
+				}
 				String comment = i.getComment();
-				String key = MessageFormat.format("{0,number,000000000000000}|{1,number,000000}|{2}|{3}", modifiedTime, userid, comment, path);
+				String key = MessageFormat.format(revisionKeyFormat, modifiedTime, userid, comment, path);
 				sortedFileList.put(key, historyFile);
 				System.err.println("Found file marked as: " + key);
 			}
