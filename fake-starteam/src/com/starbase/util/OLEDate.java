@@ -16,6 +16,8 @@
  *****************************************************************************/
 package com.starbase.util;
 
+import java.util.Date;
+
 public class OLEDate {
 	
 	private Long javaTime;
@@ -37,6 +39,10 @@ public class OLEDate {
 		this.javaTime = javaTime;
 	}
 	
+	public OLEDate(Date createdDate) {
+		this.javaTime = createdDate.getTime();
+	}
+
 	public long getLongValue() {
 		if(null != javaTime) {
 			return javaTime;

@@ -17,9 +17,11 @@
 package org.ossnoize.fakestarteam;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import com.starbase.starteam.Project;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class SerializableView extends View implements Serializable {
 
@@ -33,6 +35,8 @@ public class SerializableView extends View implements Serializable {
 	private String description;
 	private String defaultWorkingFolder;
 	private int id;
+	private Date createdDate;
+	private int createdBy;
 	private volatile Project project;
 	
 	protected SerializableView() {
@@ -45,6 +49,8 @@ public class SerializableView extends View implements Serializable {
 		this.description = description;
 		this.defaultWorkingFolder = defaultWorkingFolder;
 		this.id = SimpleTypedResourceIDProvider.getProvider().registerNew(this);
+		this.createdDate = new Date();
+		this.createdBy = InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID();
 		if(null != parent) {
 			project = parent.getProject();
 			if(project instanceof SerializableProject) {
@@ -104,5 +110,15 @@ public class SerializableView extends View implements Serializable {
 	@Override
 	public void setDefaultPath(String path) {
 		defaultWorkingFolder = path;
+	}
+	
+	@Override
+	public OLEDate getCreatedTime() {
+		if(null == createdDate) {
+			// TODO: Remove this patch for old serialized views.
+			createdDate = new Date(System.currentTimeMillis());
+			update();
+		}
+		return new OLEDate(createdDate);
 	}
 }

@@ -16,6 +16,8 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
+import com.starbase.util.OLEDate;
+
 public class View extends SimpleTypedResource implements ISecurableContainer, ISecurableObject {
 	
 	private Folder rootFolder;
@@ -69,6 +71,10 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public void populate() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public OLEDate getCreatedTime() {
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
