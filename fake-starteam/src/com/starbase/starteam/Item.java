@@ -110,6 +110,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	@Override
 	public int getID() {
+		return hashCode();
+	}
+	
+	public int getObjectID() {
 		return Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 	}
 	
