@@ -18,6 +18,7 @@ package org.sync;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -56,7 +57,11 @@ public class GitImporter {
 		project = p;
 		view = v;
 		helper = RepositoryHelperFactory.getFactory().createHelper();
-		deletedFiles = helper.getListOfTrackedFile();
+		if(null != helper) {
+			deletedFiles = helper.getListOfTrackedFile();
+		} else {
+			deletedFiles = new HashSet<String>();
+		}
 	}
 
 	public void generateFastImportStream() {
@@ -73,17 +78,17 @@ public class GitImporter {
 			String userName = server.getUser(f.getModifiedBy()).getName();
 			String userEmail = userName.replaceAll(" ", ".");
 			userEmail += "@" + "cie.com";
-			String path = f.getParentFolderHierarchy() + java.io.File.separator + f.getName();
-			/* TODO: need to validate this with the real thing */
+			String path = f.getParentFolderHierarchy() + f.getName();
 			path = path.replace('\\', '/');
-			path = path.substring(1);
+			// Strip the view name from the path
+			path = path.substring(2 + view.getName().length());
 			
 			try {
 				int fileStatus = f.getStatus();
 				if(Status.UNKNOWN == fileStatus || Status.MODIFIED == fileStatus) {
 					// try harder
 					MD5 localChecksum = new MD5();
-					java.io.File aFile = new java.io.File(System.getProperty("user.dir") + java.io.File.separator + f.getParentFolderHierarchy() + java.io.File.separator + f.getName());
+					java.io.File aFile = new java.io.File(System.getProperty("user.dir") + java.io.File.separator + f.getParentFolderHierarchy() + f.getName());
 					localChecksum.computeFileMD5Ex(aFile);
 					fileStatus = f.getStatusByMD5(localChecksum);
 				}
@@ -182,9 +187,9 @@ public class GitImporter {
 				File historyFile = (File) i;
 				long modifiedTime = i.getModifiedTime().getLongValue();
 				int userid = i.getModifiedBy();
-				String path = i.getParentFolderHierarchy() + java.io.File.separator + historyFile.getName();
+				String path = i.getParentFolderHierarchy() + historyFile.getName();
 				path = path.replace('\\', '/');
-				path = path.substring(1);
+				//path = path.substring(1);
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
 				}
