@@ -19,11 +19,11 @@
 
 AddOption('--jargs', dest='jargs', type='string', nargs=1, action='store', metavar='DIR', help='jargs jar path')
 AddOption('--starteam', dest='starteam', type='string', nargs=1, action='store', metavar='DIR', help='starteam sdk location (default to fake-starteam if not specified)')
-AddOption('--javasdkhome', dest='javasdkhome', type='string', nargs=1, action='store', metavar='DIR', help='Java SE SDK Home')
+AddOption('--jdkhome', dest='jdkhome', type='string', nargs=1, action='store', metavar='DIR', help='Java SE SDK Home')
 
 JARGS = GetOption('jargs')
 STARTEAM = GetOption('starteam')
-JAVASDKHOME = GetOption('javasdkhome')
+JAVASDKHOME = GetOption('jdkhome')
 
 if not GetOption('clean'):
     if not GetOption('help'):
@@ -33,18 +33,19 @@ if not GetOption('clean'):
 
 env = Environment(JAVACLASSPATH = [JARGS])
 if JAVASDKHOME:
-    env.Append(PATH = [JAVASDKHOME + "/bin"])
+    env['ENV']['PATH'] += ";" + JAVASDKHOME
 
 env.Append(JAVACFLAGS = ['-Xlint:unchecked'])
 if not STARTEAM:
     fakeStarteamTarget = 'bin/fake-starteam.jar'
     fakeclasses = env.Java(target = 'fake-starteam/classes', source = 'fake-starteam/src')
-    fakeclasses.append('syncronizer.mf')
+    fakeclasses.append('fakestarteam.mf')
     env.Jar(target = fakeStarteamTarget, source = fakeclasses)
     env.Append(JAVACLASSPATH = [fakeStarteamTarget])
 else:
     env.Append(JAVACLASSPATH = [STARTEAM])
 
 syncclasses = env.Java(target = 'syncronizer/classes', source = 'syncronizer/src')
+syncclasses.append('syncronizer.mf')
 env.Jar(target = 'bin/syncronizer.jar', source = syncclasses)
 
