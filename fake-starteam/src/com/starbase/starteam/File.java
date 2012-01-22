@@ -320,7 +320,7 @@ public class File extends Item {
 	protected List<Item> loadHistory() {
 		int lastRevision = findLastRevision(getName());
 		List<Item> ret = new ArrayList<Item>(lastRevision);
-		for(int i=0; i<lastRevision; i++) {
+		for(int i=0; i<=lastRevision; i++) {
 			ret.add(new File(getName(), i, parent));
 		}
 		return ret;
