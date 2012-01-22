@@ -16,6 +16,8 @@
 ******************************************************************************/
 package org.ossnoize.git.fastimport;
 
+import java.text.MessageFormat;
+
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
 public abstract class FileOperation implements FastImportObject {
@@ -23,15 +25,15 @@ public abstract class FileOperation implements FastImportObject {
 
 	public void setPath(String path) throws InvalidPathException {
 		if(path.endsWith("/"))
-			throw new InvalidPathException("The path end with '/'.");
+			throw new InvalidPathException(MessageFormat.format("The path {0} end with \"/\".", path));
 		if(path.startsWith("/"))
-			throw new InvalidPathException("The path start with a '/'.");
+			throw new InvalidPathException(MessageFormat.format("The path {0} start with a \"/\".", path));
 		if(path.startsWith("\""))
-			throw new InvalidPathException("The path start with a '\"'.");
+			throw new InvalidPathException(MessageFormat.format("The path {0} start with a \".", path));
 		if(path.contains("//"))
-			throw new InvalidPathException("The path should not contains double '/'.");
+			throw new InvalidPathException(MessageFormat.format("The path {0} should not contains double \"/\".", path));
 		if(path.contains("/../") || path.contains("/./"))
-			throw new InvalidPathException("The path should not contains relative reference (.. or .) in it.");
+			throw new InvalidPathException(MessageFormat.format("The path {0} should not contains relative reference (.. or .) in it.", path));
 		Path = path;
 	}
 }
