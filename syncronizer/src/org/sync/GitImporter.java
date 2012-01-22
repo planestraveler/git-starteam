@@ -190,7 +190,7 @@ public class GitImporter {
 				// To find out if they are all the same in the history.
 				if(first) {
 					for(Item history : historyFile.getHistory()) {
-						System.err.println("Name " + history + " : ID <" + history.getObjectID() + ">");
+						System.err.println("Name " + history + " : ID <" + history.getObjectID() + ":" + history.getID() + ">");
 					}
 					first = false;
 				}
