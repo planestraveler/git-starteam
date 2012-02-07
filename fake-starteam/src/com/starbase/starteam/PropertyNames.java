@@ -20,11 +20,13 @@ public class PropertyNames {
 	public final java.lang.String COMMENT = "Comment";
 	public final java.lang.String FOLDER_NAME = "Name";
 	public final java.lang.String OBJECT_ID = "Object ID";
+	public final java.lang.String PARENT_OBJECT_ID = "Parent ID";
 	public final java.lang.String ROOT_OBJECT_ID = "Root Object ID";
 	public final java.lang.String FILE_DESCRIPTION = "Description";
 	public final java.lang.String FILE_NAME = "Name";
 	public final java.lang.String FILE_MD5_CHECKSUM = "MD5 Checksum";
 	public final java.lang.String FILE_SIZE = "Size";
+	public final java.lang.String FOLDER_PATH = "Folder Path";
 	public final java.lang.String REVISION_NUMBER = "Version";
 	public final java.lang.String MODIFIED_USER_ID = "Modified By";
 	public final java.lang.String CREATED_USER_ID = "Created By";
