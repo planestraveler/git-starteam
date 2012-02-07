@@ -41,6 +41,7 @@ public class MainEntry {
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
+		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
 
 		try {
 			parser.parse(args);
@@ -60,6 +61,7 @@ public class MainEntry {
 		String view = (String) parser.getOptionValue(selectView);
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
+		String head = (String) parser.getOptionValue(selectHead);
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -83,6 +85,9 @@ public class MainEntry {
 						for(View v : p.getViews()) {
 							if(v.getName().equalsIgnoreCase(view)) {
 								GitImporter g = new GitImporter(starteam, p, v);
+								if(null != head) {
+									g.setHeadName(head);
+								}
 								if(null != resume) {
 									g.setResume(resume);
 								}

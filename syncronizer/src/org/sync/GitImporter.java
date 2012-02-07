@@ -47,6 +47,7 @@ public class GitImporter {
 	private View view;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
 	private final String headFormat = "refs/heads/{0}";
+	private String alternateHead = null;
 	private boolean isResume = false;
 	private RepositoryHelper helper;
 	// Use this set to find all the deleted files.
@@ -69,6 +70,10 @@ public class GitImporter {
 		recursiveFilePopulation(root);
 		recoverDeleteInformation(deletedFiles);
 
+		String head = view.getName();
+		if(null != alternateHead) {
+			head = alternateHead;
+		}
 		String lastComment = "";
 		int lastUID = -1;
 		Commit lastcommit = null;
@@ -103,7 +108,7 @@ public class GitImporter {
 					if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
 						lastcommit.addFileOperation(fm);
 					} else {
-						String ref = MessageFormat.format(headFormat, view.getName());
+						String ref = MessageFormat.format(headFormat, head);
 						Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
 						commit.addFileOperation(fm);
 						if(null == lastcommit) {
@@ -131,7 +136,7 @@ public class GitImporter {
 		// TODO: delete event. (as known from now)
 		if(deletedFiles.size() > 0) {
 			try {
-				String ref = MessageFormat.format(headFormat, view.getName());
+				String ref = MessageFormat.format(headFormat, head);
 				Commit commit = new Commit("File Janitor", "janitor@cie.com", "Cleaning files move along", ref, new java.util.Date(System.currentTimeMillis()));
 				if(null == lastcommit) {
 					if(isResume) {
@@ -211,5 +216,9 @@ public class GitImporter {
 		for(Folder subfolder : f.getSubFolders()) {
 			recursiveFilePopulation(subfolder);
 		}
+	}
+
+	public void setHeadName(String head) {
+		alternateHead = head;
 	}
 }
