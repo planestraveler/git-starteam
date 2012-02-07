@@ -52,6 +52,9 @@ public class Folder extends Item {
 		}
 	};
 
+	protected Folder() {
+	}
+	
 	public Folder(Server server) {
 		throw new UnsupportedOperationException("Unknown goal for this constructor");
 	}
@@ -59,6 +62,7 @@ public class Folder extends Item {
 	public Folder(Folder parent, String name, String workingFolder) {
 		this.parent = parent;
 		view = parent.getView();
+		setName(name);
 		try {
 			String folder = parent.holdingPlace.getCanonicalPath() + File.separator + name;
 			holdingPlace = new File(folder);
@@ -68,30 +72,8 @@ public class Folder extends Item {
 			e.printStackTrace();
 		}
 	}
-	
-	protected Folder(View currentView) {
-		File serverArchive = InternalPropertiesProvider.getInstance().getFile();
-		if(!serverArchive.isDirectory()) {
-			throw new UnsupportedOperationException("The archive need to be a directory.");
-		}
-		try {
-			String rootFolder = serverArchive.getCanonicalPath() + File.separator +
-					currentView.getProject().getName() + File.separator + currentView.getName();
-			holdingPlace = new File(rootFolder);
-			validateHoldingPlace();
-			loadFolderProperties();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		// We don't want the root folder to have any default name.
-		// so overwrite the view name with a blank one and update.
-		setName("");
-		this.parent = null;
-		view = currentView;
-		update();
-	}
 
-	private void validateHoldingPlace() {
+	protected void validateHoldingPlace() {
 		if(null == holdingPlace) {
 			throw new InvalidOperationException("Cannot create a folder without an holding place.");
 		}
@@ -182,8 +164,7 @@ public class Folder extends Item {
 		return getName();
 	}
 	
-	private void loadFolderProperties() {
-		itemProperties = new Properties();
+	protected void loadFolderProperties() {
 		FileInputStream fin = null;
 		try {
 			File folderProperty = new File(holdingPlace.getCanonicalPath() + File.separator + FOLDER_PROPERTIES);
@@ -196,7 +177,11 @@ public class Folder extends Item {
 				// initialize the basic properties of the folder.
 				itemProperties.setProperty(propertyKeys.OBJECT_ID, 
 						Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
-				setName(holdingPlace.getName());
+				if (null != parent)	{
+					itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(parent.getObjectID()));
+					itemProperties.setProperty(propertyKeys.FOLDER_PATH, 
+							parent.getParentFolderQualifiedName() + File.separatorChar + holdingPlace.getName());
+				}
 				update();
 			}
 		} catch (IOException e) {
@@ -205,4 +190,6 @@ public class Folder extends Item {
 			FileUtility.close(fin);
 		}
 	}
+	
+	
 }

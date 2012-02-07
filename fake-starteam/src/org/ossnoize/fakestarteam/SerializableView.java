@@ -19,6 +19,7 @@ package org.ossnoize.fakestarteam;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.starbase.starteam.Folder;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.View;
 import com.starbase.util.OLEDate;
@@ -35,9 +36,11 @@ public class SerializableView extends View implements Serializable {
 	private String description;
 	private String defaultWorkingFolder;
 	private int id;
+	private int rootFolderId;
 	private Date createdDate;
 	private int createdBy;
 	private volatile Project project;
+	private volatile Folder rootFolder;
 	
 	protected SerializableView() {
 	}
@@ -57,6 +60,8 @@ public class SerializableView extends View implements Serializable {
 				((SerializableProject)project).addNewView(this);
 			}
 		}
+		rootFolder = new FakeFolder(this, 0);
+		rootFolderId = rootFolder.getObjectID();
 	}
 
 	@Override
@@ -120,5 +125,13 @@ public class SerializableView extends View implements Serializable {
 			update();
 		}
 		return new OLEDate(createdDate);
+	}
+	
+	@Override
+	public Folder getRootFolder() {
+		if(null == rootFolder) {
+			rootFolder = new FakeFolder(this, rootFolderId);
+		}
+		return rootFolder;
 	}
 }

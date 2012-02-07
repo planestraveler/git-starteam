@@ -157,6 +157,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		}
 	}
 	
+	public String getParentFolderQualifiedName() {
+		return itemProperties.getProperty(propertyKeys.FOLDER_PATH);
+	}
+	
 	@Override
 	public TypeNames getTypeNames() {
 		return super.getTypeNames();
