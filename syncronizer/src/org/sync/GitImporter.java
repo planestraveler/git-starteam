@@ -86,7 +86,8 @@ public class GitImporter {
 			String path = f.getParentFolderHierarchy() + f.getName();
 			path = path.replace('\\', '/');
 			// Strip the view name from the path
-			path = path.substring(2 + view.getName().length());
+			int indexOfFirstPath = path.indexOf('/');
+			path = path.substring(indexOfFirstPath + 1);
 			
 			try {
 				int fileStatus = f.getStatus();
