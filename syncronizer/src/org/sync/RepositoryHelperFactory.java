@@ -35,6 +35,7 @@ public class RepositoryHelperFactory {
 	 * properly initialized. The process could also only block when all the process have finished properly.
 	 */
 	private RepositoryHelper helper;
+	private String preferredPath;
 	
 	private RepositoryHelperFactory() {
 	}
@@ -60,7 +61,7 @@ public class RepositoryHelperFactory {
 		String[] gitDir = dir.list(gitFilter);
 		if(null != gitDir) {
 			if(gitDir.length == 1) {
-				helper = new org.sync.githelper.GitHelper();
+				helper = new org.sync.githelper.GitHelper(preferredPath);
 				return helper;
 			}
 		}
@@ -73,5 +74,9 @@ public class RepositoryHelperFactory {
 	 */
 	public void clearCachedHelper() {
 		helper = null;
+	}
+
+	public void setPreferedPath(String pathToProgram) {
+		preferredPath = pathToProgram;
 	}
 }
