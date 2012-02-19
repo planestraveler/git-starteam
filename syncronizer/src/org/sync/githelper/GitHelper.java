@@ -33,9 +33,40 @@ public class GitHelper implements RepositoryHelper {
 	private Thread gitErrorStreamEater;
 	private HashSet<String> trackedFiles;
 	private int trackedFilesReturnCode;
+	private String gitExecutable;
 	
 	public GitHelper() {
-		grabTrackedFiles();
+		if(findExecutable()) {
+			grabTrackedFiles();
+		}
+	}
+
+	private boolean findExecutable() {
+		String os = System.getProperty("os.name");
+		if(os.equalsIgnoreCase("Windows")) {
+			File gitExec = new File("C:" + File.separator + "Program Files" + File.separator + 
+					"Git" + File.separator + "bin" + File.separator + "git.exe");
+			if(gitExec.exists() && gitExec.canExecute()) {
+				try {
+					gitExecutable = gitExec.getCanonicalPath();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				gitExec = new File("C:" + File.separator + "Program Files (x86)" + File.separator + 
+						"Git" + File.separator + "bin" + File.separator + "git.exe");
+				if(gitExec.exists() && gitExec.canExecute()) {
+					try {
+						gitExecutable = gitExec.getCanonicalPath();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} else {
+			gitExecutable = "git";
+		}
+		return (null != gitExecutable);
 	}
 
 	private void grabTrackedFiles() {
