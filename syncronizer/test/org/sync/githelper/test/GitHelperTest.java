@@ -22,7 +22,7 @@ public class GitHelperTest {
 
 	@Test
 	public void testGetListOfTrackedFile() {
-		test = new GitHelper();
+		test = new GitHelper(null);
 		Set<String> listOfFiles = test.getListOfTrackedFile();
 		assertNotNull(listOfFiles);
 		// Check for self in the list of files always start from the working directory. 

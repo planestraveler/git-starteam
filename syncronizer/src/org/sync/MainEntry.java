@@ -42,6 +42,7 @@ public class MainEntry {
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
+		CmdLineParser.Option selectPath = parser.addStringOption('X', "path-to-program");
 
 		try {
 			parser.parse(args);
@@ -62,12 +63,15 @@ public class MainEntry {
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
+		String pathToProgram = (String) parser.getOptionValue(selectPath);
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
 			System.exit(3);
 		}
 		
+		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
+
 		try {
 			BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
 			Server starteam = new Server(host, port);

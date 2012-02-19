@@ -35,25 +35,31 @@ public class GitHelper implements RepositoryHelper {
 	private int trackedFilesReturnCode;
 	private String gitExecutable;
 	
-	public GitHelper() {
-		if(findExecutable()) {
+	public GitHelper(String preferedPath) {
+		if(findExecutable(preferedPath)) {
 			grabTrackedFiles();
 		}
 	}
 
-	private boolean findExecutable() {
+	private boolean findExecutable(String preferedPath) {
 		String os = System.getProperty("os.name");
-		if(os.equalsIgnoreCase("Windows")) {
-			File gitExec = new File("C:" + File.separator + "Program Files" + File.separator + 
-					"Git" + File.separator + "bin" + File.separator + "git.exe");
+		if(null != preferedPath) {
+			String fileExtension = "";
+			if(os.equalsIgnoreCase("Windows")) {
+				fileExtension = ".exe";
+			}
+			File gitExec = new File(preferedPath + File.separator + "git" + fileExtension);
 			if(gitExec.exists() && gitExec.canExecute()) {
 				try {
 					gitExecutable = gitExec.getCanonicalPath();
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} else {
-				gitExec = new File("C:" + File.separator + "Program Files (x86)" + File.separator + 
+			}
+		} else {
+			if(os.equalsIgnoreCase("Windows")) {
+				File gitExec = new File("C:" + File.separator + "Program Files" + File.separator + 
 						"Git" + File.separator + "bin" + File.separator + "git.exe");
 				if(gitExec.exists() && gitExec.canExecute()) {
 					try {
@@ -61,10 +67,20 @@ public class GitHelper implements RepositoryHelper {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+				} else {
+					gitExec = new File("C:" + File.separator + "Program Files (x86)" + File.separator + 
+							"Git" + File.separator + "bin" + File.separator + "git.exe");
+					if(gitExec.exists() && gitExec.canExecute()) {
+						try {
+							gitExecutable = gitExec.getCanonicalPath();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
+			} else {
+				gitExecutable = "git";
 			}
-		} else {
-			gitExecutable = "git";
 		}
 		return (null != gitExecutable);
 	}
@@ -73,7 +89,7 @@ public class GitHelper implements RepositoryHelper {
 		trackedFilesReturnCode = Integer.MAX_VALUE;
 		trackedFiles = null;
 		ProcessBuilder process = new ProcessBuilder();
-		process.command("git", "ls-files");
+		process.command(gitExecutable, "ls-files");
 		process.directory(new File(System.getProperty("user.dir")));
 		try {
 			Process lsFiles = process.start();
