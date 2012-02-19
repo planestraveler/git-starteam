@@ -151,7 +151,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public String getParentFolderHierarchy() {
 		if(null == parent.getParentFolder()) {
-			return File.separator + view.getName() + File.separator;
+			if(null == view.getParentView()) {
+				return view.getProject().getName() + File.separator;
+			}
+			return view.getName() + File.separator;
 		} else {
 			return parent.getParentFolderHierarchy() + parent + File.separator;
 		}
