@@ -117,6 +117,8 @@ public class MainEntry {
 		System.out.println("-v <view>\tSelect the view used for importation");
 		System.out.println("[-U <user>]\tPreselect the user login");
 		System.out.println("[-R]\t\tResume the file history importation");
+		System.out.println("[-H <head>]\tSelect the name of the head to use");
+		System.out.println("[-X <path to dvcs>\tSelect the path where to find the dvcs executable");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
 	}
