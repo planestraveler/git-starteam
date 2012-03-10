@@ -16,6 +16,9 @@
 ******************************************************************************/
 package org.sync;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashSet;
@@ -34,6 +37,7 @@ import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
+import com.starbase.starteam.PropertyEnums;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.Status;
 import com.starbase.starteam.View;
@@ -50,6 +54,7 @@ public class GitImporter {
 	private String alternateHead = null;
 	private boolean isResume = false;
 	private RepositoryHelper helper;
+	private PropertyEnums propertyEnums = new PropertyEnums();
 	// Use this set to find all the deleted files.
 	private Set<String> deletedFiles; 
 	
@@ -102,6 +107,10 @@ public class GitImporter {
 					java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
 					aFile.deleteOnExit();
 					f.checkoutTo(aFile, 0, true, false, false);
+					if(propertyEnums.FILE_ENCODING_BINARY != f.getCharset()) {
+						// This is a text file we need to force it's EOL to CR
+						aFile = forceEOLToCR(aFile);
+					}
 					
 					FileModification fm = new FileModification(new Data(aFile));
 					fm.setFileType(GitFileType.Normal);
@@ -221,5 +230,28 @@ public class GitImporter {
 
 	public void setHeadName(String head) {
 		alternateHead = head;
+	}
+	
+	private java.io.File forceEOLToCR(java.io.File iFile) throws IOException {
+		java.io.File ret = java.io.File.createTempFile("ForceEOL", "tmp");
+		ret.deleteOnExit();
+		
+		BufferedReader reader = new BufferedReader(new FileReader(iFile));
+		FileWriter writer = new FileWriter(ret);
+		String line = reader.readLine();
+		while(null != line) {
+			writer.write(line);
+			line = reader.readLine();
+			if (null != line) {
+				writer.write(0x0A);
+			}
+		}
+		writer.close();
+		reader.close();
+		
+		// Save some space at least
+		iFile.delete();
+		
+		return ret;
 	}
 }
