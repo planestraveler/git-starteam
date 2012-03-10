@@ -145,6 +145,7 @@ public class File extends Item {
 
 	private void copyToGz(java.io.File file) throws IOException {
 		MessageDigest digest;
+		int encoding = propertyEnums.FILE_ENCODING_ASCII;
 		try {
 			digest = MessageDigest.getInstance("MD5");
 		} catch (NoSuchAlgorithmException e) {
@@ -166,6 +167,19 @@ public class File extends Item {
 			size += read;
 			gzout.write(buffer, 0, read);
 			digest.update(buffer, 0, read);
+			// Analyze the encoding of the file.
+			if(encoding == propertyEnums.FILE_ENCODING_ASCII ||
+			   encoding == propertyEnums.FILE_ENCODING_UNICODE) 
+			{
+				for(int it = 0; it < read; ++it) {
+					if(0 == buffer[it]) {
+						encoding = propertyEnums.FILE_ENCODING_BINARY;
+						break;
+					} else if (0 > buffer[it]) {
+						encoding = propertyEnums.FILE_ENCODING_UNICODE;
+					}
+				}
+			}
 			read = fin.read(buffer);
 		}
 		byte[] md5Array = digest.digest();
@@ -173,6 +187,7 @@ public class File extends Item {
 		
 		itemProperties.setProperty(propertyKeys.FILE_MD5_CHECKSUM, fileChecksum.toHexString());
 		itemProperties.setProperty(propertyKeys.FILE_SIZE, Long.toString(size));
+		itemProperties.setProperty(propertyKeys.FILE_ENCODING, Integer.toString(encoding));
 		FileUtility.close(fin, gzout, fout);
 	}
 
@@ -409,7 +424,7 @@ public class File extends Item {
 					throw new InvalidOperationException("The file encoding value is invalid: " + ex.getMessage());
 				}
 			} else {
-				// Assume file that have un-identified encoding as binary.
+				// Assume file that have unidentified encoding as binary.
 				return propertyEnums.FILE_ENCODING_BINARY;
 			}
 		} else {
