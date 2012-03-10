@@ -39,8 +39,6 @@ public class File extends Item {
 	private static final String FILE_PROPERTIES = "file.properties";
 	private static final String FILE_STORED = "stored.gz";
 
-	private int status = Status.UNKNOWN;
-
 	public File(Folder parent) {
 		super();
 		this.parent = parent;
@@ -85,7 +83,6 @@ public class File extends Item {
 			setModifiedTime();
 			copyToGz(file);
 			isNew = false;
-			status = Status.CURRENT;
 			update();
 		} else {
 			throw new InvalidOperationException("Cannot add a file that is already existing");
@@ -111,7 +108,6 @@ public class File extends Item {
 			setModifiedTime();
 			registerNewID();
 			copyToGz(file);
-			status = Status.CURRENT;
 			update();
 		} else {
 			throw new InvalidOperationException("Cannot check-in a file that was not added");
@@ -139,7 +135,6 @@ public class File extends Item {
 	public void checkoutTo(java.io.File checkoutTo, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
 		if(holdingPlace.exists()) {
 			copyFromGz(holdingPlace, checkoutTo);
-			status = Status.CURRENT;
 			if(!timeStampNow) {
 				checkoutTo.setLastModified(getModifiedTime().getLongValue());
 			}
@@ -399,6 +394,23 @@ public class File extends Item {
 					FileUtility.close(gzin, fin);
 				}
 				return fileChecksum.getData();
+			}
+		} else {
+			throw new InvalidOperationException("Item Properties was never initialized");
+		}
+	}
+	
+	public int getCharset() {
+		if(null != itemProperties) {
+			if(itemProperties.containsKey(propertyKeys.FILE_ENCODING)) {
+				try {
+					return Integer.parseInt(itemProperties.getProperty(propertyKeys.FILE_ENCODING));
+				} catch (NumberFormatException ex) {
+					throw new InvalidOperationException("The file encoding value is invalid: " + ex.getMessage());
+				}
+			} else {
+				// Assume file that have un-identified encoding as binary.
+				return propertyEnums.FILE_ENCODING_BINARY;
 			}
 		} else {
 			throw new InvalidOperationException("Item Properties was never initialized");
