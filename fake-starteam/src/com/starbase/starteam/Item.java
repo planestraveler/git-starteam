@@ -34,6 +34,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 
 	protected static final PropertyNames propertyKeys = new PropertyNames();
+	protected static final PropertyEnums propertyEnums = new PropertyEnums();
 	
 	protected boolean isNew;
 	protected boolean isFromHistory;
