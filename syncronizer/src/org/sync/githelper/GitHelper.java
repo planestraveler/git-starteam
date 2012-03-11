@@ -45,7 +45,7 @@ public class GitHelper implements RepositoryHelper {
 		String os = System.getProperty("os.name");
 		if(null != preferedPath) {
 			String fileExtension = "";
-			if(os.equalsIgnoreCase("Windows")) {
+			if(os.contains("indow")) {
 				fileExtension = ".exe";
 			}
 			File gitExec = new File(preferedPath + File.separator + "git" + fileExtension);
@@ -58,7 +58,7 @@ public class GitHelper implements RepositoryHelper {
 				}
 			}
 		} else {
-			if(os.equalsIgnoreCase("Windows")) {
+			if(os.contains("indow")) {
 				File gitExec = new File("C:" + File.separator + "Program Files" + File.separator + 
 						"Git" + File.separator + "bin" + File.separator + "git.exe");
 				if(gitExec.exists() && gitExec.canExecute()) {
