@@ -17,6 +17,7 @@
 package org.sync;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -72,41 +73,37 @@ public class MainEntry {
 		
 		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
 
-		try {
-			BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
-			Server starteam = new Server(host, port);
-			starteam.connect();
-			if(null == user) {
-				System.err.print("Username:");
-				user = inputReader.readLine();
-			}
-			System.err.print("Password:");
-			String password = inputReader.readLine();
-			int userid = starteam.logOn(user, password);
-			if(userid > 0) {
-				for(Project p : starteam.getProjects()) {
-					if(p.getName().equalsIgnoreCase(project)) {
-						for(View v : p.getViews()) {
-							if(v.getName().equalsIgnoreCase(view)) {
-								GitImporter g = new GitImporter(starteam, p, v);
-								if(null != head) {
-									g.setHeadName(head);
-								}
-								if(null != resume) {
-									g.setResume(resume);
-								}
-								g.generateFastImportStream();
-								break;
+		Console con = System.console();
+		Server starteam = new Server(host, port);
+		starteam.connect();
+		if(null == user) {
+			System.err.print("Username:");
+			user = con.readLine();
+		}
+		System.err.print("Password:");
+		String password = new String(con.readPassword());
+		int userid = starteam.logOn(user, password);
+		if(userid > 0) {
+			for(Project p : starteam.getProjects()) {
+				if(p.getName().equalsIgnoreCase(project)) {
+					for(View v : p.getViews()) {
+						if(v.getName().equalsIgnoreCase(view)) {
+							GitImporter g = new GitImporter(starteam, p, v);
+							if(null != head) {
+								g.setHeadName(head);
 							}
+							if(null != resume) {
+								g.setResume(resume);
+							}
+							g.generateFastImportStream();
+							break;
 						}
-						break;
 					}
+					break;
 				}
-			} else {
-				System.err.println("Could not log in user: " + user);
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} else {
+			System.err.println("Could not log in user: " + user);
 		}
 	}
 
