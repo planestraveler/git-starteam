@@ -111,14 +111,14 @@ public class MainEntry {
 	}
 
 	public static void printHelp() {
-		System.out.println("-h <host>\tDefine on which host the server is hosted");
-		System.out.println("-P <port>\tDefine the port used to connect to the starteam server");
-		System.out.println("-p <project>\tSelect the project to import from");
-		System.out.println("-v <view>\tSelect the view used for importation");
-		System.out.println("[-U <user>]\tPreselect the user login");
-		System.out.println("[-R]\t\tResume the file history importation");
-		System.out.println("[-H <head>]\tSelect the name of the head to use");
-		System.out.println("[-X <path to dvcs>\tSelect the path where to find the dvcs executable");
+		System.out.println("-h <host>\t\tDefine on which host the server is hosted");
+		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
+		System.out.println("-p <project>\t\tSelect the project to import from");
+		System.out.println("-v <view>\t\tSelect the view used for importation");
+		System.out.println("[-U <user>]\t\tPreselect the user login");
+		System.out.println("[-R]\t\t\tResume the file history importation");
+		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
+		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
 	}
