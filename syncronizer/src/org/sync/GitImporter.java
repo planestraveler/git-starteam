@@ -157,12 +157,14 @@ public class GitImporter {
 					commit.setFromCommit(lastcommit);
 				}
 				for(String path : deletedFiles) {
-					FileOperation fileDelete = new FileDelete();
-					try {
-						fileDelete.setPath(path);
-						commit.addFileOperation(fileDelete);
-					} catch (InvalidPathException e1) {
-						e1.printStackTrace();
+					if(!helper.isSpecialFile(path)) {
+						FileOperation fileDelete = new FileDelete();
+						try {
+							fileDelete.setPath(path);
+							commit.addFileOperation(fileDelete);
+						} catch (InvalidPathException e1) {
+							e1.printStackTrace();
+						}
 					}
 				}
 				lastcommit = commit;
