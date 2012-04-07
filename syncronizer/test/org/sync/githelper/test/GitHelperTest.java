@@ -28,5 +28,16 @@ public class GitHelperTest {
 		// Check for self in the list of files always start from the working directory. 
 		assertTrue(listOfFiles.contains("test/org/sync/githelper/test/GitHelperTest.java"));
 	}
+	
+	@Test
+	public void testSpecialFiles() {
+		test = new GitHelper(null);
+		assertTrue(test.isSpecialFile(".gitignore"));
+		assertTrue(test.isSpecialFile("a/deep/down/git/directory/.gitignore"));
+		assertTrue(test.isSpecialFile(".gitattributes"));
+		assertTrue(test.isSpecialFile("a/deep/down/git/directory/.gitattributes"));
+		assertFalse(test.isSpecialFile("aFile.txt"));
+		assertFalse(test.isSpecialFile("some/random/directory/file.gitignore"));
+	}
 
 }
