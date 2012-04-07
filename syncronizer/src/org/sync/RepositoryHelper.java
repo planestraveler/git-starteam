@@ -25,4 +25,10 @@ public interface RepositoryHelper {
 	 * @return a set of File path contained in the current version of the repository.
 	 */
 	public Set<String> getListOfTrackedFile();
+	
+	/**
+	 * Tell if the file is a special target repository type file.
+	 * @return True if it is a sepcial file, False otherwise.
+	 */
+	public boolean isSpecialFile(String filename);
 }

@@ -99,6 +99,7 @@ public class GitHelper implements RepositoryHelper {
 			gitErrorStreamEater.start();
 			trackedFilesReturnCode = lsFiles.waitFor();
 			gitQueryWorker.join();
+			gitErrorStreamEater.join();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -115,6 +116,16 @@ public class GitHelper implements RepositoryHelper {
 		return (Set<String>) trackedFiles.clone();
 	}
 
+	@Override
+	public boolean isSpecialFile(String filename) {
+		File testFile = new File(filename);
+		if(testFile.getName().equalsIgnoreCase(".gitignore"))
+			return true;
+		else if (testFile.getName().equalsIgnoreCase(".gitattributes"))
+			return true;
+		return false;
+	}
+	
 	private class GitLsFilesReader implements Runnable {
 
 		private InputStream input;
@@ -156,4 +167,5 @@ public class GitHelper implements RepositoryHelper {
 		}
 		
 	}
+
 }
