@@ -14,15 +14,16 @@ public class GitHelperTest {
 
 	@Before
 	public void setUp() throws Exception {
+		test = new GitHelper(null);
 	}
 
 	@After
 	public void tearDown() throws Exception {
+		test = null;
 	}
 
 	@Test
 	public void testGetListOfTrackedFile() {
-		test = new GitHelper(null);
 		Set<String> listOfFiles = test.getListOfTrackedFile();
 		assertNotNull(listOfFiles);
 		// Check for self in the list of files always start from the working directory. 
@@ -31,7 +32,6 @@ public class GitHelperTest {
 	
 	@Test
 	public void testSpecialFiles() {
-		test = new GitHelper(null);
 		assertTrue(test.isSpecialFile(".gitignore"));
 		assertTrue(test.isSpecialFile("a/deep/down/git/directory/.gitignore"));
 		assertTrue(test.isSpecialFile(".gitattributes"));
