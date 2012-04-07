@@ -28,7 +28,7 @@ public interface RepositoryHelper {
 	
 	/**
 	 * Tell if the file is a special target repository type file.
-	 * @return True if it is a sepcial file, False otherwise.
+	 * @return True if it is a special file, False otherwise.
 	 */
 	public boolean isSpecialFile(String filename);
 }
