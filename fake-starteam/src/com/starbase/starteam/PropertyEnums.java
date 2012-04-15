@@ -17,6 +17,9 @@
 package com.starbase.starteam;
 
 public class PropertyEnums {
+	
+	protected PropertyEnums() {}
+	
 	public final int FILE_ENCODING_BINARY 	= 0;
 	public final int FILE_ENCODING_ASCII 	= 1;
 	public final int FILE_ENCODING_UNICODE 	= 2;
