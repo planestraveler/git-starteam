@@ -79,6 +79,10 @@ public class Creator {
 		if(0 < server.logOn(loginName, passwd)) {
 			System.out.println("Connected to the fake server");
 		}
+		if(!server.isLoggedOn()) {
+			System.err.println("The user " + loginName + " has not logged in.");
+			System.exit(3);
+		}
 		String createProjectName = (String) parser.getOptionValue(createProject);
 		if(null != createProjectName) {
 			ProjectProvider.getInstance().createNewProject(server, createProjectName, File.separator);
