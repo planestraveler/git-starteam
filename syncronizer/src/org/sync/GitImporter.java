@@ -54,7 +54,7 @@ public class GitImporter {
 	private String alternateHead = null;
 	private boolean isResume = false;
 	private RepositoryHelper helper;
-	private PropertyEnums propertyEnums = new PropertyEnums();
+	private PropertyEnums propertyEnums = null;
 	// Use this set to find all the deleted files.
 	private Set<String> deletedFiles; 
 	
@@ -63,6 +63,7 @@ public class GitImporter {
 		project = p;
 		view = v;
 		helper = RepositoryHelperFactory.getFactory().createHelper();
+		propertyEnums = server.getPropertyEnums();
 		if(null != helper) {
 			deletedFiles = helper.getListOfTrackedFile();
 		} else {
