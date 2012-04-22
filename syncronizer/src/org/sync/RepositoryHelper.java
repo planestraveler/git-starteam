@@ -16,6 +16,7 @@
 ******************************************************************************/
 package org.sync;
 
+import java.io.OutputStream;
 import java.util.Set;
 
 public interface RepositoryHelper {
@@ -31,4 +32,11 @@ public interface RepositoryHelper {
 	 * @return True if it is a special file, False otherwise.
 	 */
 	public boolean isSpecialFile(String filename);
+	
+	/**
+	 * Create a fast-import process and dump all the repository information in the 
+	 * input stream of the process.
+	 * @return The OutputStream representing the InputStream of the process.
+	 */
+	public OutputStream getFastImportStream();
 }

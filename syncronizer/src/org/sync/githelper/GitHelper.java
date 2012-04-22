@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,6 +35,9 @@ public class GitHelper implements RepositoryHelper {
 	private HashSet<String> trackedFiles;
 	private int trackedFilesReturnCode;
 	private String gitExecutable;
+	private Process gitFastImport;
+	private Thread gitFastImportOutputEater;
+	private Thread gitFastImportErrorEater;
 	
 	public GitHelper(String preferedPath) {
 		if(findExecutable(preferedPath)) {
@@ -99,7 +103,9 @@ public class GitHelper implements RepositoryHelper {
 			gitErrorStreamEater.start();
 			trackedFilesReturnCode = lsFiles.waitFor();
 			gitQueryWorker.join();
+			gitQueryWorker = null;
 			gitErrorStreamEater.join();
+			gitErrorStreamEater = null;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -124,6 +130,25 @@ public class GitHelper implements RepositoryHelper {
 		else if (testFile.getName().equalsIgnoreCase(".gitattributes"))
 			return true;
 		return false;
+	}
+	
+	@Override
+	public OutputStream getFastImportStream() {
+		if(null == gitFastImport) {
+			ProcessBuilder process = new ProcessBuilder();
+			process.command(gitExecutable, "fast-import");
+			process.directory(new File(System.getProperty("user.dir")));
+			try {
+				gitFastImport = process.start();
+				gitFastImportOutputEater = new Thread(new ErrorEater(gitFastImport.getInputStream()));
+				gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream()));
+				gitFastImportOutputEater.start();
+				gitFastImportErrorEater.start();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return gitFastImport.getOutputStream();
 	}
 	
 	private class GitLsFilesReader implements Runnable {
