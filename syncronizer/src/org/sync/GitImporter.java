@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Map;
@@ -75,6 +76,7 @@ public class GitImporter {
 		Folder root = view.getRootFolder();
 		recursiveFilePopulation(root);
 		recoverDeleteInformation(deletedFiles);
+		OutputStream exportStream = helper.getFastImportStream();
 
 		String head = view.getName();
 		if(null != alternateHead) {
@@ -127,7 +129,7 @@ public class GitImporter {
 								commit.resumeOnTopOfRef();
 							}
 						} else {
-							lastcommit.writeTo(System.out);
+							lastcommit.writeTo(exportStream);
 							commit.setFromCommit(lastcommit);
 						}
 						
@@ -154,7 +156,7 @@ public class GitImporter {
 						commit.resumeOnTopOfRef();
 					}
 				} else {
-					lastcommit.writeTo(System.out);
+					lastcommit.writeTo(exportStream);
 					commit.setFromCommit(lastcommit);
 				}
 				for(String path : deletedFiles) {
@@ -175,7 +177,8 @@ public class GitImporter {
 		}
 		if(null != lastcommit) {
 			try {
-				lastcommit.writeTo(System.out);
+				lastcommit.writeTo(exportStream);
+				exportStream.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
