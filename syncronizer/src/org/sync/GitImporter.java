@@ -222,6 +222,9 @@ public class GitImporter {
 				String path = i.getParentFolderHierarchy() + historyFile.getName();
 				path = path.replace('\\', '/');
 				//path = path.substring(1);
+				int indexOfFirstPath = path.indexOf('/');
+				path = path.substring(indexOfFirstPath + 1);
+
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
 				}
