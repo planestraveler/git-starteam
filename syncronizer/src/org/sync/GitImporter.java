@@ -17,6 +17,8 @@
 package org.sync;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -239,21 +241,23 @@ public class GitImporter {
 	}
 	
 	private java.io.File forceEOLToCR(java.io.File iFile) throws IOException {
-		java.io.File ret = java.io.File.createTempFile("ForceEOL", "tmp");
+		java.io.File ret = java.io.File.createTempFile("ForceEOL", ".tmp");
 		ret.deleteOnExit();
 		
-		BufferedReader reader = new BufferedReader(new FileReader(iFile));
-		FileWriter writer = new FileWriter(ret);
-		String line = reader.readLine();
-		while(null != line) {
-			writer.write(line);
-			line = reader.readLine();
-			if (null != line) {
-				writer.write(0x0A);
+		FileInputStream fin = new FileInputStream(iFile);
+		FileOutputStream writer = new FileOutputStream(ret);
+		byte bytio[] = new byte[2048];
+		int read = fin.read(bytio);
+		while(read >= 0) {
+			for(int i=0; i < read; ++i) {
+				if(bytio[i] != 0x0D) {
+					writer.write(bytio[i]);
+				}
 			}
+			read = fin.read(bytio);
 		}
 		writer.close();
-		reader.close();
+		fin.close();
 		
 		// Save some space at least
 		iFile.delete();
