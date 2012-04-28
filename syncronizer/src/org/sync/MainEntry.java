@@ -44,6 +44,7 @@ public class MainEntry {
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
 		CmdLineParser.Option selectPath = parser.addStringOption('X', "path-to-program");
+		CmdLineParser.Option selectPassword = parser.addStringOption("password");
 
 		try {
 			parser.parse(args);
@@ -65,6 +66,7 @@ public class MainEntry {
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
 		String pathToProgram = (String) parser.getOptionValue(selectPath);
+		String password = (String) parser.getOptionValue(selectPassword);
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -73,15 +75,15 @@ public class MainEntry {
 		
 		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
 
-		Console con = System.console();
 		Server starteam = new Server(host, port);
 		starteam.connect();
+		Console con = System.console();
 		if(null == user) {
-			System.err.print("Username:");
-			user = con.readLine();
+			user = con.readLine("Username:");
 		}
-		System.err.print("Password:");
-		String password = new String(con.readPassword());
+		if(null == password) {
+			password = new String(con.readPassword("Password:"));
+		}
 		int userid = starteam.logOn(user, password);
 		if(userid > 0) {
 			for(Project p : starteam.getProjects()) {
