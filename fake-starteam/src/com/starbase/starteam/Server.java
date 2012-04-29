@@ -27,6 +27,8 @@ public class Server {
 	private int Port;
 	private boolean connected;
 	private User loggedUser;
+	private PropertyNames propertyNames = new PropertyNames();
+	private PropertyEnums propertyEnums = new PropertyEnums();
 
 	public Server(String address, int port) {
 		Address = address;
@@ -78,5 +80,13 @@ public class Server {
 	
 	public User getUser(int id) {
 		return UserProvider.getInstance().getUser(id);
+	}
+	
+	public PropertyNames getPropertyNames() {
+		return propertyNames;
+	}
+	
+	public PropertyEnums getPropertyEnums() {
+		return propertyEnums;
 	}
 }

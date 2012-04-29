@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ResourceBundle;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -26,6 +26,7 @@ public class PropertyNames {
 	public final java.lang.String FILE_NAME = "Name";
 	public final java.lang.String FILE_MD5_CHECKSUM = "MD5 Checksum";
 	public final java.lang.String FILE_SIZE = "Size";
+	public final java.lang.String FILE_ENCODING = "File Type";
 	public final java.lang.String FOLDER_PATH = "Folder Path";
 	public final java.lang.String REVISION_NUMBER = "Version";
 	public final java.lang.String MODIFIED_USER_ID = "Modified By";

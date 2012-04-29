@@ -16,7 +16,13 @@
 ******************************************************************************/
 package org.sync;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,6 +40,7 @@ import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
+import com.starbase.starteam.PropertyEnums;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.Status;
 import com.starbase.starteam.View;
@@ -50,6 +57,7 @@ public class GitImporter {
 	private String alternateHead = null;
 	private boolean isResume = false;
 	private RepositoryHelper helper;
+	private PropertyEnums propertyEnums = null;
 	// Use this set to find all the deleted files.
 	private Set<String> deletedFiles; 
 	
@@ -58,6 +66,7 @@ public class GitImporter {
 		project = p;
 		view = v;
 		helper = RepositoryHelperFactory.getFactory().createHelper();
+		propertyEnums = server.getPropertyEnums();
 		if(null != helper) {
 			deletedFiles = helper.getListOfTrackedFile();
 		} else {
@@ -69,6 +78,7 @@ public class GitImporter {
 		Folder root = view.getRootFolder();
 		recursiveFilePopulation(root);
 		recoverDeleteInformation(deletedFiles);
+		OutputStream exportStream = helper.getFastImportStream();
 
 		String head = view.getName();
 		if(null != alternateHead) {
@@ -102,6 +112,10 @@ public class GitImporter {
 					java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
 					aFile.deleteOnExit();
 					f.checkoutTo(aFile, 0, true, false, false);
+					if(propertyEnums.FILE_ENCODING_BINARY != f.getCharset()) {
+						// This is a text file we need to force it's EOL to CR
+						aFile = forceEOLToCR(aFile);
+					}
 					
 					FileModification fm = new FileModification(new Data(aFile));
 					fm.setFileType(GitFileType.Normal);
@@ -117,7 +131,7 @@ public class GitImporter {
 								commit.resumeOnTopOfRef();
 							}
 						} else {
-							lastcommit.writeTo(System.out);
+							lastcommit.writeTo(exportStream);
 							commit.setFromCommit(lastcommit);
 						}
 						
@@ -144,16 +158,18 @@ public class GitImporter {
 						commit.resumeOnTopOfRef();
 					}
 				} else {
-					lastcommit.writeTo(System.out);
+					lastcommit.writeTo(exportStream);
 					commit.setFromCommit(lastcommit);
 				}
 				for(String path : deletedFiles) {
-					FileOperation fileDelete = new FileDelete();
-					try {
-						fileDelete.setPath(path);
-						commit.addFileOperation(fileDelete);
-					} catch (InvalidPathException e1) {
-						e1.printStackTrace();
+					if(!helper.isSpecialFile(path)) {
+						FileOperation fileDelete = new FileDelete();
+						try {
+							fileDelete.setPath(path);
+							commit.addFileOperation(fileDelete);
+						} catch (InvalidPathException e1) {
+							e1.printStackTrace();
+						}
 					}
 				}
 				lastcommit = commit;
@@ -163,7 +179,8 @@ public class GitImporter {
 		}
 		if(null != lastcommit) {
 			try {
-				lastcommit.writeTo(System.out);
+				lastcommit.writeTo(exportStream);
+				exportStream.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -205,6 +222,9 @@ public class GitImporter {
 				String path = i.getParentFolderHierarchy() + historyFile.getName();
 				path = path.replace('\\', '/');
 				//path = path.substring(1);
+				int indexOfFirstPath = path.indexOf('/');
+				path = path.substring(indexOfFirstPath + 1);
+
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
 				}
@@ -221,5 +241,30 @@ public class GitImporter {
 
 	public void setHeadName(String head) {
 		alternateHead = head;
+	}
+	
+	private java.io.File forceEOLToCR(java.io.File iFile) throws IOException {
+		java.io.File ret = java.io.File.createTempFile("ForceEOL", ".tmp");
+		ret.deleteOnExit();
+		
+		FileInputStream fin = new FileInputStream(iFile);
+		FileOutputStream writer = new FileOutputStream(ret);
+		byte bytio[] = new byte[2048];
+		int read = fin.read(bytio);
+		while(read >= 0) {
+			for(int i=0; i < read; ++i) {
+				if(bytio[i] != 0x0D) {
+					writer.write(bytio[i]);
+				}
+			}
+			read = fin.read(bytio);
+		}
+		writer.close();
+		fin.close();
+		
+		// Save some space at least
+		iFile.delete();
+		
+		return ret;
 	}
 }

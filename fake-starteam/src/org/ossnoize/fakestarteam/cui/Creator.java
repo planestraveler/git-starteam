@@ -68,11 +68,7 @@ public class Creator {
 			printHelp();
 			System.exit(2);
 		}
-		String createProjectName = (String) parser.getOptionValue(createProject);
 		Server server = new Server("localhost", 23456);
-		if(null != createProjectName) {
-			ProjectProvider.getInstance().createNewProject(server, createProjectName, File.separator);
-		}
 		String createUserName = (String) parser.getOptionValue(createUser);
 		if(null != createUserName) {
 			UserProvider.getInstance().createNewUser(createUserName);
@@ -82,6 +78,14 @@ public class Creator {
 		server.connect();
 		if(0 < server.logOn(loginName, passwd)) {
 			System.out.println("Connected to the fake server");
+		}
+		if(!server.isLoggedOn()) {
+			System.err.println("The user " + loginName + " has not logged in.");
+			System.exit(3);
+		}
+		String createProjectName = (String) parser.getOptionValue(createProject);
+		if(null != createProjectName) {
+			ProjectProvider.getInstance().createNewProject(server, createProjectName, File.separator);
 		}
 		String setUserPassword = (String) parser.getOptionValue(setPassword);
 		String fullName = (String) parser.getOptionValue(userFullName);

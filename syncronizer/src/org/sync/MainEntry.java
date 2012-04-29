@@ -17,6 +17,7 @@
 package org.sync;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -43,6 +44,7 @@ public class MainEntry {
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
 		CmdLineParser.Option selectPath = parser.addStringOption('X', "path-to-program");
+		CmdLineParser.Option selectPassword = parser.addStringOption("password");
 
 		try {
 			parser.parse(args);
@@ -64,6 +66,7 @@ public class MainEntry {
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
 		String pathToProgram = (String) parser.getOptionValue(selectPath);
+		String password = (String) parser.getOptionValue(selectPassword);
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -72,51 +75,49 @@ public class MainEntry {
 		
 		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
 
-		try {
-			BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
-			Server starteam = new Server(host, port);
-			starteam.connect();
-			if(null == user) {
-				System.err.print("Username:");
-				user = inputReader.readLine();
-			}
-			System.err.print("Password:");
-			String password = inputReader.readLine();
-			int userid = starteam.logOn(user, password);
-			if(userid > 0) {
-				for(Project p : starteam.getProjects()) {
-					if(p.getName().equalsIgnoreCase(project)) {
-						for(View v : p.getViews()) {
-							if(v.getName().equalsIgnoreCase(view)) {
-								GitImporter g = new GitImporter(starteam, p, v);
-								if(null != head) {
-									g.setHeadName(head);
-								}
-								if(null != resume) {
-									g.setResume(resume);
-								}
-								g.generateFastImportStream();
-								break;
+		Server starteam = new Server(host, port);
+		starteam.connect();
+		Console con = System.console();
+		if(null == user) {
+			user = con.readLine("Username:");
+		}
+		if(null == password) {
+			password = new String(con.readPassword("Password:"));
+		}
+		int userid = starteam.logOn(user, password);
+		if(userid > 0) {
+			for(Project p : starteam.getProjects()) {
+				if(p.getName().equalsIgnoreCase(project)) {
+					for(View v : p.getViews()) {
+						if(v.getName().equalsIgnoreCase(view)) {
+							GitImporter g = new GitImporter(starteam, p, v);
+							if(null != head) {
+								g.setHeadName(head);
 							}
+							if(null != resume) {
+								g.setResume(resume);
+							}
+							g.generateFastImportStream();
+							break;
 						}
-						break;
 					}
+					break;
 				}
-			} else {
-				System.err.println("Could not log in user: " + user);
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} else {
+			System.err.println("Could not log in user: " + user);
 		}
 	}
 
 	public static void printHelp() {
-		System.out.println("-h <host>\tDefine on which host the server is hosted");
-		System.out.println("-P <port>\tDefine the port used to connect to the starteam server");
-		System.out.println("-p <project>\tSelect the project to import from");
-		System.out.println("-v <view>\tSelect the view used for importation");
-		System.out.println("[-U <user>]\tPreselect the user login");
-		System.out.println("[-R]\t\tResume the file history importation");
+		System.out.println("-h <host>\t\tDefine on which host the server is hosted");
+		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
+		System.out.println("-p <project>\t\tSelect the project to import from");
+		System.out.println("-v <view>\t\tSelect the view used for importation");
+		System.out.println("[-U <user>]\t\tPreselect the user login");
+		System.out.println("[-R]\t\t\tResume the file history importation");
+		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
+		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
 	}
