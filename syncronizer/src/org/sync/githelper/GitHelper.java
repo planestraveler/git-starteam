@@ -28,6 +28,9 @@ import java.util.Set;
 import org.sync.ErrorEater;
 import org.sync.RepositoryHelper;
 
+import java.io.File;
+import java.io.FilenameFilter;
+
 public class GitHelper implements RepositoryHelper {
 
 	private Thread gitQueryWorker;
@@ -38,11 +41,26 @@ public class GitHelper implements RepositoryHelper {
 	private Process gitFastImport;
 	private Thread gitFastImportOutputEater;
 	private Thread gitFastImportErrorEater;
+    private String gitRepositoryDir;
 	
-	public GitHelper(String preferedPath) {
-		if(findExecutable(preferedPath)) {
-			grabTrackedFiles();
+	private final FilenameFilter gitFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.equals(".git");
 		}
+	};
+    
+	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
+        gitRepositoryDir = System.getProperty("user.dir");
+        
+		if (!findExecutable(preferedPath)) {
+            throw new Exception("Git executable not found.");
+        }
+        if (!repositoryExists(createRepo)) {
+            throw new Exception("Destination repository not found in '" + gitRepositoryDir + "'");
+        }
+        
+        grabTrackedFiles();
 	}
 
 	private boolean findExecutable(String preferedPath) {
@@ -89,12 +107,34 @@ public class GitHelper implements RepositoryHelper {
 		return (null != gitExecutable);
 	}
 
+    private boolean repositoryExists(boolean create) {
+		File dir = new File(gitRepositoryDir);
+		String[] gitDir = dir.list(gitFilter);
+		if(null != gitDir) {
+			if (gitDir.length == 1) {
+                return true;
+            } else if (create) {
+                ProcessBuilder process = new ProcessBuilder();
+                process.command(gitExecutable, "init");
+                process.directory(new File(gitRepositoryDir));
+                try {
+                    process.start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+		}
+        return false;
+    }
+    
 	private void grabTrackedFiles() {
 		trackedFilesReturnCode = Integer.MAX_VALUE;
 		trackedFiles = null;
 		ProcessBuilder process = new ProcessBuilder();
 		process.command(gitExecutable, "ls-files");
-		process.directory(new File(System.getProperty("user.dir")));
+		process.directory(new File(gitRepositoryDir));
 		try {
 			Process lsFiles = process.start();
 			gitQueryWorker = new Thread(new GitLsFilesReader(lsFiles.getInputStream()));
@@ -137,7 +177,7 @@ public class GitHelper implements RepositoryHelper {
 		if(null == gitFastImport) {
 			ProcessBuilder process = new ProcessBuilder();
 			process.command(gitExecutable, "fast-import");
-			process.directory(new File(System.getProperty("user.dir")));
+			process.directory(new File(gitRepositoryDir));
 			try {
 				gitFastImport = process.start();
 				gitFastImportOutputEater = new Thread(new ErrorEater(gitFastImport.getInputStream()));

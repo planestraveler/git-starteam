@@ -79,7 +79,7 @@ public class GitImporter {
 		try {
 			exportStream = helper.getFastImportStream();
 		} catch (NullPointerException e) {
-			System.err.println("Error: '" + System.getProperty("user.dir") + "' is not a Git repository.");
+			e.printStackTrace();
 			return;
 		}
 

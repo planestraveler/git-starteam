@@ -44,6 +44,7 @@ public class MainEntry {
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
 		CmdLineParser.Option selectPath = parser.addStringOption('X', "path-to-program");
+		CmdLineParser.Option isCreateRepo = parser.addBooleanOption('c', "create-new-repo");
 		CmdLineParser.Option selectPassword = parser.addStringOption("password");
 
 		try {
@@ -66,6 +67,7 @@ public class MainEntry {
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
 		String pathToProgram = (String) parser.getOptionValue(selectPath);
+        Boolean createNewRepo = (Boolean) parser.getOptionValue(isCreateRepo);
 		String password = (String) parser.getOptionValue(selectPassword);
 		
 		if(host == null || port == null || project == null || view == null) {
@@ -74,6 +76,7 @@ public class MainEntry {
 		}
 		
 		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
+		RepositoryHelperFactory.getFactory().setCreateRepo((null != createNewRepo));
 
 		Server starteam = new Server(host, port);
 		starteam.connect();
@@ -118,6 +121,7 @@ public class MainEntry {
 		System.out.println("[-R]\t\t\tResume the file history importation");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
 		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
+		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
 	}
