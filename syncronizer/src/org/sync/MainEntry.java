@@ -67,7 +67,7 @@ public class MainEntry {
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
 		String pathToProgram = (String) parser.getOptionValue(selectPath);
-        Boolean createNewRepo = (Boolean) parser.getOptionValue(isCreateRepo);
+		Boolean createNewRepo = (Boolean) parser.getOptionValue(isCreateRepo);
 		String password = (String) parser.getOptionValue(selectPassword);
 		
 		if(host == null || port == null || project == null || view == null) {

@@ -16,9 +16,6 @@
 ******************************************************************************/
 package org.sync;
 
-import java.io.File;
-import java.io.FilenameFilter;
-
 public class RepositoryHelperFactory {
 
 	private static RepositoryHelperFactory instance = null;
@@ -29,7 +26,7 @@ public class RepositoryHelperFactory {
 	 */
 	private RepositoryHelper helper;
 	private String preferredPath;
-    private boolean createRepo;
+	private boolean createRepo;
 	
 	private RepositoryHelperFactory() {
 	}
@@ -48,17 +45,17 @@ public class RepositoryHelperFactory {
 	 * @return An appropriate helper with respect to the detected repository. Null otherwise.
 	 */
 	public RepositoryHelper createHelper() {
-        if (null == helper) {
-            try {
-                // TODO: Add more validation to support more repository type. (Bazaar, Mercurial, ...)
-                helper = new org.sync.githelper.GitHelper(preferredPath, createRepo);
-            } catch (Exception e) {
-                e.printStackTrace();
-                clearCachedHelper();
-            }
-        }
-        
-        return helper;
+		if (null == helper) {
+			try {
+				// TODO: Add more validation to support more repository type. (Bazaar, Mercurial, ...)
+				helper = new org.sync.githelper.GitHelper(preferredPath, createRepo);
+			} catch (Exception e) {
+				e.printStackTrace();
+				clearCachedHelper();
+			}
+		}
+		
+		return helper;
 	}
 	
 	/**
