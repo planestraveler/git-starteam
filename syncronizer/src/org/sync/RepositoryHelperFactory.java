@@ -16,19 +16,9 @@
 ******************************************************************************/
 package org.sync;
 
-import java.io.File;
-import java.io.FilenameFilter;
-
 public class RepositoryHelperFactory {
 
 	private static RepositoryHelperFactory instance = null;
-	// TODO: Add more filter to support more repository type. (Bazaar, Mercurial, ...)
-	private final FilenameFilter gitFilter = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			return name.equals(".git");
-		}
-	};
 	/** 
 	 * We cache the help to not create a ton of process instance. Each helper should initialize it process
 	 * and cache it locally. Ideally, the helper should block the current thread until all property are
@@ -36,6 +26,7 @@ public class RepositoryHelperFactory {
 	 */
 	private RepositoryHelper helper;
 	private String preferredPath;
+	private boolean createRepo;
 	
 	private RepositoryHelperFactory() {
 	}
@@ -54,19 +45,17 @@ public class RepositoryHelperFactory {
 	 * @return An appropriate helper with respect to the detected repository. Null otherwise.
 	 */
 	public RepositoryHelper createHelper() {
-		if(null != helper) {
-			return helper;
-		}
-		File dir = new File(System.getProperty("user.dir"));
-		String[] gitDir = dir.list(gitFilter);
-		if(null != gitDir) {
-			if(gitDir.length == 1) {
-				helper = new org.sync.githelper.GitHelper(preferredPath);
-				return helper;
+		if (null == helper) {
+			try {
+				// TODO: Add more validation to support more repository type. (Bazaar, Mercurial, ...)
+				helper = new org.sync.githelper.GitHelper(preferredPath, createRepo);
+			} catch (Exception e) {
+				e.printStackTrace();
+				clearCachedHelper();
 			}
 		}
-		// TODO: Add more validation to support more repository type. (Bazaar, Mercurial, ...)
-		return null;
+		
+		return helper;
 	}
 	
 	/**
@@ -78,5 +67,9 @@ public class RepositoryHelperFactory {
 
 	public void setPreferedPath(String pathToProgram) {
 		preferredPath = pathToProgram;
+	}
+
+	public void setCreateRepo(boolean create) {
+		createRepo = create;
 	}
 }

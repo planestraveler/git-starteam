@@ -75,10 +75,17 @@ public class GitImporter {
 	}
 
 	public void generateFastImportStream() {
+		OutputStream exportStream;
+		try {
+			exportStream = helper.getFastImportStream();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+			return;
+		}
+
 		Folder root = view.getRootFolder();
 		recursiveFilePopulation(root);
 		recoverDeleteInformation(deletedFiles);
-		OutputStream exportStream = helper.getFastImportStream();
 
 		String head = view.getName();
 		if(null != alternateHead) {
