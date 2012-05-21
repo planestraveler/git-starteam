@@ -169,4 +169,17 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	public TypeNames getTypeNames() {
 		return super.getTypeNames();
 	}
+	
+	public Item shareTo(Folder folder) {
+		StringBuffer childIdList = null;
+		if(folder.itemProperties.containsKey(propertyKeys._CHILD_FOLDER)) {
+			childIdList = new StringBuffer(folder.itemProperties.getProperty(propertyKeys._CHILD_FOLDER));
+		} else {
+			childIdList = new StringBuffer(25);
+		}
+		childIdList.append(";").append(getObjectID());
+		folder.itemProperties.setProperty(propertyKeys._CHILD_FOLDER, childIdList.toString());
+		folder.update();
+		return folder;
+	}
 }
