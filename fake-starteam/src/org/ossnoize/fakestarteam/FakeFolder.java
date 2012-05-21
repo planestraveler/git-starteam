@@ -8,16 +8,15 @@ import com.starbase.starteam.View;
 
 public class FakeFolder extends Folder {
 	
-	protected FakeFolder(View view, int objectID) {
+	public FakeFolder(View view, int objectID) {
 		this.parent = null;
 		this.view = view;
-		File serverArchive = InternalPropertiesProvider.getInstance().getFile();
+		File serverArchive = InternalPropertiesProvider.getInstance().getStorageLocation();
 		if(!serverArchive.isDirectory()) {
 			throw new UnsupportedOperationException("The archive need to be a directory.");
 		}
 		try {
-			holdingPlace = new File(serverArchive.getCanonicalPath() + File.separator +
-					this.view.getProject().getName() + File.separator + objectID);
+			holdingPlace = new File(serverArchive.getCanonicalPath() + File.separator + objectID);
 			if(holdingPlace.exists() && holdingPlace.isDirectory()) {
 				validateHoldingPlace();
 				loadFolderProperties();
