@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.ossnoize.fakestarteam.FakeFolder;
 import org.ossnoize.fakestarteam.FileUtility;
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
@@ -60,17 +61,23 @@ public class Folder extends Item {
 	}
 	
 	public Folder(Folder parent, String name, String workingFolder) {
+		itemProperties = new Properties();
+		// initialize the basic properties of the folder.
+		itemProperties.setProperty(propertyKeys.OBJECT_ID, 
+				Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
 		this.parent = parent;
 		view = parent.getView();
 		setName(name);
 		try {
-			String folder = parent.holdingPlace.getCanonicalPath() + File.separator + name;
+			File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
+			String folder = storage.getCanonicalPath() + File.separator + getObjectID();
 			holdingPlace = new File(folder);
 			validateHoldingPlace();
 			loadFolderProperties();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		parent.shareTo(this);
 	}
 
 	protected void validateHoldingPlace() {
@@ -102,12 +109,19 @@ public class Folder extends Item {
 	}
 	
 	public Folder[] getSubFolders() {
+		if(itemProperties == null)
+			throw new InvalidOperationException("The properties are not initialized");
+
+		String listOfFolder = itemProperties.getProperty(propertyKeys._CHILD_FOLDER);
 		List<Folder> generatedList = new ArrayList<Folder>();
-		for(File f : holdingPlace.listFiles()) {
-			if(f.isDirectory()) {
-				String[] subFolders = f.list(FOLDER_TESTER);
-				if(subFolders != null && subFolders.length == 1) {
-					generatedList.add(new Folder(this, f.getName(), ""));
+		if(listOfFolder != null && listOfFolder.length() > 0) {
+			for(String folderId : listOfFolder.split(";")) {
+				try {
+					int id = Integer.parseInt(folderId);
+					Folder child = new FakeFolder(this.view, id);
+					generatedList.add(child);
+				} catch (NumberFormatException ne) {
+					throw new InvalidOperationException("Folder child id corrupted.");
 				}
 			}
 		}
