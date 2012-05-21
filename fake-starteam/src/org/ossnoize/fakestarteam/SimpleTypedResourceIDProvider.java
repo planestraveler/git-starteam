@@ -87,16 +87,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} finally {
-			if(in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {}
-			}
-			if(gzin != null) {
-				try {
-					gzin.close();
-				} catch (IOException e) {}
-			}
+			FileUtility.close(in, gzin);
 		}
 		return ret;
 	}
