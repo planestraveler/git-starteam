@@ -31,6 +31,7 @@ public class InternalPropertiesProvider {
 	}
 
 	private File Archive;
+	private File StorageLocation;
 	private Server server;
 	
 	private InternalPropertiesProvider() {
@@ -39,20 +40,31 @@ public class InternalPropertiesProvider {
 	private void validateArchive() {
 		if(Archive.isFile()) {
 			Archive.delete();
-			Archive.mkdir();
 		}
 		if(!Archive.exists()) {
 			Archive.mkdirs();
+		}
+		if(StorageLocation.isFile()) {
+			StorageLocation.delete();
+		}
+		if(StorageLocation.exists()) {
+			StorageLocation.mkdirs();
 		}
 	}
 	
 	public File getFile() {
 		return Archive;
 	}
+	
+	public File getStorageLocation() {
+		return StorageLocation;
+	}
 
 	public void setCurrentServer(Server server) {
 		this.server = server;
 		Archive = new File(server.getAddress() + "." + server.getPort());
+		StorageLocation = new File(server.getAddress() + "." + server.getPort() + 
+				File.separator + "ObjectStorage");
 		validateArchive();
 	}
 	
