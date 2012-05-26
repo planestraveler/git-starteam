@@ -136,14 +136,28 @@ public class Folder extends Item {
 		Folder[] buffer = new Folder[generatedList.size()];
 		return generatedList.toArray(buffer);
 	}
-	
+
 	private com.starbase.starteam.File[] getFiles() {
+		if(itemProperties == null)
+			throw new InvalidOperationException("The properties are not initialized yet");
+
+		String listOfFile = itemProperties.getProperty(propertyKeys._FILES);
 		List<com.starbase.starteam.File> generatedList = new ArrayList<com.starbase.starteam.File>();
-		for(File f : holdingPlace.listFiles()) {
-			if(f.isDirectory()) {
-				String[] fileRevision = f.list(FILE_TESTER);
-				if(null != fileRevision && fileRevision.length >= 1) {
-					generatedList.add(new com.starbase.starteam.File(f.getName(), this));
+		if(listOfFile != null && 0 < listOfFile.length()) {
+			for(String fileID : listOfFile.split(";")) {
+				if(null != fileID && 0 < fileID.length()) {
+					try {
+						int id = Integer.parseInt(fileID);
+						SimpleTypedResource ressource =
+								SimpleTypedResourceIDProvider.getProvider().findExisting(id);
+						if(null != ressource && ressource instanceof com.starbase.starteam.File) {
+							generatedList.add((com.starbase.starteam.File)ressource);
+						} else {
+							generatedList.add(new com.starbase.starteam.File(id, this));
+						}
+					} catch (NumberFormatException ne) {
+						throw new InvalidOperationException("Folder child id corrupted.");
+					}
 				}
 			}
 		}

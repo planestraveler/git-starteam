@@ -28,6 +28,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.ossnoize.fakestarteam.FileUtility;
+import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
@@ -46,33 +47,34 @@ public class File extends Item {
 		isNew = true;
 	}
 
-	protected File(String name, Folder parent) {
+	protected File(int id, Folder parent) {
 		super();
 		this.parent = parent;
 		this.view = parent.getView();
 		try {
-			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + findLastRevision(name));
+			holdingPlace = createHoldingPlace(id, findLastRevision(id));
 		} catch (IOException e) {
-			throw new InvalidOperationException("Cannot initialize the " + name + " in " + parent);
+			throw new InvalidOperationException("Cannot initialize the " + id + " in " + parent);
 		}
 		loadFileProperties();
 	}
 
-	protected File(String name, int revision, Folder parent) {
+	protected File(int id, int revision, Folder parent) {
 		super();
 		this.parent = parent;
 		this.view = parent.getView();
 		try {
-			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + revision);
+			holdingPlace = createHoldingPlace(id, revision);
 		} catch (IOException e) {
-			throw new InvalidOperationException("Cannot initialize the " + name + " in " + parent + ": revision " + revision);
+			throw new InvalidOperationException("Cannot initialize the " + id + " in " + parent + ": revision " + revision);
 		}
 		loadFileProperties();
 	}
 
 	public void add(java.io.File file, String name, String desc, String reason, int lockStatus, boolean updateStatus) throws java.io.IOException {
 		if(isNew()) {
-			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + "0");
+			registerNewID();
+			holdingPlace = createHoldingPlace(0);
 			loadFileProperties();
 			setRevisionNumber(0);
 			setComment(reason);
@@ -84,20 +86,31 @@ public class File extends Item {
 			copyToGz(file);
 			isNew = false;
 			update();
+			shareTo(parent);
 		} else {
 			throw new InvalidOperationException("Cannot add a file that is already existing");
 		}
+	}
+
+	private java.io.File createHoldingPlace(int revision) throws IOException {
+		return createHoldingPlace(getObjectID(), revision);
+	}
+
+	private java.io.File createHoldingPlace(int id, int revision) throws IOException {
+		java.io.File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
+		String folder = storage.getCanonicalPath() + java.io.File.separator + id + java.io.File.separator + revision;
+		return new java.io.File(folder);
 	}
 
 	public void checkinFrom(java.io.File file, String reason, int lockStatus, boolean forceCheckin, boolean updateStatus) throws java.io.IOException {
 		if(!isNew()) {
 			int newRevision = getRevisionNumber() + 1;
 			loadFileProperties();
-			holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + getName() + java.io.File.separator + newRevision);
+			holdingPlace = createHoldingPlace(newRevision);
 			if(holdingPlace.exists()) {
 				if(forceCheckin) {
-					newRevision = findLastRevision(getName()) + 1;
-					holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + getName() + java.io.File.separator + newRevision);
+					newRevision = findLastRevision(getObjectID()) + 1;
+					holdingPlace = createHoldingPlace(newRevision);
 				} else {
 					throw new InvalidOperationException("Cannot check-in a past version of a file, do a force check-in to force the update");
 				}
@@ -106,7 +119,6 @@ public class File extends Item {
 			setComment(reason);
 			setModifiedBy();
 			setModifiedTime();
-			registerNewID();
 			copyToGz(file);
 			update();
 		} else {
@@ -115,7 +127,7 @@ public class File extends Item {
 	}
 	
 	public boolean checkoutByVersion(java.io.File checkoutTo, int viewVersion, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
-		holdingPlace = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + getName() + java.io.File.separator + viewVersion);
+		holdingPlace = createHoldingPlace(viewVersion);
 		if(holdingPlace.exists()) {
 			loadFileProperties();
 			if(null == checkoutTo) {
@@ -275,7 +287,9 @@ public class File extends Item {
 	}
 
 	private void loadFileProperties() {
-		itemProperties = new Properties();
+		if(null == itemProperties) {
+			itemProperties = new Properties();
+		}
 		FileInputStream fin = null;
 		try {
 			java.io.File fileProperty = new java.io.File(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_PROPERTIES);
@@ -284,9 +298,6 @@ public class File extends Item {
 				itemProperties.load(fin);
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
-			} else {
-				registerNewID();
-				isNew = true;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -296,42 +307,36 @@ public class File extends Item {
 	}
 
 	private void registerNewID() {
-		if(null != itemProperties) {
-			itemProperties.setProperty(propertyKeys.OBJECT_ID, 
-					Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
-		} else {
-			throw new InvalidOperationException("itemProperties is not yet initialized");
-		}
+		itemProperties = new Properties();
+		itemProperties.setProperty(propertyKeys.OBJECT_ID,
+				Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
+		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID,
+				Integer.toString(parent.getObjectID()));
 	}
 
-	private int findLastRevision(String name) {
+	private int findLastRevision(int id) {
 		int max = 0;
-		try {
-			java.io.File nameDir = new java.io.File(parent.holdingPlace.getCanonicalPath() + java.io.File.separator + name);
-			if(nameDir.exists()) {
-				for(String aRevision : nameDir.list()) {
-					try {
-						int tocheck = Integer.parseInt(aRevision.trim());
-						if(tocheck > max) {
-							max = tocheck;
-						}
-					} catch (NumberFormatException ne) {
-						ne.printStackTrace();
+		if(holdingPlace.exists()) {
+			for(String aRevision : holdingPlace.list()) {
+				try {
+					int tocheck = Integer.parseInt(aRevision.trim());
+					if(tocheck > max) {
+						max = tocheck;
 					}
+				} catch (NumberFormatException ne) {
+					ne.printStackTrace();
 				}
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		return max;
 	}
 	
 	@Override
 	protected List<Item> loadHistory() {
-		int lastRevision = findLastRevision(getName());
+		int lastRevision = findLastRevision(getObjectID());
 		List<Item> ret = new ArrayList<Item>(lastRevision);
 		for(int i=0; i<=lastRevision; i++) {
-			ret.add(new File(getName(), i, parent));
+			ret.add(new File(getObjectID(), i, parent));
 		}
 		return ret;
 	}
@@ -430,5 +435,19 @@ public class File extends Item {
 		} else {
 			throw new InvalidOperationException("Item Properties was never initialized");
 		}
+	}
+
+	@Override
+	public Item shareTo(Folder folder) {
+		StringBuffer childIdList = null;
+		if(folder.itemProperties.containsKey(propertyKeys._FILES)) {
+			childIdList = new StringBuffer(folder.itemProperties.getProperty(propertyKeys._FILES)).append(";");
+		} else {
+			childIdList = new StringBuffer(25);
+		}
+		childIdList.append(getObjectID());
+		folder.itemProperties.setProperty(propertyKeys._FILES, childIdList.toString());
+		folder.update();
+		return this;
 	}
 }
