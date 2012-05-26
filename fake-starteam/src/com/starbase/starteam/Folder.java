@@ -77,7 +77,7 @@ public class Folder extends Item {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		parent.shareTo(this);
+		shareTo(parent);
 	}
 
 	protected void validateHoldingPlace() {
