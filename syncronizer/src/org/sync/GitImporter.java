@@ -209,14 +209,6 @@ public class GitImporter {
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
-				// Small code to test the object ID in the starteam repository. 
-				// To find out if they are all the same in the history.
-				if(first) {
-					for(Item history : historyFile.getHistory()) {
-						System.err.println("Name " + history + " : ID <" + history.getObjectID() + ":" + history.getID() + ">");
-					}
-					first = false;
-				}
 				long modifiedTime = i.getModifiedTime().getLongValue();
 				int userid = i.getModifiedBy();
 				String path = i.getParentFolderHierarchy() + historyFile.getName();
