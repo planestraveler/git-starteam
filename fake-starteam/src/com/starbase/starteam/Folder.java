@@ -59,7 +59,7 @@ public class Folder extends Item {
 	public Folder(Server server) {
 		throw new UnsupportedOperationException("Unknown goal for this constructor");
 	}
-	
+
 	public Folder(Folder parent, String name, String workingFolder) {
 		itemProperties = new Properties();
 		// initialize the basic properties of the folder.
@@ -189,8 +189,6 @@ public class Folder extends Item {
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
 			} else {
 				// initialize the basic properties of the folder.
-				itemProperties.setProperty(propertyKeys.OBJECT_ID, 
-						Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
 				if (null != parent)	{
 					itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(parent.getObjectID()));
 					itemProperties.setProperty(propertyKeys.FOLDER_PATH, 
@@ -205,5 +203,17 @@ public class Folder extends Item {
 		}
 	}
 	
-	
+	@Override
+	public Item shareTo(Folder folder) {
+		StringBuffer childIdList = null;
+		if(folder.itemProperties.containsKey(propertyKeys._CHILD_FOLDER)) {
+			childIdList = new StringBuffer(folder.itemProperties.getProperty(propertyKeys._CHILD_FOLDER)).append(";");
+		} else {
+			childIdList = new StringBuffer(25);
+		}
+		childIdList.append(getObjectID());
+		folder.itemProperties.setProperty(propertyKeys._CHILD_FOLDER, childIdList.toString());
+		folder.update();
+		return folder;
+	}
 }
