@@ -133,5 +133,12 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 			saveNewID();
 		}
 	}
+
+	public SimpleTypedResource findExisting(int id) {
+		if(existingResource.containsKey(id)) {
+			return existingResource.get(id);
+		}
+		return null;
+	}
 	
 }

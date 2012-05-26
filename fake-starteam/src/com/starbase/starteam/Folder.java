@@ -116,12 +116,20 @@ public class Folder extends Item {
 		List<Folder> generatedList = new ArrayList<Folder>();
 		if(listOfFolder != null && listOfFolder.length() > 0) {
 			for(String folderId : listOfFolder.split(";")) {
-				try {
-					int id = Integer.parseInt(folderId);
-					Folder child = new FakeFolder(this.view, id, this);
-					generatedList.add(child);
-				} catch (NumberFormatException ne) {
-					throw new InvalidOperationException("Folder child id corrupted.");
+				if(null != folderId && 0 < folderId.length()) {
+					try {
+						int id = Integer.parseInt(folderId);
+						SimpleTypedResource ressource =
+								SimpleTypedResourceIDProvider.getProvider().findExisting(id);
+						if(null != ressource && ressource instanceof Folder) {
+							generatedList.add((Folder)ressource);
+						} else {
+							Folder child = new FakeFolder(this.view, id, this);
+							generatedList.add(child);
+						}
+					} catch (NumberFormatException ne) {
+						throw new InvalidOperationException("Folder child id corrupted.");
+					}
 				}
 			}
 		}
