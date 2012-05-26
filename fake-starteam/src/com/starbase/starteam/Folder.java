@@ -192,7 +192,7 @@ public class Folder extends Item {
 				if (null != parent)	{
 					itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(parent.getObjectID()));
 					itemProperties.setProperty(propertyKeys.FOLDER_PATH, 
-							parent.getParentFolderQualifiedName() + File.separatorChar + holdingPlace.getName());
+							parent.getParentFolderQualifiedName() + File.separatorChar + getName());
 				}
 				update();
 			}
