@@ -36,4 +36,5 @@ public class PropertyNames {
 	public final java.lang.String CREATED_TIME = "Created Time";
 	public final java.lang.String DELETED_TIME = "Deleted Time";
 	protected final java.lang.String _CHILD_FOLDER = ".Child Folder ID list";
+	protected final java.lang.String _FILES = ".Files ID list";
 }
