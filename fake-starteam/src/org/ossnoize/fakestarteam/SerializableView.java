@@ -39,8 +39,8 @@ public class SerializableView extends View implements Serializable {
 	private int rootFolderId;
 	private Date createdDate;
 	private int createdBy;
-	private volatile Project project;
-	private volatile Folder rootFolder;
+	private transient Project project;
+	private transient Folder rootFolder;
 	
 	protected SerializableView() {
 	}
@@ -60,7 +60,7 @@ public class SerializableView extends View implements Serializable {
 				((SerializableProject)project).addNewView(this);
 			}
 		}
-		rootFolder = new FakeFolder(this, 0);
+		rootFolder = new FakeFolder(this, 0, null);
 		rootFolderId = rootFolder.getObjectID();
 	}
 
@@ -130,7 +130,7 @@ public class SerializableView extends View implements Serializable {
 	@Override
 	public Folder getRootFolder() {
 		if(null == rootFolder) {
-			rootFolder = new FakeFolder(this, rootFolderId);
+			rootFolder = new FakeFolder(this, rootFolderId, null);
 		}
 		return rootFolder;
 	}

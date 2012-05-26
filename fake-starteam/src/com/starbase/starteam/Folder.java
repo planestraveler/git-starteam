@@ -118,7 +118,7 @@ public class Folder extends Item {
 			for(String folderId : listOfFolder.split(";")) {
 				try {
 					int id = Integer.parseInt(folderId);
-					Folder child = new FakeFolder(this.view, id);
+					Folder child = new FakeFolder(this.view, id, this);
 					generatedList.add(child);
 				} catch (NumberFormatException ne) {
 					throw new InvalidOperationException("Folder child id corrupted.");
