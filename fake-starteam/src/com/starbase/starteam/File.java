@@ -398,32 +398,11 @@ public class File extends Item {
 
 	public byte[] getMD5() {
 		if(null != itemProperties) {
-			if(itemProperties.containsKey(propertyKeys.FILE_MD5_CHECKSUM)) {
-				String md5sum = itemProperties.getProperty(propertyKeys.FILE_MD5_CHECKSUM);
-				MD5 fileChecksum = new MD5(md5sum);
-				return fileChecksum.getData();
-			} else {
-				MD5 fileChecksum = new MD5();
-				FileInputStream fin = null;
-				GZIPInputStream gzin = null;
-				try {
-					fin = new FileInputStream(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_STORED);
-					gzin = new GZIPInputStream(fin);
-
-					fileChecksum.computeStreamMD5Ex(gzin);
-
-					String md5sum = fileChecksum.toHexString();
-					itemProperties.setProperty(propertyKeys.FILE_MD5_CHECKSUM, md5sum);
-				} catch (IOException e) {
-					throw new InvalidOperationException("could not generate md5 because of " + e.getMessage());
-				} finally {
-					FileUtility.close(gzin, fin);
-				}
-				return fileChecksum.getData();
-			}
-		} else {
-			throw new InvalidOperationException("Item Properties was never initialized");
+			String md5sum = itemProperties.getProperty(propertyKeys.FILE_MD5_CHECKSUM);
+			MD5 fileChecksum = new MD5(md5sum);
+			return fileChecksum.getData();
 		}
+		throw new InvalidOperationException("Item Properties was never initialized");
 	}
 	
 	public int getCharset() {
