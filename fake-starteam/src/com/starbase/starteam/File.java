@@ -316,17 +316,23 @@ public class File extends Item {
 
 	private int findLastRevision(int id) {
 		int max = 0;
-		if(holdingPlace.exists()) {
-			for(String aRevision : holdingPlace.list()) {
-				try {
-					int tocheck = Integer.parseInt(aRevision.trim());
-					if(tocheck > max) {
-						max = tocheck;
+		java.io.File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
+		try {
+			java.io.File tempLocation = new java.io.File(storage.getCanonicalPath() + java.io.File.separator + id);
+			if(tempLocation.exists()) {
+				for(String aRevision : tempLocation.list()) {
+					try {
+						int tocheck = Integer.parseInt(aRevision.trim());
+						if(tocheck > max) {
+							max = tocheck;
+						}
+					} catch (NumberFormatException ne) {
+						ne.printStackTrace();
 					}
-				} catch (NumberFormatException ne) {
-					ne.printStackTrace();
 				}
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return max;
 	}
