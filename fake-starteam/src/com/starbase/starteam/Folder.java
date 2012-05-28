@@ -33,25 +33,6 @@ import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
 public class Folder extends Item {
 	private static final String FOLDER_PROPERTIES = "folder.properties";
-	private static final FilenameFilter FOLDER_TESTER = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			return name.equalsIgnoreCase(FOLDER_PROPERTIES);
-		}
-	};
-
-	private static final FilenameFilter FILE_TESTER = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			boolean valid = true;
-			for(char c : name.toCharArray()) {
-				if(!Character.isDigit(c)) {
-					valid = false;
-				}
-			}
-			return valid;
-		}
-	};
 
 	protected Folder() {
 	}
