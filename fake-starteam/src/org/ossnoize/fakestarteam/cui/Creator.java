@@ -249,7 +249,8 @@ public class Creator {
 		}
 		for(Item i : rootFolder.getItems(rootFolder.getTypeNames().FILE)) {
 			com.starbase.starteam.File f = (com.starbase.starteam.File)i;
-			System.out.println(ident + "-" + f.getName() + "\t" + f.getSizeEx() + "\t" + f.getObjectID());
+			System.out.println(ident + "-" + f.getName() + "\t" + f.getRevisionNumber() + 
+					                   "\t" + f.getSizeEx() + "\t" + f.getObjectID());
 		}
 		System.out.println(ident + ">" + rootFolder.getName());
 	}
