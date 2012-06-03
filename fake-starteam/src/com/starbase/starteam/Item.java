@@ -173,4 +173,8 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	public Item shareTo(Folder folder) {
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
+
+	public void moveTo(Folder folder) {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
 }

@@ -435,4 +435,19 @@ public class File extends Item {
 		folder.update();
 		return this;
 	}
+	
+	@Override
+	public void moveTo(Folder folder) {
+		Folder origin = getParentFolder();
+		String thisStringId = Integer.toString(getObjectID());
+		if(origin.itemProperties.containsKey(propertyKeys._FILES)) {
+			StringBuffer idList = new StringBuffer(origin.itemProperties.getProperty(propertyKeys._FILES));
+			int start = idList.indexOf(thisStringId);
+			idList.delete(start, start+thisStringId.length());
+			origin.itemProperties.setProperty(propertyKeys._FILES, idList.toString());
+			origin.update();
+		}
+		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(folder.getObjectID()));
+		shareTo(folder);
+	}
 }
