@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.ossnoize.fakestarteam.FakeFolder;
 import org.ossnoize.fakestarteam.FileUtility;
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
@@ -47,10 +48,9 @@ public class File extends Item {
 		isNew = true;
 	}
 
-	protected File(int id, Folder parent) {
+	protected File(int id, View view) {
 		super();
-		this.parent = parent;
-		this.view = parent.getView();
+		this.view = view;
 		try {
 			holdingPlace = createHoldingPlace(id, findLastRevision(id));
 		} catch (IOException e) {
@@ -59,10 +59,9 @@ public class File extends Item {
 		loadFileProperties();
 	}
 
-	protected File(int id, int revision, Folder parent) {
+	protected File(int id, int revision, View view) {
 		super();
-		this.parent = parent;
-		this.view = parent.getView();
+		this.view = view;
 		try {
 			holdingPlace = createHoldingPlace(id, revision);
 		} catch (IOException e) {
@@ -298,6 +297,13 @@ public class File extends Item {
 				itemProperties.load(fin);
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
+				
+				SimpleTypedResource ressource = SimpleTypedResourceIDProvider.getProvider().findExisting(getParentObjectID());
+				if(ressource instanceof Folder) {
+					parent = (Folder)ressource;
+				} else {
+					parent = new FakeFolder(this.view, id, null);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -342,7 +348,7 @@ public class File extends Item {
 		int lastRevision = findLastRevision(getObjectID());
 		List<Item> ret = new ArrayList<Item>(lastRevision);
 		for(int i=0; i<=lastRevision; i++) {
-			ret.add(new File(getObjectID(), i, parent));
+			ret.add(new File(getObjectID(), i, this.view));
 		}
 		return ret;
 	}

@@ -117,6 +117,13 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	public int getObjectID() {
 		return Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 	}
+
+	public int getParentObjectID() {
+		if(itemProperties.containsKey(propertyKeys.PARENT_OBJECT_ID)) {
+			return Integer.parseInt(itemProperties.getProperty(propertyKeys.PARENT_OBJECT_ID));
+		}
+		return 0;
+	}
 	
 	public boolean isNew() {
 		return isNew;

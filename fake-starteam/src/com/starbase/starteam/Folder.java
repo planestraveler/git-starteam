@@ -134,7 +134,7 @@ public class Folder extends Item {
 						if(null != ressource && ressource instanceof com.starbase.starteam.File) {
 							generatedList.add((com.starbase.starteam.File)ressource);
 						} else {
-							generatedList.add(new com.starbase.starteam.File(id, this));
+							generatedList.add(new com.starbase.starteam.File(id, this.view));
 						}
 					} catch (NumberFormatException ne) {
 						throw new InvalidOperationException("Folder child id corrupted.");
@@ -190,6 +190,13 @@ public class Folder extends Item {
 				itemProperties.load(fin);
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
+				
+				SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(getParentObjectID());
+				if(parent instanceof Folder) {
+					this.parent = (Folder)parent;
+				} else if(getParentObjectID() != 0) {
+					this.parent = new FakeFolder(this.view, getParentObjectID(), null);
+				}
 			} else {
 				// initialize the basic properties of the folder.
 				if (null != parent)	{
@@ -207,7 +214,7 @@ public class Folder extends Item {
 			FileUtility.close(fin);
 		}
 	}
-	
+
 	@Override
 	public Item shareTo(Folder folder) {
 		StringBuffer childIdList = null;
