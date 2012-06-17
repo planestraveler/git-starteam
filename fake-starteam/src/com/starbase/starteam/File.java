@@ -365,21 +365,20 @@ public class File extends Item {
 	public int getStatus(java.io.File file) throws IOException {
 		OLEDate time = getModifiedTime();
 		long size = getSizeEx();
+		long lastModificed = file.lastModified();
 		if(!file.isFile()) {
 			return Status.MISSING;
 		}
-		if(file.lastModified() > time.getLongValue()) {
+		if(lastModificed > time.getLongValue()) {
 			return Status.MODIFIED;
 		}
-		if(file.lastModified() == time.getLongValue()) {
+		if(lastModificed == time.getLongValue()) {
 			if(file.length() == size) {
 				return Status.CURRENT;
 			}
 		}
-		if(file.lastModified() < time.getLongValue()) {
-			if(file.length() != size) {
-				return Status.OUTOFDATE;
-			}
+		if(lastModificed < time.getLongValue()) {
+			return Status.OUTOFDATE;
 		}
 		return Status.UNKNOWN;
 	}
