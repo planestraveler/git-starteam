@@ -28,6 +28,7 @@ import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.Status;
 import com.starbase.starteam.View;
 
 import jargs.gnu.CmdLineParser;
@@ -206,7 +207,12 @@ public class Creator {
 											if(null != f && f.getName().equals(importFile.getName())) {
 												foundFile = true;
 												try {
-													f.checkinFrom(importFile, commentToModification, Item.LockType.UNCHANGED, false, true);
+													int status = f.getStatus(importFile);
+													if(status == Status.MODIFIED) {
+														f.checkinFrom(importFile, commentToModification, Item.LockType.UNCHANGED, false, true);
+													} else {
+														System.out.println("Status of file is not MODIFIED but " + status);
+													}
 												} catch (IOException e) {
 													e.printStackTrace();
 												}
