@@ -197,6 +197,9 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	public String getParentFolderQualifiedName() {
+		if(0 == getParentObjectID()) {
+			return view.getName();
+		}
 		return itemProperties.getProperty(propertyKeys.FOLDER_PATH);
 	}
 	
