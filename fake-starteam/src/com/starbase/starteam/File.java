@@ -320,29 +320,6 @@ public class File extends Item {
 				Integer.toString(parent.getObjectID()));
 	}
 
-	private int findLastRevision(int id) {
-		int max = 0;
-		java.io.File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
-		try {
-			java.io.File tempLocation = new java.io.File(storage.getCanonicalPath() + java.io.File.separator + id);
-			if(tempLocation.exists()) {
-				for(String aRevision : tempLocation.list()) {
-					try {
-						int tocheck = Integer.parseInt(aRevision.trim());
-						if(tocheck > max) {
-							max = tocheck;
-						}
-					} catch (NumberFormatException ne) {
-						ne.printStackTrace();
-					}
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return max;
-	}
-	
 	@Override
 	protected List<Item> loadHistory() {
 		int lastRevision = findLastRevision(getObjectID());

@@ -164,9 +164,18 @@ public class Folder extends Item {
 		if(itemProperties == null) {
 			throw new InvalidOperationException("Properties are not initialized yet!!!");
 		}
+		int version = getRevisionNumber() + 1;
+		setRevisionNumber(version);
 		FileOutputStream fout = null;
 		try {
-			fout = new FileOutputStream(holdingPlace.getCanonicalPath() + File.separator + FOLDER_PROPERTIES);
+			File storageFolder = new File(holdingPlace.getCanonicalPath() + File.separator + version);
+			if(storageFolder.exists())
+			{
+				throw new Error("Corrupted folder id:" + getObjectID());
+			}
+			storageFolder.mkdirs();
+			
+			fout = new FileOutputStream(storageFolder.getCanonicalPath() + File.separator + FOLDER_PROPERTIES);
 			itemProperties.store(fout, "Folders properties");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -183,7 +192,8 @@ public class Folder extends Item {
 	protected void loadFolderProperties() {
 		FileInputStream fin = null;
 		try {
-			File folderProperty = new File(holdingPlace.getCanonicalPath() + File.separator + FOLDER_PROPERTIES);
+			int lastRevision = findLastRevision(Integer.parseInt(holdingPlace.getName()));
+			File folderProperty = new File(holdingPlace.getCanonicalPath() + File.separator + lastRevision + File.separator + FOLDER_PROPERTIES);
 			if(folderProperty.exists()) {
 				fin = new FileInputStream(folderProperty);
 				itemProperties.load(fin);
