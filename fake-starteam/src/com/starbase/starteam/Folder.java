@@ -166,6 +166,8 @@ public class Folder extends Item {
 		}
 		int version = getRevisionNumber() + 1;
 		setRevisionNumber(version);
+		setModifiedBy();
+		setModifiedTime();
 		FileOutputStream fout = null;
 		try {
 			File storageFolder = new File(holdingPlace.getCanonicalPath() + File.separator + version);
