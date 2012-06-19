@@ -19,12 +19,12 @@ package com.starbase.starteam;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.ossnoize.fakestarteam.FakeFolder;
 import org.ossnoize.fakestarteam.FileUtility;
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
@@ -32,66 +32,35 @@ import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
 public class Folder extends Item {
 	private static final String FOLDER_PROPERTIES = "folder.properties";
-	private static final FilenameFilter FOLDER_TESTER = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			return name.equalsIgnoreCase(FOLDER_PROPERTIES);
-		}
-	};
 
-	private static final FilenameFilter FILE_TESTER = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			boolean valid = true;
-			for(char c : name.toCharArray()) {
-				if(!Character.isDigit(c)) {
-					valid = false;
-				}
-			}
-			return valid;
-		}
-	};
-
+	protected Folder() {
+	}
+	
 	public Folder(Server server) {
 		throw new UnsupportedOperationException("Unknown goal for this constructor");
 	}
-	
+
 	public Folder(Folder parent, String name, String workingFolder) {
+		itemProperties = new Properties();
+		// initialize the basic properties of the folder.
+		itemProperties.setProperty(propertyKeys.OBJECT_ID, 
+				Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
 		this.parent = parent;
 		view = parent.getView();
+		setName(name);
 		try {
-			String folder = parent.holdingPlace.getCanonicalPath() + File.separator + name;
+			File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
+			String folder = storage.getCanonicalPath() + File.separator + getObjectID();
 			holdingPlace = new File(folder);
 			validateHoldingPlace();
 			loadFolderProperties();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	protected Folder(View currentView) {
-		File serverArchive = InternalPropertiesProvider.getInstance().getFile();
-		if(!serverArchive.isDirectory()) {
-			throw new UnsupportedOperationException("The archive need to be a directory.");
-		}
-		try {
-			String rootFolder = serverArchive.getCanonicalPath() + File.separator +
-					currentView.getProject().getName() + File.separator + currentView.getName();
-			holdingPlace = new File(rootFolder);
-			validateHoldingPlace();
-			loadFolderProperties();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		// We don't want the root folder to have any default name.
-		// so overwrite the view name with a blank one and update.
-		setName("");
-		this.parent = null;
-		view = currentView;
-		update();
+		shareTo(parent);
 	}
 
-	private void validateHoldingPlace() {
+	protected void validateHoldingPlace() {
 		if(null == holdingPlace) {
 			throw new InvalidOperationException("Cannot create a folder without an holding place.");
 		}
@@ -120,26 +89,55 @@ public class Folder extends Item {
 	}
 	
 	public Folder[] getSubFolders() {
+		if(itemProperties == null)
+			throw new InvalidOperationException("The properties are not initialized");
+
+		String listOfFolder = itemProperties.getProperty(propertyKeys._CHILD_FOLDER);
 		List<Folder> generatedList = new ArrayList<Folder>();
-		for(File f : holdingPlace.listFiles()) {
-			if(f.isDirectory()) {
-				String[] subFolders = f.list(FOLDER_TESTER);
-				if(subFolders != null && subFolders.length == 1) {
-					generatedList.add(new Folder(this, f.getName(), ""));
+		if(listOfFolder != null && listOfFolder.length() > 0) {
+			for(String folderId : listOfFolder.split(";")) {
+				if(null != folderId && 0 < folderId.length()) {
+					try {
+						int id = Integer.parseInt(folderId);
+						SimpleTypedResource ressource =
+								SimpleTypedResourceIDProvider.getProvider().findExisting(id);
+						if(null != ressource && ressource instanceof Folder) {
+							generatedList.add((Folder)ressource);
+						} else {
+							Folder child = new FakeFolder(this.view, id, this);
+							generatedList.add(child);
+						}
+					} catch (NumberFormatException ne) {
+						throw new InvalidOperationException("Folder child id corrupted.");
+					}
 				}
 			}
 		}
 		Folder[] buffer = new Folder[generatedList.size()];
 		return generatedList.toArray(buffer);
 	}
-	
+
 	private com.starbase.starteam.File[] getFiles() {
+		if(itemProperties == null)
+			throw new InvalidOperationException("The properties are not initialized yet");
+
+		String listOfFile = itemProperties.getProperty(propertyKeys._FILES);
 		List<com.starbase.starteam.File> generatedList = new ArrayList<com.starbase.starteam.File>();
-		for(File f : holdingPlace.listFiles()) {
-			if(f.isDirectory()) {
-				String[] fileRevision = f.list(FILE_TESTER);
-				if(null != fileRevision && fileRevision.length >= 1) {
-					generatedList.add(new com.starbase.starteam.File(f.getName(), this));
+		if(listOfFile != null && 0 < listOfFile.length()) {
+			for(String fileID : listOfFile.split(";")) {
+				if(null != fileID && 0 < fileID.length()) {
+					try {
+						int id = Integer.parseInt(fileID);
+						SimpleTypedResource ressource =
+								SimpleTypedResourceIDProvider.getProvider().findExisting(id);
+						if(null != ressource && ressource instanceof com.starbase.starteam.File) {
+							generatedList.add((com.starbase.starteam.File)ressource);
+						} else {
+							generatedList.add(new com.starbase.starteam.File(id, this.view));
+						}
+					} catch (NumberFormatException ne) {
+						throw new InvalidOperationException("Folder child id corrupted.");
+					}
 				}
 			}
 		}
@@ -166,9 +164,20 @@ public class Folder extends Item {
 		if(itemProperties == null) {
 			throw new InvalidOperationException("Properties are not initialized yet!!!");
 		}
+		int version = getRevisionNumber() + 1;
+		setRevisionNumber(version);
+		setModifiedBy();
+		setModifiedTime();
 		FileOutputStream fout = null;
 		try {
-			fout = new FileOutputStream(holdingPlace.getCanonicalPath() + File.separator + FOLDER_PROPERTIES);
+			File storageFolder = new File(holdingPlace.getCanonicalPath() + File.separator + version);
+			if(storageFolder.exists())
+			{
+				throw new Error("Corrupted folder id:" + getObjectID());
+			}
+			storageFolder.mkdirs();
+			
+			fout = new FileOutputStream(storageFolder.getCanonicalPath() + File.separator + FOLDER_PROPERTIES);
 			itemProperties.store(fout, "Folders properties");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -182,21 +191,32 @@ public class Folder extends Item {
 		return getName();
 	}
 	
-	private void loadFolderProperties() {
-		itemProperties = new Properties();
+	protected void loadFolderProperties() {
 		FileInputStream fin = null;
 		try {
-			File folderProperty = new File(holdingPlace.getCanonicalPath() + File.separator + FOLDER_PROPERTIES);
+			int lastRevision = findLastRevision(Integer.parseInt(holdingPlace.getName()));
+			File folderProperty = new File(holdingPlace.getCanonicalPath() + File.separator + lastRevision + File.separator + FOLDER_PROPERTIES);
 			if(folderProperty.exists()) {
 				fin = new FileInputStream(folderProperty);
 				itemProperties.load(fin);
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
+				
+				SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(getParentObjectID());
+				if(parent instanceof Folder) {
+					this.parent = (Folder)parent;
+				} else if(getParentObjectID() != 0) {
+					this.parent = new FakeFolder(this.view, getParentObjectID(), null);
+				}
 			} else {
 				// initialize the basic properties of the folder.
-				itemProperties.setProperty(propertyKeys.OBJECT_ID, 
-						Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
-				setName(holdingPlace.getName());
+				if (null != parent)	{
+					itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(parent.getObjectID()));
+					itemProperties.setProperty(propertyKeys.FOLDER_PATH, 
+							parent.getParentFolderQualifiedName() + File.separatorChar + getName());
+				} else {
+					itemProperties.setProperty(propertyKeys.FOLDER_PATH, getName());
+				}
 				update();
 			}
 		} catch (IOException e) {
@@ -204,5 +224,19 @@ public class Folder extends Item {
 		} finally {
 			FileUtility.close(fin);
 		}
+	}
+
+	@Override
+	public Item shareTo(Folder folder) {
+		StringBuffer childIdList = null;
+		if(folder.itemProperties.containsKey(propertyKeys._CHILD_FOLDER)) {
+			childIdList = new StringBuffer(folder.itemProperties.getProperty(propertyKeys._CHILD_FOLDER)).append(";");
+		} else {
+			childIdList = new StringBuffer(25);
+		}
+		childIdList.append(getObjectID());
+		folder.itemProperties.setProperty(propertyKeys._CHILD_FOLDER, childIdList.toString());
+		folder.update();
+		return folder;
 	}
 }

@@ -28,6 +28,7 @@ import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.Status;
 import com.starbase.starteam.View;
 
 import jargs.gnu.CmdLineParser;
@@ -56,6 +57,7 @@ public class Creator {
 		CmdLineParser.Option createFolders = parser.addStringOption("create-folders");
 		CmdLineParser.Option addFileInPath = parser.addStringOption("path");
 		CmdLineParser.Option comment = parser.addStringOption('m', "comment");
+		CmdLineParser.Option hierarchy = parser.addBooleanOption('H', "hierarchy");
 		
 		try {
 			parser.parse(args);
@@ -205,7 +207,12 @@ public class Creator {
 											if(null != f && f.getName().equals(importFile.getName())) {
 												foundFile = true;
 												try {
-													f.checkinFrom(importFile, commentToModification, Item.LockType.UNCHANGED, false, true);
+													int status = f.getStatus(importFile);
+													if(status == Status.MODIFIED) {
+														f.checkinFrom(importFile, commentToModification, Item.LockType.UNCHANGED, false, true);
+													} else {
+														System.out.println("Status of file is not MODIFIED but " + status);
+													}
 												} catch (IOException e) {
 													e.printStackTrace();
 												}
@@ -231,9 +238,27 @@ public class Creator {
 							System.out.println("Cannot find the specified path: " + addInPath);
 						}
 					}
+					Boolean showHierarchy = (Boolean)parser.getOptionValue(hierarchy);
+					if(null != showHierarchy && showHierarchy.booleanValue()) {
+						System.out.println("Showing content of View");
+						showContentOfFolder(selectedView.getRootFolder(), "");
+					}
 				}
 			}
 		}
+	}
+
+	private static void showContentOfFolder(Folder rootFolder, String ident) {
+		System.out.println(ident + "+" + rootFolder.getName());
+		for(Folder f : rootFolder.getSubFolders()) {
+			showContentOfFolder(f, ident + " ");
+		}
+		for(Item i : rootFolder.getItems(rootFolder.getTypeNames().FILE)) {
+			com.starbase.starteam.File f = (com.starbase.starteam.File)i;
+			System.out.println(ident + "-" + f.getName() + "\t" + f.getRevisionNumber() + 
+					                   "\t" + f.getSizeEx() + "\t" + f.getObjectID());
+		}
+		System.out.println(ident + ">" + rootFolder.getName());
 	}
 
 	private static void printHelp() {

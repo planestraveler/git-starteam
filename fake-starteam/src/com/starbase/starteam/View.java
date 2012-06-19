@@ -79,9 +79,6 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public Folder getRootFolder() {
-		if(rootFolder == null) {
-			rootFolder = new Folder(this);
-		}
-		return rootFolder;
+		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 }

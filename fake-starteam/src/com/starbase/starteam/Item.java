@@ -17,9 +17,11 @@
 package com.starbase.starteam;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
 import com.starbase.util.OLEDate;
@@ -55,16 +57,42 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	public int getRevisionNumber() {
-		try {
-			return Integer.parseInt(itemProperties.getProperty(propertyKeys.REVISION_NUMBER));
-		} catch (NumberFormatException ne) {
-			throw new InvalidOperationException("The REVISION_NUMBER Property is not a number: " + 
-					itemProperties.getProperty(propertyKeys.REVISION_NUMBER));
+		if(itemProperties.containsKey(propertyKeys.REVISION_NUMBER)) {
+			try {
+				return Integer.parseInt(itemProperties.getProperty(propertyKeys.REVISION_NUMBER));
+			} catch (NumberFormatException ne) {
+				throw new InvalidOperationException("The REVISION_NUMBER Property is not a number: " + 
+						itemProperties.getProperty(propertyKeys.REVISION_NUMBER));
+			}
 		}
+		return 0;
 	}
 	
 	protected void setRevisionNumber(int rev) {
 		itemProperties.setProperty(propertyKeys.REVISION_NUMBER, Integer.toString(rev));
+	}
+	
+	protected int findLastRevision(int id) {
+		int max = 0;
+		java.io.File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
+		try {
+			java.io.File tempLocation = new java.io.File(storage.getCanonicalPath() + java.io.File.separator + id);
+			if(tempLocation.exists()) {
+				for(String aRevision : tempLocation.list()) {
+					try {
+						int tocheck = Integer.parseInt(aRevision.trim());
+						if(tocheck > max) {
+							max = tocheck;
+						}
+					} catch (NumberFormatException ne) {
+						ne.printStackTrace();
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return max;
 	}
 	
 	public int getModifiedBy() {
@@ -117,6 +145,13 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	public int getObjectID() {
 		return Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 	}
+
+	public int getParentObjectID() {
+		if(itemProperties.containsKey(propertyKeys.PARENT_OBJECT_ID)) {
+			return Integer.parseInt(itemProperties.getProperty(propertyKeys.PARENT_OBJECT_ID));
+		}
+		return 0;
+	}
 	
 	public boolean isNew() {
 		return isNew;
@@ -161,8 +196,23 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		}
 	}
 	
+	public String getParentFolderQualifiedName() {
+		if(0 == getParentObjectID()) {
+			return view.getName();
+		}
+		return itemProperties.getProperty(propertyKeys.FOLDER_PATH);
+	}
+	
 	@Override
 	public TypeNames getTypeNames() {
 		return super.getTypeNames();
+	}
+	
+	public Item shareTo(Folder folder) {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+
+	public void moveTo(Folder folder) {
+		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 }
