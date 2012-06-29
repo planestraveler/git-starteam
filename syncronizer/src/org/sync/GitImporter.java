@@ -45,13 +45,16 @@ import com.starbase.starteam.Server;
 import com.starbase.starteam.Status;
 import com.starbase.starteam.View;
 import com.starbase.starteam.File;
+import com.starbase.starteam.CheckoutManager;
 import com.starbase.util.MD5;
+import com.starbase.util.OLEDate;
 
 public class GitImporter {
 	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
 	private Server server;
 	private Project project;
 	private View view;
+	private long lastModifiedTime = 0;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
 	private final String headFormat = "refs/heads/{0}";
 	private String alternateHead = null;
@@ -74,6 +77,24 @@ public class GitImporter {
 		}
 	}
 
+	public long getLastModifiedTime() {
+		return lastModifiedTime;
+	}
+
+	public void recursiveLastModifiedTime(Folder f) {
+		for(Item i : f.getItems(f.getTypeNames().FILE)) {
+			if(i instanceof File) {
+				long modifiedTime = i.getModifiedTime().getLongValue();
+				if(modifiedTime > lastModifiedTime) {
+					lastModifiedTime = modifiedTime;
+				}
+			}
+		}
+		for(Folder subfolder : f.getSubFolders()) {
+			recursiveLastModifiedTime(subfolder);
+		}
+	}
+
 	public void generateFastImportStream() {
 		OutputStream exportStream;
 		try {
@@ -83,6 +104,7 @@ public class GitImporter {
 			return;
 		}
 
+		CheckoutManager cm = new CheckoutManager(view);
 		Folder root = view.getRootFolder();
 		recursiveFilePopulation(root);
 		recoverDeleteInformation(deletedFiles);
@@ -99,7 +121,7 @@ public class GitImporter {
 			String cmt = f.getComment();
 			String userName = server.getUser(f.getModifiedBy()).getName();
 			String userEmail = userName.replaceAll(" ", ".");
-			userEmail += "@" + "cie.com";
+			userEmail += "@" + "silan.com";
 			String path = f.getParentFolderHierarchy() + f.getName();
 			path = path.replace('\\', '/');
 			// Strip the view name from the path
@@ -108,6 +130,7 @@ public class GitImporter {
 			
 			try {
 				int fileStatus = f.getStatus();
+/*
 				if(Status.UNKNOWN == fileStatus || Status.MODIFIED == fileStatus) {
 					// try harder
 					MD5 localChecksum = new MD5();
@@ -115,10 +138,18 @@ public class GitImporter {
 					localChecksum.computeFileMD5Ex(aFile);
 					fileStatus = f.getStatusByMD5(localChecksum);
 				}
+*/
+				System.err.println(System.getProperty("user.dir") + java.io.File.separator + f.getParentFolderHierarchy() + f.getName());
+				System.err.println(cmt);
 				if(fileStatus != Status.CURRENT && fileStatus != Status.MODIFIED) {
 					java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
 					aFile.deleteOnExit();
-					f.checkoutTo(aFile, 0, true, false, false);
+					cm.checkoutTo(f, aFile);
+//					f.checkoutTo(aFile, 0, true, false, false);
+//					f.checkoutByVersion(aFile, 1, 0, true, false, false);
+//					f.checkoutByDate(aFile, new OLEDate(1263427200000L), 0, true, false, false);
+//					FileOutputStream s = new FileOutputStream(aFile);
+//					f.checkoutToStream(s, 0, false);
 					if(propertyEnums.FILE_ENCODING_BINARY != f.getCharset()) {
 						// This is a text file we need to force it's EOL to CR
 						aFile = forceEOLToCR(aFile);
@@ -230,6 +261,8 @@ public class GitImporter {
 				String comment = i.getComment();
 				String key = MessageFormat.format(revisionKeyFormat, modifiedTime, userid, comment, path);
 				sortedFileList.put(key, historyFile);
+				System.err.println(path + i.getRevisionNumber());
+				System.err.println("ItemCreatedTime:" + i.getCreatedTime().getLongValue());
 				System.err.println("Found file marked as: " + key);
 			}
 		}

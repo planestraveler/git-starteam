@@ -21,9 +21,11 @@ import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import com.starbase.starteam.Folder;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
@@ -93,14 +95,39 @@ public class MainEntry {
 				if(p.getName().equalsIgnoreCase(project)) {
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
-							GitImporter g = new GitImporter(starteam, p, v);
-							if(null != head) {
-								g.setHeadName(head);
+//							View lastView = v;
+							long hours = 3600000L; // mSec
+							long day = 24 * hours; // 86400000 mSec
+							long firstTime = 1263427200000L; // test
+							long lastTime = firstTime + 3 * day;
+//							long firstTime = v.getCreatedTime().getLongValue();
+//							long lastTime = v.getConfiguration().getTime().getLongValue();
+							View vc;
+							GitImporter gi = new GitImporter(starteam, p, v);
+							gi.recursiveLastModifiedTime(v.getRootFolder());
+							lastTime = gi.getLastModifiedTime();
+							System.err.println("Commit from UTC java time " + firstTime + " to " + lastTime);
+							for(;firstTime < lastTime; firstTime += day) {
+								GitImporter g;
+								if(lastTime - firstTime <= day) {
+									vc = v;
+								} else {
+									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime)));
+								}
+								g = new GitImporter(starteam, p, vc);
+//								if(vc.isEqualTo(lastView)) {
+//									lastView = vc;
+//									continue;
+//								}
+								if(null != head) {
+									g.setHeadName(head);
+								}
+								if(null != resume) {
+									g.setResume(resume);
+								}
+								g.generateFastImportStream();
+//								lastView = vc;
 							}
-							if(null != resume) {
-								g.setResume(resume);
-							}
-							g.generateFastImportStream();
 							break;
 						}
 					}
