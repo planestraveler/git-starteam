@@ -92,29 +92,30 @@ public class MainEntry {
 		int userid = starteam.logOn(user, password);
 		if(userid > 0) {
 			for(Project p : starteam.getProjects()) {
+				GitImporter g = new GitImporter(starteam, p);
 				if(p.getName().equalsIgnoreCase(project)) {
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
 //							View lastView = v;
 							long hours = 3600000L; // mSec
 							long day = 24 * hours; // 86400000 mSec
-							long firstTime = 1263427200000L; // test
-							long lastTime = firstTime + 3 * day;
-//							long firstTime = v.getCreatedTime().getLongValue();
-//							long lastTime = v.getConfiguration().getTime().getLongValue();
+//							long firstTime = 1263427200000L; // test
+							long firstTime = v.getCreatedTime().getLongValue();
 							View vc;
-							GitImporter gi = new GitImporter(starteam, p, v);
+							GitImporter gi = new GitImporter(starteam, p);
+							gi.init(v);
 							gi.recursiveLastModifiedTime(v.getRootFolder());
-							lastTime = gi.getLastModifiedTime();
+							gi.end();
+							long lastTime = gi.getLastModifiedTime();
 							System.err.println("Commit from UTC java time " + firstTime + " to " + lastTime);
 							for(;firstTime < lastTime; firstTime += day) {
-								GitImporter g;
+								System.err.println(firstTime + ":" + lastTime);
 								if(lastTime - firstTime <= day) {
 									vc = v;
 								} else {
 									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime)));
 								}
-								g = new GitImporter(starteam, p, vc);
+								g.init(vc);
 //								if(vc.isEqualTo(lastView)) {
 //									lastView = vc;
 //									continue;
@@ -125,9 +126,10 @@ public class MainEntry {
 								if(null != resume) {
 									g.setResume(resume);
 								}
-								g.generateFastImportStream();
+								g.generateFastImportStream(firstTime);
 //								lastView = vc;
 							}
+							g.end();
 							break;
 						}
 					}
