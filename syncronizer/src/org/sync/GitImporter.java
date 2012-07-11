@@ -67,7 +67,7 @@ public class GitImporter {
 	private PropertyEnums propertyEnums = null;
 	// Use this set to find all the deleted files.
 	private Set<String> files = new HashSet<String>();
-	private Set<String> deletedFiles;
+	private Set<String> deletedFiles = new HashSet<String>();
 	private Set<String> lastFiles = new HashSet<String>();
 	
 	public GitImporter(Server s, Project p) {
@@ -78,27 +78,9 @@ public class GitImporter {
 
 	public void init(View v) {
 		view = v;
-		helper = RepositoryHelperFactory.getFactory().createHelper();
-		if(null != helper) {
-			deletedFiles = helper.getListOfTrackedFile();
-		} else {
-			deletedFiles = new HashSet<String>();
-		}
-		try {
-			exportStream = helper.getFastImportStream();
-		} catch (NullPointerException e) {
-			e.printStackTrace();
-			return;
-		}
 	}
 	
 	public void end() {
-		try {
-			exportStream.close();
-			RepositoryHelperFactory.getFactory().clearCachedHelper();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
 	}
 	
 	public long getLastModifiedTime() {
@@ -120,6 +102,13 @@ public class GitImporter {
 	}
 
 	public void generateFastImportStream(long firstTime) {
+		helper = RepositoryHelperFactory.getFactory().createHelper();
+		try {
+			exportStream = helper.getFastImportStream();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+			return;
+		}
 		CheckoutManager cm = new CheckoutManager(view);
 		Folder root = view.getRootFolder();
 		files.clear();
@@ -207,6 +196,9 @@ public class GitImporter {
 						} else {
 							System.err.println("commit 1.");
 							lastcommit.writeTo(exportStream);
+							if(! isResume) {
+								isResume = true;
+							}		
 							commit.setFromCommit(lastcommit);
 						}
 						
@@ -235,6 +227,9 @@ public class GitImporter {
 				} else {
 					System.err.println("commit 2.");
 					lastcommit.writeTo(exportStream);
+					if(! isResume) {
+						isResume = true;
+					}		
 					commit.setFromCommit(lastcommit);
 				}
 				for(String path : deletedFiles) {
@@ -257,9 +252,18 @@ public class GitImporter {
 			try {
 				System.err.println("commit 3.");
 				lastcommit.writeTo(exportStream);
+				exportStream.close();
+				Thread.sleep(1000);
+				RepositoryHelperFactory.getFactory().clearCachedHelper();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+            catch(InterruptedException e)   { 
+                System.err.println( "Interrupted "); 
+            } 
+			if(! isResume) {
+				isResume = true;
+			}		
 		} else {
 			if(AddedSortedFileList.size() > 0) {
 				System.err.println("There was no new revision in the starteam view.");
