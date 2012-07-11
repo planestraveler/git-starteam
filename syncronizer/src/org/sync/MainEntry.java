@@ -97,19 +97,19 @@ public class MainEntry {
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
 //							View lastView = v;
-							long hours = 3600000L; // mSec
-							long day = 24 * hours; // 86400000 mSec
+							long hour = 3600000L; // mSec
+							long day = 24 * hour; // 86400000 mSec
 //							long firstTime = 1263427200000L; // test
-							long firstTime = v.getCreatedTime().getLongValue();
+							long firstTime = v.getCreatedTime().getLongValue() + 1000;
 							View vc;
 							GitImporter gi = new GitImporter(starteam, p);
 							gi.init(v);
 							gi.recursiveLastModifiedTime(v.getRootFolder());
 							gi.end();
 							long lastTime = gi.getLastModifiedTime();
-							System.err.println("Commit from UTC java time " + firstTime + " to " + lastTime);
+							System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
 							for(;firstTime < lastTime; firstTime += day) {
-								System.err.println(firstTime + ":" + lastTime);
+//								System.err.println(firstTime + ":" + lastTime);
 								if(lastTime - firstTime <= day) {
 									vc = v;
 								} else {

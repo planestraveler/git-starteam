@@ -164,7 +164,7 @@ public class GitImporter {
 			path = path.substring(indexOfFirstPath + 1);
 			
 			try {
-				int fileStatus = f.getStatus();
+//				int fileStatus = f.getStatus();
 //				System.err.println("fileStatus:" + fileStatus);
 /*
 				if(Status.UNKNOWN == fileStatus || Status.MODIFIED == fileStatus) {
@@ -177,7 +177,7 @@ public class GitImporter {
 */
 //				System.err.println(System.getProperty("user.dir") + java.io.File.separator + f.getParentFolderHierarchy() + f.getName());
 //				System.err.println(cmt);
-				if(fileStatus != Status.CURRENT && fileStatus != Status.MODIFIED) {
+//				if(fileStatus != Status.CURRENT && fileStatus != Status.MODIFIED) {
 					java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
 					aFile.deleteOnExit();
 					cm.checkoutTo(f, aFile);
@@ -186,10 +186,10 @@ public class GitImporter {
 //					f.checkoutByDate(aFile, new OLEDate(1263427200000L), 0, true, false, false);
 //					FileOutputStream s = new FileOutputStream(aFile);
 //					f.checkoutToStream(s, 0, false);
-					if(propertyEnums.FILE_ENCODING_BINARY != f.getCharset()) {
-						// This is a text file we need to force it's EOL to CR
-						aFile = forceEOLToCR(aFile);
-					}
+//					if(propertyEnums.FILE_ENCODING_BINARY != f.getCharset()) {
+//						// This is a text file we need to force it's EOL to CR
+//						aFile = forceEOLToCR(aFile);
+//					}
 					
 					FileModification fm = new FileModification(new Data(aFile));
 					fm.setFileType(GitFileType.Normal);
@@ -215,7 +215,7 @@ public class GitImporter {
 						lastUID = f.getModifiedBy();
 						lastcommit = commit;
 					}
-				}
+//				}
 			} catch (IOException io) {
 				io.printStackTrace();
 			} catch (InvalidPathException e1) {
@@ -265,7 +265,7 @@ public class GitImporter {
 				System.err.println("There was no new revision in the starteam view.");
 				System.err.println("All the files in the repository are at theire lastest version");
 			} else {
-				System.err.println("The starteam view specified was empty.");
+//				System.err.println("The starteam view specified was empty.");
 			}
 		}
 		AddedSortedFileList.clear();
