@@ -191,6 +191,18 @@ public class GitHelper implements RepositoryHelper {
 		return gitFastImport.getOutputStream();
 	}
 	
+	public boolean isGitFastImportRunning() {
+		try {
+			if(0 == gitFastImport.exitValue()) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (IllegalThreadStateException e) {
+		}
+		return true;
+	}
+	
 	private class GitLsFilesReader implements Runnable {
 
 		private InputStream input;

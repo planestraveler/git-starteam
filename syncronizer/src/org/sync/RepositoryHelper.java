@@ -33,6 +33,8 @@ public interface RepositoryHelper {
 	 */
 	public boolean isSpecialFile(String filename);
 	
+	public boolean isGitFastImportRunning();
+	
 	/**
 	 * Create a fast-import process and dump all the repository information in the 
 	 * input stream of the process.

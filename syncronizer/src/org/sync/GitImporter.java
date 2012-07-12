@@ -194,7 +194,7 @@ public class GitImporter {
 								commit.resumeOnTopOfRef();
 							}
 						} else {
-							System.err.println("commit 1.");
+//							System.err.println("commit 1.");
 							lastcommit.writeTo(exportStream);
 							if(! isResume) {
 								isResume = true;
@@ -225,7 +225,7 @@ public class GitImporter {
 						commit.resumeOnTopOfRef();
 					}
 				} else {
-					System.err.println("commit 2.");
+//					System.err.println("commit 2.");
 					lastcommit.writeTo(exportStream);
 					if(! isResume) {
 						isResume = true;
@@ -250,17 +250,18 @@ public class GitImporter {
 		}
 		if(null != lastcommit) {
 			try {
-				System.err.println("commit 3.");
+//				System.err.println("commit 3.");
 				lastcommit.writeTo(exportStream);
 				exportStream.close();
-				Thread.sleep(1000);
+				while(helper.isGitFastImportRunning());
+//				Thread.sleep(1000);
 				RepositoryHelperFactory.getFactory().clearCachedHelper();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-            catch(InterruptedException e)   { 
-                System.err.println( "Interrupted "); 
-            } 
+//            catch(InterruptedException e)   { 
+//                System.err.println( "Interrupted "); 
+//            } 
 			if(! isResume) {
 				isResume = true;
 			}		
@@ -306,6 +307,7 @@ public class GitImporter {
 				String key = MessageFormat.format(revisionKeyFormat, modifiedTime, userid, comment, path);
 				if(! lastSortedFileList.containsKey(key)) {
 					AddedSortedFileList.put(key, historyFile);
+//					System.err.println("Found file marked as: " + key);
 				}
 				sortedFileList.put(key, historyFile);
 //				System.err.println(path + i.getRevisionNumber());
