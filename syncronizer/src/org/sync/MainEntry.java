@@ -20,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Project;
@@ -42,6 +44,7 @@ public class MainEntry {
 		CmdLineParser.Option selectPort = parser.addIntegerOption('P', "port");
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
+		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
@@ -65,6 +68,7 @@ public class MainEntry {
 		Integer port = (Integer) parser.getOptionValue(selectPort);
 		String project = (String) parser.getOptionValue(selectProject);
 		String view = (String) parser.getOptionValue(selectView);
+		String time = (String) parser.getOptionValue(selectTime);
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
@@ -75,6 +79,17 @@ public class MainEntry {
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
 			System.exit(3);
+		}
+		
+		Date date = null;
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if(null != time) {
+			try {
+				date = dateFormat.parse(time);
+			} catch (Exception ex) {
+				System.out.println(ex.getMessage());
+				System.exit(3);
+			}
 		}
 		
 		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
@@ -101,6 +116,9 @@ public class MainEntry {
 							long day = 24 * hour; // 86400000 mSec
 //							long firstTime = 1263427200000L; // test
 							long firstTime = v.getCreatedTime().getLongValue() + 1000;
+							if (null != date){
+								firstTime = date.getTime();
+							}
 							View vc;
 							GitImporter gi = new GitImporter(starteam, p);
 							gi.init(v);
@@ -146,6 +164,7 @@ public class MainEntry {
 		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
+		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 17:06:07\") to import from");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
