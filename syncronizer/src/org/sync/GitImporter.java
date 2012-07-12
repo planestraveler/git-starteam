@@ -53,7 +53,6 @@ public class GitImporter {
 	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
 	private Server server;
 	private Project project;
-	private View view;
 	private long lastModifiedTime = 0;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
 	private Map<String, File> AddedSortedFileList = new TreeMap<String, File>();
@@ -76,11 +75,12 @@ public class GitImporter {
 		propertyEnums = server.getPropertyEnums();
 	}
 
-	public void init(View v) {
-		view = v;
+	public void init() {
+		helper = RepositoryHelperFactory.getFactory().createHelper();
 	}
 	
 	public void end() {
+		RepositoryHelperFactory.getFactory().clearCachedHelper();
 	}
 	
 	public long getLastModifiedTime() {
@@ -101,8 +101,7 @@ public class GitImporter {
 		}
 	}
 
-	public void generateFastImportStream(long firstTime) {
-		helper = RepositoryHelperFactory.getFactory().createHelper();
+	public void generateFastImportStream(View view, long vcTime) {
 		try {
 			exportStream = helper.getFastImportStream();
 		} catch (NullPointerException e) {
@@ -133,6 +132,15 @@ public class GitImporter {
 //		}
 		recoverDeleteInformation(deletedFiles);
 
+		if(AddedSortedFileList.size() > 0 || deletedFiles.size() > 0) {
+			try {
+				exportStream = helper.getFastImportStream();
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+		
 		String head = view.getName();
 		if(null != alternateHead) {
 			head = alternateHead;
@@ -219,7 +227,7 @@ public class GitImporter {
 		if(deletedFiles.size() > 0) {
 			try {
 				String ref = MessageFormat.format(headFormat, head);
-				Commit commit = new Commit("File Janitor", "janitor@cie.com", "Cleaning files move along", ref, new java.util.Date(firstTime));
+				Commit commit = new Commit("File Janitor", "janitor@cie.com", "Cleaning files move along", ref, new java.util.Date(vcTime));
 				if(null == lastcommit) {
 					if(isResume) {
 						commit.resumeOnTopOfRef();
@@ -252,10 +260,7 @@ public class GitImporter {
 			try {
 //				System.err.println("commit 3.");
 				lastcommit.writeTo(exportStream);
-				exportStream.close();
-				while(helper.isGitFastImportRunning());
 //				Thread.sleep(1000);
-				RepositoryHelperFactory.getFactory().clearCachedHelper();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -272,6 +277,14 @@ public class GitImporter {
 			} else {
 //				System.err.println("The starteam view specified was empty.");
 			}
+		}
+		if(AddedSortedFileList.size() > 0 || deletedFiles.size() > 0) {
+			try {
+				exportStream.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			while(helper.isGitFastImportRunning());
 		}
 		AddedSortedFileList.clear();
 	}

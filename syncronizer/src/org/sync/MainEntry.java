@@ -121,19 +121,20 @@ public class MainEntry {
 							}
 							View vc;
 							GitImporter gi = new GitImporter(starteam, p);
-							gi.init(v);
 							gi.recursiveLastModifiedTime(v.getRootFolder());
-							gi.end();
 							long lastTime = gi.getLastModifiedTime();
+							long vcTime;
 							System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
+							g.init();
 							for(;firstTime < lastTime; firstTime += day) {
 //								System.err.println(firstTime + ":" + lastTime);
 								if(lastTime - firstTime <= day) {
 									vc = v;
+									vcTime = lastTime;
 								} else {
 									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime)));
+									vcTime = firstTime;
 								}
-								g.init(vc);
 //								if(vc.isEqualTo(lastView)) {
 //									lastView = vc;
 //									continue;
@@ -144,7 +145,8 @@ public class MainEntry {
 								if(null != resume) {
 									g.setResume(resume);
 								}
-								g.generateFastImportStream(firstTime);
+								System.err.println("View Configuration Time: " + new java.util.Date(vcTime));
+								g.generateFastImportStream(vc, vcTime);
 //								lastView = vc;
 							}
 							g.end();
@@ -164,7 +166,7 @@ public class MainEntry {
 		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
-		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 17:06:07\") to import from");
+		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:25:28\") to import from");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");

@@ -194,6 +194,7 @@ public class GitHelper implements RepositoryHelper {
 	public boolean isGitFastImportRunning() {
 		try {
 			if(0 == gitFastImport.exitValue()) {
+				gitFastImport = null;
 				return false;
 			} else {
 				return true;
