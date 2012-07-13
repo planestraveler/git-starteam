@@ -45,6 +45,7 @@ public class MainEntry {
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
 		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
+		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
@@ -69,6 +70,7 @@ public class MainEntry {
 		String project = (String) parser.getOptionValue(selectProject);
 		String view = (String) parser.getOptionValue(selectView);
 		String time = (String) parser.getOptionValue(selectTime);
+		String domain = (String) parser.getOptionValue(selectDomain);
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
@@ -91,7 +93,11 @@ public class MainEntry {
 				System.exit(3);
 			}
 		}
-		
+
+		if(null == domain) {
+			domain = "cie.com";
+		}
+
 		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
 		RepositoryHelperFactory.getFactory().setCreateRepo((null != createNewRepo));
 
@@ -146,7 +152,7 @@ public class MainEntry {
 									g.setResume(resume);
 								}
 								System.err.println("View Configuration Time: " + new java.util.Date(vcTime));
-								g.generateFastImportStream(vc, vcTime);
+								g.generateFastImportStream(vc, vcTime, domain);
 //								lastView = vc;
 							}
 							g.end();
@@ -167,6 +173,7 @@ public class MainEntry {
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
 		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:25:28\") to import from");
+		System.out.println("-d <domain>\t\tSelect the email domain (format like cie.com) of the user");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");

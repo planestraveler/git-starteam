@@ -101,7 +101,7 @@ public class GitImporter {
 		}
 	}
 
-	public void generateFastImportStream(View view, long vcTime) {
+	public void generateFastImportStream(View view, long vcTime, String domain) {
 		try {
 			exportStream = helper.getFastImportStream();
 		} catch (NullPointerException e) {
@@ -110,6 +110,7 @@ public class GitImporter {
 		}
 		CheckoutManager cm = new CheckoutManager(view);
 		Folder root = view.getRootFolder();
+//		recursiveFolderPopulation(root, "asdf");
 		files.clear();
 		deletedFiles.clear();
 		deletedFiles.addAll(lastFiles);
@@ -153,7 +154,7 @@ public class GitImporter {
 			String cmt = f.getComment();
 			String userName = server.getUser(f.getModifiedBy()).getName();
 			String userEmail = userName.replaceAll(" ", ".");
-			userEmail += "@" + "silan.com";
+			userEmail += "@" + domain;
 			String path = f.getParentFolderHierarchy() + f.getName();
 			path = path.replace('\\', '/');
 			// Strip the view name from the path
@@ -227,7 +228,7 @@ public class GitImporter {
 		if(deletedFiles.size() > 0) {
 			try {
 				String ref = MessageFormat.format(headFormat, head);
-				Commit commit = new Commit("File Janitor", "janitor@cie.com", "Cleaning files move along", ref, new java.util.Date(vcTime));
+				Commit commit = new Commit("File Janitor", "janitor@" + domain, "Cleaning files move along", ref, new java.util.Date(vcTime));
 				if(null == lastcommit) {
 					if(isResume) {
 						commit.resumeOnTopOfRef();
@@ -298,6 +299,15 @@ public class GitImporter {
 	public void setResume(boolean b) {
 		isResume = b;
 	}
+
+//	private void recursiveFolderPopulation(Folder f, String d) {
+//		boolean first = true;
+//		for(Folder subfolder : f.getSubFolders()) {
+//			d.indexOf('/')
+//			if(subfolder.getName() == d.substring(beginIndex, endIndex))
+////			recursiveFilePopulation(subfolder);
+//		}
+//	}
 
 	private void recursiveFilePopulation(Folder f) {
 		boolean first = true;
