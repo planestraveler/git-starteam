@@ -177,7 +177,7 @@ public class GitImporter {
 //				System.err.println(cmt);
 //				if(fileStatus != Status.CURRENT && fileStatus != Status.MODIFIED) {
 					java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
-					aFile.deleteOnExit();
+//					aFile.deleteOnExit();
 					cm.checkoutTo(f, aFile);
 //					f.checkoutTo(aFile, 0, true, false, false);
 //					f.checkoutByVersion(aFile, 1, 0, true, false, false);
@@ -222,6 +222,7 @@ public class GitImporter {
 			} catch (InvalidPathException e1) {
 				e1.printStackTrace();
 			}
+			f.discard();
 		}
 		// TODO: Simple hack to make deletion of disapered files. Since starteam does not carry some kind of
 		// TODO: delete event. (as known from now)
@@ -285,6 +286,7 @@ public class GitImporter {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			System.gc();
 			while(helper.isGitFastImportRunning());
 		}
 		AddedSortedFileList.clear();
@@ -327,6 +329,7 @@ public class GitImporter {
 				}
 				files.add(path);
 				String comment = i.getComment();
+				i.discard();
 				String key = MessageFormat.format(revisionKeyFormat, modifiedTime, userid, comment, path);
 				if(! lastSortedFileList.containsKey(key)) {
 					AddedSortedFileList.put(key, historyFile);
