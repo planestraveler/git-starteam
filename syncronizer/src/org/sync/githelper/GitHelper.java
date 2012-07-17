@@ -173,6 +173,18 @@ public class GitHelper implements RepositoryHelper {
 	}
 	
 	@Override
+	public void gc() {
+		ProcessBuilder process = new ProcessBuilder();
+		process.command(gitExecutable, "gc");
+		process.directory(new File(gitRepositoryDir));
+		try {
+			gitFastImport = process.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
 	public OutputStream getFastImportStream() {
 		if(null == gitFastImport) {
 			ProcessBuilder process = new ProcessBuilder();

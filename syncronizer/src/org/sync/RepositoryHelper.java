@@ -33,6 +33,8 @@ public interface RepositoryHelper {
 	 */
 	public boolean isSpecialFile(String filename);
 	
+	public void gc();
+	
 	public boolean isGitFastImportRunning();
 	
 	/**

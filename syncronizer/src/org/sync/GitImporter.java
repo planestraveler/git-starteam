@@ -82,6 +82,7 @@ public class GitImporter {
 	}
 	
 	public void end() {
+		helper.gc();
 		RepositoryHelperFactory.getFactory().clearCachedHelper();
 	}
 	
