@@ -127,6 +127,7 @@ public class GitImporter {
 			return;
 		}
 		CheckoutManager cm = new CheckoutManager(view);
+		cm.getOptions().setEOLConversionEnabled(false);
 		folder = null;
 		setFolder(view, folderPath);
 		if(null == folder) {
