@@ -45,6 +45,7 @@ public class MainEntry {
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
 		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
+		CmdLineParser.Option selectFolder = parser.addStringOption('f', "folder");
 		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
@@ -70,6 +71,7 @@ public class MainEntry {
 		String project = (String) parser.getOptionValue(selectProject);
 		String view = (String) parser.getOptionValue(selectView);
 		String time = (String) parser.getOptionValue(selectTime);
+		String folder = (String) parser.getOptionValue(selectFolder);
 		String domain = (String) parser.getOptionValue(selectDomain);
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
@@ -121,13 +123,20 @@ public class MainEntry {
 							long hour = 3600000L; // mSec
 							long day = 24 * hour; // 86400000 mSec
 //							long firstTime = 1263427200000L; // test
-							long firstTime = v.getCreatedTime().getLongValue() + 1000;
-							if (null != date){
-								firstTime = date.getTime();
+							long firstTime = v.getCreatedTime().getLongValue();
+							System.err.println("View Created Time: " + new java.util.Date(firstTime));
+							if (null == date){
+								date = new java.util.Date(firstTime);
+								date.setHours(23);
+								date.setMinutes(59);
+								date.setSeconds(59);
 							}
+							firstTime = date.getTime();
+							
 							View vc;
 							GitImporter gi = new GitImporter(starteam, p);
-							gi.recursiveLastModifiedTime(v.getRootFolder());
+							gi.setFolder(v, folder);
+							gi.recursiveLastModifiedTime(gi.getFolder());
 							long lastTime = gi.getLastModifiedTime();
 							long vcTime;
 							System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
@@ -152,8 +161,8 @@ public class MainEntry {
 									g.setResume(resume);
 								}
 								System.err.println("View Configuration Time: " + new java.util.Date(vcTime));
-								g.generateFastImportStream(vc, vcTime, domain);
-//								lastView = vc;
+								g.generateFastImportStream(vc, vcTime, folder, domain);
+								vc.discard();
 							}
 							g.end();
 							break;
@@ -172,7 +181,8 @@ public class MainEntry {
 		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
-		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:25:28\") to import from");
+		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
+		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like cie.com) of the user");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation");

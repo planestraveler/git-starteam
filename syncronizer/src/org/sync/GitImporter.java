@@ -53,6 +53,8 @@ public class GitImporter {
 	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
 	private Server server;
 	private Project project;
+	Folder folder;
+	int folderNameLength;
 	private long lastModifiedTime = 0;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
 	private Map<String, File> AddedSortedFileList = new TreeMap<String, File>();
@@ -87,6 +89,20 @@ public class GitImporter {
 		return lastModifiedTime;
 	}
 
+	public void setFolder(View view, String folderPath) {
+		if(null != folderPath) {
+			recursiveFolderPopulation(view.getRootFolder(), folderPath);
+			folderNameLength = folderPath.length();
+		} else {
+			folder = view.getRootFolder();
+			folderNameLength = 0;
+		}
+	}
+
+	public Folder getFolder() {
+		return folder;
+	}
+
 	public void recursiveLastModifiedTime(Folder f) {
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
@@ -94,14 +110,16 @@ public class GitImporter {
 				if(modifiedTime > lastModifiedTime) {
 					lastModifiedTime = modifiedTime;
 				}
+				i.discard();
 			}
 		}
 		for(Folder subfolder : f.getSubFolders()) {
 			recursiveLastModifiedTime(subfolder);
 		}
+		f.discard();
 	}
 
-	public void generateFastImportStream(View view, long vcTime, String domain) {
+	public void generateFastImportStream(View view, long vcTime, String folderPath, String domain) {
 		try {
 			exportStream = helper.getFastImportStream();
 		} catch (NullPointerException e) {
@@ -109,13 +127,17 @@ public class GitImporter {
 			return;
 		}
 		CheckoutManager cm = new CheckoutManager(view);
-		Folder root = view.getRootFolder();
-//		recursiveFolderPopulation(root, "asdf");
+		folder = null;
+		setFolder(view, folderPath);
+		if(null == folder) {
+			return;
+		}
+
 		files.clear();
 		deletedFiles.clear();
 		deletedFiles.addAll(lastFiles);
 		sortedFileList.clear();
-		recursiveFilePopulation(root);
+		recursiveFilePopulation(folder);
 		lastFiles.clear();
 		lastFiles.addAll(files);
 		lastSortedFileList.clear();
@@ -159,7 +181,7 @@ public class GitImporter {
 			path = path.replace('\\', '/');
 			// Strip the view name from the path
 			int indexOfFirstPath = path.indexOf('/');
-			path = path.substring(indexOfFirstPath + 1);
+			path = path.substring(indexOfFirstPath + 1 + folderNameLength);
 			
 			try {
 //				int fileStatus = f.getStatus();
@@ -302,14 +324,26 @@ public class GitImporter {
 		isResume = b;
 	}
 
-//	private void recursiveFolderPopulation(Folder f, String d) {
-//		boolean first = true;
-//		for(Folder subfolder : f.getSubFolders()) {
-//			d.indexOf('/')
-//			if(subfolder.getName() == d.substring(beginIndex, endIndex))
-////			recursiveFilePopulation(subfolder);
-//		}
-//	}
+	private void recursiveFolderPopulation(Folder f, String folderPath) {
+		boolean first = true;
+		for(Folder subfolder : f.getSubFolders()) {
+			if(null != folder) {
+				subfolder.discard();
+				f.discard();
+				break;
+			}
+			String path = subfolder.getFolderHierarchy();
+			path = path.replace('\\', '/');
+			int indexOfFirstPath = path.indexOf('/');
+			path = path.substring(indexOfFirstPath + 1);
+			if(folderPath.equalsIgnoreCase(path)) {
+				folder = subfolder;
+				break;
+			}
+			recursiveFolderPopulation(subfolder, folderPath);
+		}
+		f.discard();
+	}
 
 	private void recursiveFilePopulation(Folder f) {
 		boolean first = true;
@@ -322,7 +356,7 @@ public class GitImporter {
 				path = path.replace('\\', '/');
 				//path = path.substring(1);
 				int indexOfFirstPath = path.indexOf('/');
-				path = path.substring(indexOfFirstPath + 1);
+				path = path.substring(indexOfFirstPath + 1 + folderNameLength);
 
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
@@ -344,6 +378,7 @@ public class GitImporter {
 		for(Folder subfolder : f.getSubFolders()) {
 			recursiveFilePopulation(subfolder);
 		}
+		f.discard();
 	}
 
 	public void setHeadName(String head) {
