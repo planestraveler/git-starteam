@@ -47,7 +47,6 @@ import com.starbase.starteam.View;
 import com.starbase.starteam.File;
 import com.starbase.starteam.CheckoutManager;
 import com.starbase.util.MD5;
-import com.starbase.util.OLEDate;
 
 public class GitImporter {
 	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
@@ -66,7 +65,7 @@ public class GitImporter {
 	private boolean isResume = false;
 	private RepositoryHelper helper;
 	private PropertyEnums propertyEnums = null;
-	// Use this set to find all the deleted files.
+	// Use these sets to find all the deleted files.
 	private Set<String> files = new HashSet<String>();
 	private Set<String> deletedFiles = new HashSet<String>();
 	private Set<String> lastFiles = new HashSet<String>();
@@ -77,11 +76,11 @@ public class GitImporter {
 		propertyEnums = server.getPropertyEnums();
 	}
 
-	public void init() {
+	public void openHelper() {
 		helper = RepositoryHelperFactory.getFactory().createHelper();
 	}
 	
-	public void end() {
+	public void closeHelper() {
 		helper.gc();
 		RepositoryHelperFactory.getFactory().clearCachedHelper();
 	}
@@ -121,14 +120,11 @@ public class GitImporter {
 	}
 
 	public void generateFastImportStream(View view, long vcTime, String folderPath, String domain) {
-		try {
-			exportStream = helper.getFastImportStream();
-		} catch (NullPointerException e) {
-			e.printStackTrace();
-			return;
-		}
+		// http://techpubs.borland.com/starteam/2009/en/sdk_documentation/api/com/starbase/starteam/CheckoutManager.html
+		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."
 		CheckoutManager cm = new CheckoutManager(view);
 		cm.getOptions().setEOLConversionEnabled(false);
+
 		folder = null;
 		setFolder(view, folderPath);
 		if(null == folder) {
@@ -144,17 +140,6 @@ public class GitImporter {
 		lastFiles.addAll(files);
 		lastSortedFileList.clear();
 		lastSortedFileList.putAll(sortedFileList);
-//		if(lastSortedFileList.equals(sortedFileList)) {
-//			return;
-//		}
-//		System.err.println("lastSortedFileList:");
-//		for(Map.Entry<String, File> e : lastSortedFileList.entrySet()) {
-//			System.err.println(e.getKey() + e.getValue());
-//		}
-//		System.err.println("sortedFileList:");
-//		for(Map.Entry<String, File> e : sortedFileList.entrySet()) {
-//			System.err.println(e.getKey() + e.getValue());
-//		}
 		recoverDeleteInformation(deletedFiles);
 
 		if(AddedSortedFileList.size() > 0 || deletedFiles.size() > 0) {
@@ -186,61 +171,35 @@ public class GitImporter {
 			path = path.substring(indexOfFirstPath + 1 + folderNameLength);
 			
 			try {
-//				int fileStatus = f.getStatus();
-//				System.err.println("fileStatus:" + fileStatus);
-/*
-				if(Status.UNKNOWN == fileStatus || Status.MODIFIED == fileStatus) {
-					// try harder
-					MD5 localChecksum = new MD5();
-					java.io.File aFile = new java.io.File(System.getProperty("user.dir") + java.io.File.separator + f.getParentFolderHierarchy() + f.getName());
-					localChecksum.computeFileMD5Ex(aFile);
-					fileStatus = f.getStatusByMD5(localChecksum);
-				}
-*/
-//				System.err.println(System.getProperty("user.dir") + java.io.File.separator + f.getParentFolderHierarchy() + f.getName());
-//				System.err.println(cmt);
-//				if(fileStatus != Status.CURRENT && fileStatus != Status.MODIFIED) {
-					java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
-//					aFile.deleteOnExit();
-					cm.checkoutTo(f, aFile);
-//					f.checkoutTo(aFile, 0, true, false, false);
-//					f.checkoutByVersion(aFile, 1, 0, true, false, false);
-//					f.checkoutByDate(aFile, new OLEDate(1263427200000L), 0, true, false, false);
-//					FileOutputStream s = new FileOutputStream(aFile);
-//					f.checkoutToStream(s, 0, false);
-//					if(propertyEnums.FILE_ENCODING_BINARY != f.getCharset()) {
-//						// This is a text file we need to force it's EOL to CR
-//						aFile = forceEOLToCR(aFile);
-//					}
-					
-					FileModification fm = new FileModification(new Data(aFile));
-					fm.setFileType(GitFileType.Normal);
-					fm.setPath(path);
-					if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
-						lastcommit.addFileOperation(fm);
-					} else {
-						String ref = MessageFormat.format(headFormat, head);
-						Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
-						commit.addFileOperation(fm);
-						if(null == lastcommit) {
-							if(isResume) {
-								commit.resumeOnTopOfRef();
-							}
-						} else {
-//							System.err.println("commit 1.");
-							lastcommit.writeTo(exportStream);
-							if(! isResume) {
-								isResume = true;
-							}		
-							commit.setFromCommit(lastcommit);
+				java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
+				cm.checkoutTo(f, aFile);
+				
+				FileModification fm = new FileModification(new Data(aFile));
+				fm.setFileType(GitFileType.Normal);
+				fm.setPath(path);
+				if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
+					lastcommit.addFileOperation(fm);
+				} else {
+					String ref = MessageFormat.format(headFormat, head);
+					Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
+					commit.addFileOperation(fm);
+					if(null == lastcommit) {
+						if(isResume) {
+							commit.resumeOnTopOfRef();
 						}
-						
-						/** Keep last for information **/
-						lastComment = cmt;
-						lastUID = f.getModifiedBy();
-						lastcommit = commit;
+					} else {
+						lastcommit.writeTo(exportStream);
+						if(! isResume) {
+							isResume = true;
+						}		
+						commit.setFromCommit(lastcommit);
 					}
-//				}
+					
+					/** Keep last for information **/
+					lastComment = cmt;
+					lastUID = f.getModifiedBy();
+					lastcommit = commit;
+				}
 			} catch (IOException io) {
 				io.printStackTrace();
 			} catch (InvalidPathException e1) {
@@ -259,7 +218,6 @@ public class GitImporter {
 						commit.resumeOnTopOfRef();
 					}
 				} else {
-//					System.err.println("commit 2.");
 					lastcommit.writeTo(exportStream);
 					if(! isResume) {
 						isResume = true;
@@ -284,15 +242,10 @@ public class GitImporter {
 		}
 		if(null != lastcommit) {
 			try {
-//				System.err.println("commit 3.");
 				lastcommit.writeTo(exportStream);
-//				Thread.sleep(1000);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-//            catch(InterruptedException e)   { 
-//                System.err.println( "Interrupted "); 
-//            } 
 			if(! isResume) {
 				isResume = true;
 			}		
@@ -372,9 +325,6 @@ public class GitImporter {
 //					System.err.println("Found file marked as: " + key);
 				}
 				sortedFileList.put(key, historyFile);
-//				System.err.println(path + i.getRevisionNumber());
-//				System.err.println("ItemCreatedTime:" + i.getCreatedTime().getLongValue());
-//				System.err.println("Found file marked as: " + key);
 			}
 		}
 		for(Folder subfolder : f.getSubFolders()) {

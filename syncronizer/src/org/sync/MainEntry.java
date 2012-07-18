@@ -119,10 +119,8 @@ public class MainEntry {
 				if(p.getName().equalsIgnoreCase(project)) {
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
-//							View lastView = v;
 							long hour = 3600000L; // mSec
 							long day = 24 * hour; // 86400000 mSec
-//							long firstTime = 1263427200000L; // test
 							long firstTime = v.getCreatedTime().getLongValue();
 							System.err.println("View Created Time: " + new java.util.Date(firstTime));
 							if (null == date){
@@ -140,9 +138,8 @@ public class MainEntry {
 							long lastTime = gi.getLastModifiedTime();
 							long vcTime;
 							System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
-							g.init();
+							g.openHelper();
 							for(;firstTime < lastTime; firstTime += day) {
-//								System.err.println(firstTime + ":" + lastTime);
 								if(lastTime - firstTime <= day) {
 									vc = v;
 									vcTime = lastTime;
@@ -150,10 +147,6 @@ public class MainEntry {
 									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime)));
 									vcTime = firstTime;
 								}
-//								if(vc.isEqualTo(lastView)) {
-//									lastView = vc;
-//									continue;
-//								}
 								if(null != head) {
 									g.setHeadName(head);
 								}
@@ -164,7 +157,7 @@ public class MainEntry {
 								g.generateFastImportStream(vc, vcTime, folder, domain);
 								vc.discard();
 							}
-							g.end();
+							g.closeHelper();
 							break;
 						}
 					}
@@ -183,7 +176,7 @@ public class MainEntry {
 		System.out.println("-v <view>\t\tSelect the view used for importation");
 		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
 		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
-		System.out.println("-d <domain>\t\tSelect the email domain (format like cie.com) of the user");
+		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");

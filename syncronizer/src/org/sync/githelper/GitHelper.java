@@ -203,6 +203,7 @@ public class GitHelper implements RepositoryHelper {
 		return gitFastImport.getOutputStream();
 	}
 	
+	@Override
 	public boolean isGitFastImportRunning() {
 		try {
 			if(0 == gitFastImport.exitValue()) {

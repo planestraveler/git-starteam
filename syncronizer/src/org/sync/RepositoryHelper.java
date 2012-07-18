@@ -33,8 +33,15 @@ public interface RepositoryHelper {
 	 */
 	public boolean isSpecialFile(String filename);
 	
+	/**
+	 * git gc.
+	 */
 	public void gc();
 	
+	/**
+	 * Tell if the "git fast-import" process is still running.
+	 * @return True if it is running, False otherwise.
+	 */
 	public boolean isGitFastImportRunning();
 	
 	/**
