@@ -47,6 +47,7 @@ public class MainEntry {
 		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
 		CmdLineParser.Option selectFolder = parser.addStringOption('f', "folder");
 		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
+		CmdLineParser.Option isExpandKeywords = parser.addBooleanOption('k', "keyword");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
@@ -73,6 +74,7 @@ public class MainEntry {
 		String time = (String) parser.getOptionValue(selectTime);
 		String folder = (String) parser.getOptionValue(selectFolder);
 		String domain = (String) parser.getOptionValue(selectDomain);
+		Boolean keyword = (Boolean) parser.getOptionValue(isExpandKeywords);
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
@@ -115,8 +117,13 @@ public class MainEntry {
 		int userid = starteam.logOn(user, password);
 		if(userid > 0) {
 			for(Project p : starteam.getProjects()) {
-				GitImporter g = new GitImporter(starteam, p);
 				if(p.getName().equalsIgnoreCase(project)) {
+					if(null == keyword) {
+						p.setExpandKeywords(false);
+					} else {
+						p.setExpandKeywords(true);
+					}
+					GitImporter g = new GitImporter(starteam, p);
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
 							View vc;
@@ -183,6 +190,7 @@ public class MainEntry {
 		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
 		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
+		System.out.println("[-k]\t\t\tSet to enable keyword expansion in text files");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation for branch view");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
