@@ -119,6 +119,26 @@ public class GitImporter {
 		f.discard();
 	}
 
+	public void setLastFilesLastSortedFileList(View view, String folderPath) {
+		folder = null;
+		setFolder(view, folderPath);
+		if(null == folder) {
+			return;
+		}
+
+		files.clear();
+		deletedFiles.clear();
+		deletedFiles.addAll(lastFiles);
+		sortedFileList.clear();
+		recursiveFilePopulation(folder);
+		lastFiles.clear();
+		lastFiles.addAll(files);
+		lastSortedFileList.clear();
+		lastSortedFileList.putAll(sortedFileList);
+
+		AddedSortedFileList.clear();
+	}
+
 	public void generateFastImportStream(View view, long vcTime, String folderPath, String domain) {
 		// http://techpubs.borland.com/starteam/2009/en/sdk_documentation/api/com/starbase/starteam/CheckoutManager.html
 		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."

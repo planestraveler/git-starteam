@@ -119,11 +119,18 @@ public class MainEntry {
 				if(p.getName().equalsIgnoreCase(project)) {
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
+							View vc;
 							long hour = 3600000L; // mSec
 							long day = 24 * hour; // 86400000 mSec
 							long firstTime = v.getCreatedTime().getLongValue();
 							System.err.println("View Created Time: " + new java.util.Date(firstTime));
 							if (null == date){
+								if(null != resume) {
+									// -R is for branch view
+									// 2000 mSec here is to avoid side effect in StarTeam View Configuration
+									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime + 2000)));
+									g.setLastFilesLastSortedFileList(vc, folder);
+								} 
 								date = new java.util.Date(firstTime);
 								date.setHours(23);
 								date.setMinutes(59);
@@ -131,7 +138,6 @@ public class MainEntry {
 							}
 							firstTime = date.getTime();
 							
-							View vc;
 							GitImporter gi = new GitImporter(starteam, p);
 							gi.setFolder(v, folder);
 							gi.recursiveLastModifiedTime(gi.getFolder());
@@ -178,7 +184,7 @@ public class MainEntry {
 		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
-		System.out.println("[-R]\t\t\tResume the file history importation");
+		System.out.println("[-R]\t\t\tResume the file history importation for branch view");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
 		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
