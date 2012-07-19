@@ -14,7 +14,7 @@ public class GitHelperTest {
 
 	@Before
 	public void setUp() throws Exception {
-		test = new GitHelper(null);
+		test = new GitHelper(null, false);
 	}
 
 	@After
