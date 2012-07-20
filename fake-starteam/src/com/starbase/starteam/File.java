@@ -415,7 +415,7 @@ public class File extends Item {
 		childIdList.append(getObjectID());
 		folder.itemProperties.setProperty(propertyKeys._FILES, childIdList.toString());
 		folder.update();
-		return this;
+		return super.shareTo(folder);
 	}
 	
 	@Override
