@@ -237,6 +237,6 @@ public class Folder extends Item {
 		childIdList.append(getObjectID());
 		folder.itemProperties.setProperty(propertyKeys._CHILD_FOLDER, childIdList.toString());
 		folder.update();
-		return folder;
+		return super.shareTo(folder);
 	}
 }

@@ -209,7 +209,14 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	public Item shareTo(Folder folder) {
-		throw new UnsupportedOperationException("Not implemented at this level");
+		int refCount;
+		if(itemProperties.containsKey(propertyKeys._REF_COUNT))
+			refCount = Integer.parseInt(itemProperties.getProperty(propertyKeys._REF_COUNT));
+		else
+			refCount = 0;
+		refCount += 1;
+		itemProperties.setProperty(propertyKeys._REF_COUNT, Integer.toString(refCount));
+		return this;
 	}
 
 	public void moveTo(Folder folder) {
