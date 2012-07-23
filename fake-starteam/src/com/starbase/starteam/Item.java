@@ -209,6 +209,12 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	public Item shareTo(Folder folder) {
+		if(!(folder instanceof org.ossnoize.fakestarteam.TrashFolder))
+			incrementRefCount();
+		return this;
+	}
+
+	protected void incrementRefCount() {
 		int refCount;
 		if(itemProperties.containsKey(propertyKeys._REF_COUNT))
 			refCount = Integer.parseInt(itemProperties.getProperty(propertyKeys._REF_COUNT));
@@ -216,10 +222,35 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 			refCount = 0;
 		refCount += 1;
 		itemProperties.setProperty(propertyKeys._REF_COUNT, Integer.toString(refCount));
-		return this;
+	}
+
+	protected void decrementRefCount() {
+		int refCount;
+		if(itemProperties.containsKey(propertyKeys._REF_COUNT))
+			refCount = Integer.parseInt(itemProperties.getProperty(propertyKeys._REF_COUNT));
+		else
+			refCount = 1;
+		refCount -= 1;
+		itemProperties.setProperty(propertyKeys._REF_COUNT, Integer.toString(refCount));
+	}
+	
+	public boolean isDeleted() {
+		return itemProperties.containsKey(propertyKeys._REF_COUNT) && 
+				itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0");
 	}
 
 	public void moveTo(Folder folder) {
-		throw new UnsupportedOperationException("Not implemented at this level");
+		decrementRefCount();
+	}
+	
+	public void remove() {
+		Folder trash = view.getRecycleBin().getRootFolder();
+		moveTo(trash);
+		itemProperties.setProperty(propertyKeys.DELETED_TIME, Long.toString(System.currentTimeMillis()));
+		itemProperties.setProperty(propertyKeys.DELETED_USER_ID, 
+				Integer.toString(InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID()));
+		itemProperties.setProperty(PropertyNames.ITEM_DELETED_TIME, itemProperties.getProperty(propertyKeys.DELETED_TIME));
+		itemProperties.setProperty(PropertyNames.ITEM_DELETED_USER_ID, itemProperties.getProperty(propertyKeys.DELETED_USER_ID));
+		update();
 	}
 }

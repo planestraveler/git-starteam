@@ -35,6 +35,8 @@ public class PropertyNames {
 	public final java.lang.String MODIFIED_TIME = "Modified Time";
 	public final java.lang.String CREATED_TIME = "Created Time";
 	public final java.lang.String DELETED_TIME = "Deleted Time";
+	public final static java.lang.String ITEM_DELETED_TIME = "Item Deleted Time";
+	public final static java.lang.String ITEM_DELETED_USER_ID = "Item Deleted By";
 	protected final java.lang.String _CHILD_FOLDER = ".Child Folder ID list";
 	protected final java.lang.String _FILES = ".Files ID list";
 	protected final java.lang.String _REF_COUNT = ".Reference Count";

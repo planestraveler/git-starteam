@@ -81,4 +81,8 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	public Folder getRootFolder() {
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
+	
+	public RecycleBin getRecycleBin() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
 }

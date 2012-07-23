@@ -21,6 +21,7 @@ import java.util.Date;
 
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Project;
+import com.starbase.starteam.RecycleBin;
 import com.starbase.starteam.View;
 import com.starbase.util.OLEDate;
 
@@ -37,10 +38,12 @@ public class SerializableView extends View implements Serializable {
 	private String defaultWorkingFolder;
 	private int id;
 	private int rootFolderId;
+	private int trashCanId;
 	private Date createdDate;
 	private int createdBy;
 	private transient Project project;
 	private transient Folder rootFolder;
+	private transient RecycleBin trash;
 	
 	protected SerializableView() {
 	}
@@ -62,6 +65,8 @@ public class SerializableView extends View implements Serializable {
 		}
 		rootFolder = new FakeFolder(this, 0, null);
 		rootFolderId = rootFolder.getObjectID();
+		Folder trash = new FakeFolder(this, 0, null);
+		trashCanId = trash.getObjectID();
 	}
 
 	@Override
@@ -133,5 +138,13 @@ public class SerializableView extends View implements Serializable {
 			rootFolder = new FakeFolder(this, rootFolderId, null);
 		}
 		return rootFolder;
+	}
+	
+	@Override
+	public RecycleBin getRecycleBin() {
+		if(null == trash) {
+			trash = new FakeRecycleBin(this, trashCanId);
+		}
+		return trash;
 	}
 }
