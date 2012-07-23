@@ -149,6 +149,12 @@ public class MainEntry {
 							gi.setFolder(v, folder);
 							gi.recursiveLastModifiedTime(gi.getFolder());
 							long lastTime = gi.getLastModifiedTime();
+
+							// in case View life less than 24 hours
+							if(firstTime > lastTime) {
+								firstTime = v.getCreatedTime().getLongValue();
+							}
+	
 							long vcTime;
 							System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
 							g.openHelper();
