@@ -40,6 +40,12 @@ Run with starteam80 API:
 1. Create bin/.git/ folder from a StarTeam project named Prime with Prime view:
 cd ~/proj/git-starteam/bin/
 java -cp .:/usr/share/java/jargs.jar:/opt/StarTeamCP_2005r2/lib/starteam80.jar:./syncronizer.jar:../lib/org.eclipse.jgit-0.12.1.jar org.sync.MainEntry -h 192.0.1.102 -P 49203 -p Prime -v Prime -H master -U UserName -d gmail.com -f Src/apps/vlc2android/ -c
+Or, it's a good idea to add .gitignore first, so you can do below instead:
+cd ~/proj/git-starteam/bin/
+echo "*.o" > .gitignore
+git add .gitignore
+git commit -m "Init with .gitignore"
+java -cp .:/usr/share/java/jargs.jar:/opt/StarTeamCP_2005r2/lib/starteam80.jar:./syncronizer.jar:../lib/org.eclipse.jgit-0.12.1.jar org.sync.MainEntry -h 192.0.1.102 -P 49203 -p Prime -v Prime -H master -U UserName -d gmail.com -f Src/apps/vlc2android/ -R
 
 2. Add other branch to bin/.git/ folder from other view:
 In gitk --all, create OtherView branch base on the commit which time is nearest before "StarTeam->View->Properties->Type->Parent Configuration" of the Other View.
