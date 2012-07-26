@@ -195,7 +195,11 @@ public class GitImporter {
 				cm.checkoutTo(f, aFile);
 				
 				FileModification fm = new FileModification(new Data(aFile));
-				fm.setFileType(GitFileType.Normal);
+				if(aFile.canExecute()) {
+					fm.setFileType(GitFileType.Executable);
+				} else {
+					fm.setFileType(GitFileType.Normal);
+				}
 				fm.setPath(path);
 				if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
 					lastcommit.addFileOperation(fm);
