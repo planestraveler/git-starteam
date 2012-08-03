@@ -178,7 +178,7 @@ public class GitHelper implements RepositoryHelper {
 		process.command(gitExecutable, "gc");
 		process.directory(new File(gitRepositoryDir));
 		try {
-			gitFastImport = process.start();
+			process.start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
