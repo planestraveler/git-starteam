@@ -42,127 +42,207 @@ import com.starbase.starteam.Server;
 import com.starbase.starteam.Status;
 import com.starbase.starteam.View;
 import com.starbase.starteam.File;
+import com.starbase.starteam.CheckoutManager;
 import com.starbase.util.MD5;
 
 public class GitImporter {
 	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
 	private Server server;
 	private Project project;
-	private View view;
+	Folder folder;
+	int folderNameLength;
+	private long lastModifiedTime = 0;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
+	private Map<String, File> AddedSortedFileList = new TreeMap<String, File>();
+	private Map<String, File> lastSortedFileList = new TreeMap<String, File>();
+	Commit lastcommit;
+	OutputStream exportStream;
 	private final String headFormat = "refs/heads/{0}";
 	private String alternateHead = null;
 	private boolean isResume = false;
 	private RepositoryHelper helper;
 	private PropertyEnums propertyEnums = null;
-	// Use this set to find all the deleted files.
-	private Set<String> deletedFiles; 
+	// Use these sets to find all the deleted files.
+	private Set<String> files = new HashSet<String>();
+	private Set<String> deletedFiles = new HashSet<String>();
+	private Set<String> lastFiles = new HashSet<String>();
 	
-	public GitImporter(Server s, Project p, View v) {
+	public GitImporter(Server s, Project p) {
 		server = s;
 		project = p;
-		view = v;
-		helper = RepositoryHelperFactory.getFactory().createHelper();
 		propertyEnums = server.getPropertyEnums();
-		if(null != helper) {
-			deletedFiles = helper.getListOfTrackedFile();
+	}
+
+	public void openHelper() {
+		helper = RepositoryHelperFactory.getFactory().createHelper();
+	}
+	
+	public void closeHelper() {
+		helper.gc();
+		RepositoryHelperFactory.getFactory().clearCachedHelper();
+	}
+	
+	public long getLastModifiedTime() {
+		return lastModifiedTime;
+	}
+
+	public void setFolder(View view, String folderPath) {
+		if(null != folderPath) {
+			recursiveFolderPopulation(view.getRootFolder(), folderPath);
+			folderNameLength = folderPath.length();
 		} else {
-			deletedFiles = new HashSet<String>();
+			folder = view.getRootFolder();
+			folderNameLength = 0;
 		}
 	}
 
-	public void generateFastImportStream() {
-		OutputStream exportStream;
-		try {
-			exportStream = helper.getFastImportStream();
-		} catch (NullPointerException e) {
-			e.printStackTrace();
+	public Folder getFolder() {
+		return folder;
+	}
+
+	public void recursiveLastModifiedTime(Folder f) {
+		for(Item i : f.getItems(f.getTypeNames().FILE)) {
+			if(i instanceof File) {
+				long modifiedTime = i.getModifiedTime().getLongValue();
+				if(modifiedTime > lastModifiedTime) {
+					lastModifiedTime = modifiedTime;
+				}
+				i.discard();
+			}
+		}
+		for(Folder subfolder : f.getSubFolders()) {
+			recursiveLastModifiedTime(subfolder);
+		}
+		f.discard();
+	}
+
+	public void setLastFilesLastSortedFileList(View view, String folderPath) {
+		folder = null;
+		setFolder(view, folderPath);
+		if(null == folder) {
 			return;
 		}
 
-		Folder root = view.getRootFolder();
-		recursiveFilePopulation(root);
+		files.clear();
+		deletedFiles.clear();
+		deletedFiles.addAll(lastFiles);
+		sortedFileList.clear();
+		recursiveFilePopulation(folder);
+		lastFiles.clear();
+		lastFiles.addAll(files);
+		lastSortedFileList.clear();
+		lastSortedFileList.putAll(sortedFileList);
+
+		AddedSortedFileList.clear();
+	}
+
+	public void generateFastImportStream(View view, long vcTime, String folderPath, String domain) {
+		// http://techpubs.borland.com/starteam/2009/en/sdk_documentation/api/com/starbase/starteam/CheckoutManager.html
+		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."
+		CheckoutManager cm = new CheckoutManager(view);
+		cm.getOptions().setEOLConversionEnabled(false);
+
+		folder = null;
+		setFolder(view, folderPath);
+		if(null == folder) {
+			return;
+		}
+
+		files.clear();
+		deletedFiles.clear();
+		deletedFiles.addAll(lastFiles);
+		sortedFileList.clear();
+		recursiveFilePopulation(folder);
+		lastFiles.clear();
+		lastFiles.addAll(files);
+		lastSortedFileList.clear();
+		lastSortedFileList.putAll(sortedFileList);
 		recoverDeleteInformation(deletedFiles);
 
+		if(AddedSortedFileList.size() > 0 || deletedFiles.size() > 0) {
+			try {
+				exportStream = helper.getFastImportStream();
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+		
 		String head = view.getName();
 		if(null != alternateHead) {
 			head = alternateHead;
 		}
 		String lastComment = "";
 		int lastUID = -1;
-		Commit lastcommit = null;
-		for(Map.Entry<String, File> e : sortedFileList.entrySet()) {
+		lastcommit = null;
+		for(Map.Entry<String, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
 			String cmt = f.getComment();
 			String userName = server.getUser(f.getModifiedBy()).getName();
 			String userEmail = userName.replaceAll(" ", ".");
-			userEmail += "@" + "cie.com";
+			userEmail += "@" + domain;
 			String path = f.getParentFolderHierarchy() + f.getName();
 			path = path.replace('\\', '/');
 			// Strip the view name from the path
 			int indexOfFirstPath = path.indexOf('/');
-			path = path.substring(indexOfFirstPath + 1);
+			path = path.substring(indexOfFirstPath + 1 + folderNameLength);
 			
 			try {
-				int fileStatus = f.getStatus();
-				if(Status.UNKNOWN == fileStatus || Status.MODIFIED == fileStatus) {
-					// try harder
-					MD5 localChecksum = new MD5();
-					java.io.File aFile = new java.io.File(System.getProperty("user.dir") + java.io.File.separator + f.getParentFolderHierarchy() + f.getName());
-					localChecksum.computeFileMD5Ex(aFile);
-					fileStatus = f.getStatusByMD5(localChecksum);
+				java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
+				cm.checkoutTo(f, aFile);
+				
+				FileModification fm = new FileModification(new Data(aFile));
+				if(aFile.canExecute()) {
+					fm.setFileType(GitFileType.Executable);
+				} else {
+					fm.setFileType(GitFileType.Normal);
 				}
-				if(fileStatus != Status.CURRENT && fileStatus != Status.MODIFIED) {
-					java.io.File aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
-					aFile.deleteOnExit();
-					f.checkoutTo(aFile, 0, true, false, false);
-					if(propertyEnums.FILE_ENCODING_BINARY != f.getCharset()) {
-						// This is a text file we need to force it's EOL to CR
-						aFile = forceEOLToCR(aFile);
+				fm.setPath(path);
+				if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
+					lastcommit.addFileOperation(fm);
+				} else {
+					String ref = MessageFormat.format(headFormat, head);
+					Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
+					commit.addFileOperation(fm);
+					if(null == lastcommit) {
+						if(isResume) {
+							commit.resumeOnTopOfRef();
+						}
+					} else {
+						lastcommit.writeTo(exportStream);
+						if(! isResume) {
+							isResume = true;
+						}		
+						commit.setFromCommit(lastcommit);
 					}
 					
-					FileModification fm = new FileModification(new Data(aFile));
-					fm.setFileType(GitFileType.Normal);
-					fm.setPath(path);
-					if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
-						lastcommit.addFileOperation(fm);
-					} else {
-						String ref = MessageFormat.format(headFormat, head);
-						Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
-						commit.addFileOperation(fm);
-						if(null == lastcommit) {
-							if(isResume) {
-								commit.resumeOnTopOfRef();
-							}
-						} else {
-							lastcommit.writeTo(exportStream);
-							commit.setFromCommit(lastcommit);
-						}
-						
-						/** Keep last for information **/
-						lastComment = cmt;
-						lastUID = f.getModifiedBy();
-						lastcommit = commit;
-					}
+					/** Keep last for information **/
+					lastComment = cmt;
+					lastUID = f.getModifiedBy();
+					lastcommit = commit;
 				}
 			} catch (IOException io) {
 				io.printStackTrace();
 			} catch (InvalidPathException e1) {
 				e1.printStackTrace();
 			}
+			f.discard();
 		}
 		// TODO: Simple hack to make deletion of disapered files. Since starteam does not carry some kind of
 		// TODO: delete event. (as known from now)
 		if(deletedFiles.size() > 0) {
 			try {
 				String ref = MessageFormat.format(headFormat, head);
-				Commit commit = new Commit("File Janitor", "janitor@cie.com", "Cleaning files move along", ref, new java.util.Date(System.currentTimeMillis()));
+				Commit commit = new Commit("File Janitor", "janitor@" + domain, "Cleaning files move along", ref, new java.util.Date(vcTime));
 				if(null == lastcommit) {
 					if(isResume) {
 						commit.resumeOnTopOfRef();
 					}
 				} else {
 					lastcommit.writeTo(exportStream);
+					if(! isResume) {
+						isResume = true;
+					}		
 					commit.setFromCommit(lastcommit);
 				}
 				for(String path : deletedFiles) {
@@ -184,18 +264,30 @@ public class GitImporter {
 		if(null != lastcommit) {
 			try {
 				lastcommit.writeTo(exportStream);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			if(! isResume) {
+				isResume = true;
+			}		
+		} else {
+			if(AddedSortedFileList.size() > 0) {
+				System.err.println("There was no new revision in the starteam view.");
+				System.err.println("All the files in the repository are at theire lastest version");
+			} else {
+//				System.err.println("The starteam view specified was empty.");
+			}
+		}
+		if(AddedSortedFileList.size() > 0 || deletedFiles.size() > 0) {
+			try {
 				exportStream.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		} else {
-			if(sortedFileList.size() > 0) {
-				System.err.println("There was no new revision in the starteam view.");
-				System.err.println("All the files in the repository are at theire lastest version");
-			} else {
-				System.err.println("The starteam view specified was empty.");
-			}
+			System.gc();
+			while(helper.isGitFastImportRunning());
 		}
+		AddedSortedFileList.clear();
 	}
 	
 	private void recoverDeleteInformation(Set<String> listOfFiles) {
@@ -206,6 +298,27 @@ public class GitImporter {
 
 	public void setResume(boolean b) {
 		isResume = b;
+	}
+
+	private void recursiveFolderPopulation(Folder f, String folderPath) {
+		boolean first = true;
+		for(Folder subfolder : f.getSubFolders()) {
+			if(null != folder) {
+				subfolder.discard();
+				f.discard();
+				break;
+			}
+			String path = subfolder.getFolderHierarchy();
+			path = path.replace('\\', '/');
+			int indexOfFirstPath = path.indexOf('/');
+			path = path.substring(indexOfFirstPath + 1);
+			if(folderPath.equalsIgnoreCase(path)) {
+				folder = subfolder;
+				break;
+			}
+			recursiveFolderPopulation(subfolder, folderPath);
+		}
+		f.discard();
 	}
 
 	private void recursiveFilePopulation(Folder f) {
@@ -219,20 +332,26 @@ public class GitImporter {
 				path = path.replace('\\', '/');
 				//path = path.substring(1);
 				int indexOfFirstPath = path.indexOf('/');
-				path = path.substring(indexOfFirstPath + 1);
+				path = path.substring(indexOfFirstPath + 1 + folderNameLength);
 
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
 				}
+				files.add(path);
 				String comment = i.getComment();
+				i.discard();
 				String key = MessageFormat.format(revisionKeyFormat, modifiedTime, userid, comment, path);
+				if(! lastSortedFileList.containsKey(key)) {
+					AddedSortedFileList.put(key, historyFile);
+//					System.err.println("Found file marked as: " + key);
+				}
 				sortedFileList.put(key, historyFile);
-				System.err.println("Found file marked as: " + key);
 			}
 		}
 		for(Folder subfolder : f.getSubFolders()) {
 			recursiveFilePopulation(subfolder);
 		}
+		f.discard();
 	}
 
 	public void setHeadName(String head) {

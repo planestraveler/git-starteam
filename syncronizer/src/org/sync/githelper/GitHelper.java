@@ -173,6 +173,18 @@ public class GitHelper implements RepositoryHelper {
 	}
 	
 	@Override
+	public void gc() {
+		ProcessBuilder process = new ProcessBuilder();
+		process.command(gitExecutable, "gc");
+		process.directory(new File(gitRepositoryDir));
+		try {
+			process.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
 	public OutputStream getFastImportStream() {
 		if(null == gitFastImport) {
 			ProcessBuilder process = new ProcessBuilder();
@@ -189,6 +201,20 @@ public class GitHelper implements RepositoryHelper {
 			}
 		}
 		return gitFastImport.getOutputStream();
+	}
+	
+	@Override
+	public boolean isGitFastImportRunning() {
+		try {
+			if(0 == gitFastImport.exitValue()) {
+				gitFastImport = null;
+				return false;
+			} else {
+				return true;
+			}
+		} catch (IllegalThreadStateException e) {
+		}
+		return true;
 	}
 	
 	private class GitLsFilesReader implements Runnable {
