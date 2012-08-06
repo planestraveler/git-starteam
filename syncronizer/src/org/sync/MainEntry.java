@@ -20,10 +20,14 @@ import java.io.BufferedReader;
 import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import com.starbase.starteam.Folder;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
@@ -40,6 +44,10 @@ public class MainEntry {
 		CmdLineParser.Option selectPort = parser.addIntegerOption('P', "port");
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
+		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
+		CmdLineParser.Option selectFolder = parser.addStringOption('f', "folder");
+		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
+		CmdLineParser.Option isExpandKeywords = parser.addBooleanOption('k', "keyword");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
@@ -63,6 +71,10 @@ public class MainEntry {
 		Integer port = (Integer) parser.getOptionValue(selectPort);
 		String project = (String) parser.getOptionValue(selectProject);
 		String view = (String) parser.getOptionValue(selectView);
+		String time = (String) parser.getOptionValue(selectTime);
+		String folder = (String) parser.getOptionValue(selectFolder);
+		String domain = (String) parser.getOptionValue(selectDomain);
+		Boolean keyword = (Boolean) parser.getOptionValue(isExpandKeywords);
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
@@ -75,6 +87,21 @@ public class MainEntry {
 			System.exit(3);
 		}
 		
+		Date date = null;
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if(null != time) {
+			try {
+				date = dateFormat.parse(time);
+			} catch (Exception ex) {
+				System.out.println(ex.getMessage());
+				System.exit(3);
+			}
+		}
+
+		if(null == domain) {
+			domain = "cie.com";
+		}
+
 		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
 		RepositoryHelperFactory.getFactory().setCreateRepo((null != createNewRepo));
 
@@ -91,16 +118,65 @@ public class MainEntry {
 		if(userid > 0) {
 			for(Project p : starteam.getProjects()) {
 				if(p.getName().equalsIgnoreCase(project)) {
+					if(null == keyword) {
+						p.setExpandKeywords(false);
+					} else {
+						p.setExpandKeywords(true);
+					}
+					GitImporter g = new GitImporter(starteam, p);
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
-							GitImporter g = new GitImporter(starteam, p, v);
-							if(null != head) {
-								g.setHeadName(head);
+							View vc;
+							long hour = 3600000L; // mSec
+							long day = 24 * hour; // 86400000 mSec
+							long firstTime = v.getCreatedTime().getLongValue();
+							System.err.println("View Created Time: " + new java.util.Date(firstTime));
+							if (null == date){
+								if(null != resume) {
+									// -R is for branch view
+									// 2000 mSec here is to avoid side effect in StarTeam View Configuration
+									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime + 2000)));
+									g.setLastFilesLastSortedFileList(vc, folder);
+								} 
+								date = new java.util.Date(firstTime);
+								date.setHours(23);
+								date.setMinutes(59);
+								date.setSeconds(59);
 							}
-							if(null != resume) {
-								g.setResume(resume);
+							firstTime = date.getTime();
+							
+							GitImporter gi = new GitImporter(starteam, p);
+							gi.setFolder(v, folder);
+							gi.recursiveLastModifiedTime(gi.getFolder());
+							long lastTime = gi.getLastModifiedTime();
+
+							// in case View life less than 24 hours
+							if(firstTime > lastTime) {
+								firstTime = v.getCreatedTime().getLongValue();
 							}
-							g.generateFastImportStream();
+	
+							long vcTime;
+							System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
+							g.openHelper();
+							for(;firstTime < lastTime; firstTime += day) {
+								if(lastTime - firstTime <= day) {
+									vc = v;
+									vcTime = lastTime;
+								} else {
+									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime)));
+									vcTime = firstTime;
+								}
+								if(null != head) {
+									g.setHeadName(head);
+								}
+								if(null != resume) {
+									g.setResume(resume);
+								}
+								System.err.println("View Configuration Time: " + new java.util.Date(vcTime));
+								g.generateFastImportStream(vc, vcTime, folder, domain);
+								vc.discard();
+							}
+							g.closeHelper();
 							break;
 						}
 					}
@@ -117,8 +193,12 @@ public class MainEntry {
 		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
+		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
+		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
+		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
+		System.out.println("[-k]\t\t\tSet to enable keyword expansion in text files");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
-		System.out.println("[-R]\t\t\tResume the file history importation");
+		System.out.println("[-R]\t\t\tResume the file history importation for branch view");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
 		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");

@@ -34,6 +34,17 @@ public interface RepositoryHelper {
 	public boolean isSpecialFile(String filename);
 	
 	/**
+	 * git gc.
+	 */
+	public void gc();
+	
+	/**
+	 * Tell if the "git fast-import" process is still running.
+	 * @return True if it is running, False otherwise.
+	 */
+	public boolean isGitFastImportRunning();
+	
+	/**
 	 * Create a fast-import process and dump all the repository information in the 
 	 * input stream of the process.
 	 * @return The OutputStream representing the InputStream of the process.
