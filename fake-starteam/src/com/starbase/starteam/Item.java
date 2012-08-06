@@ -253,4 +253,11 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		itemProperties.setProperty(PropertyNames.ITEM_DELETED_USER_ID, itemProperties.getProperty(propertyKeys.DELETED_USER_ID));
 		update();
 	}
+	
+	public void discard() {
+		loadProperties();
+	}
+	
+	protected void loadProperties() {
+	}
 }

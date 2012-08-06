@@ -53,7 +53,7 @@ public class Folder extends Item {
 			String folder = storage.getCanonicalPath() + File.separator + getObjectID();
 			holdingPlace = new File(folder);
 			validateHoldingPlace();
-			loadFolderProperties();
+			loadProperties();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -191,7 +191,8 @@ public class Folder extends Item {
 		return getName();
 	}
 	
-	protected void loadFolderProperties() {
+	@Override
+	protected void loadProperties() {
 		FileInputStream fin = null;
 		try {
 			int lastRevision = findLastRevision(Integer.parseInt(holdingPlace.getName()));

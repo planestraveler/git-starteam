@@ -56,7 +56,7 @@ public class File extends Item {
 		} catch (IOException e) {
 			throw new InvalidOperationException("Cannot initialize the " + id + " in " + parent);
 		}
-		loadFileProperties();
+		loadProperties();
 	}
 
 	protected File(int id, int revision, View view) {
@@ -67,14 +67,14 @@ public class File extends Item {
 		} catch (IOException e) {
 			throw new InvalidOperationException("Cannot initialize the " + id + " in " + parent + ": revision " + revision);
 		}
-		loadFileProperties();
+		loadProperties();
 	}
 
 	public void add(java.io.File file, String name, String desc, String reason, int lockStatus, boolean updateStatus) throws java.io.IOException {
 		if(isNew()) {
 			registerNewID();
 			holdingPlace = createHoldingPlace(0);
-			loadFileProperties();
+			loadProperties();
 			setRevisionNumber(0);
 			setComment(reason);
 			setDescription(desc);
@@ -104,7 +104,7 @@ public class File extends Item {
 	public void checkinFrom(java.io.File file, String reason, int lockStatus, boolean forceCheckin, boolean updateStatus) throws java.io.IOException {
 		if(!isNew()) {
 			int newRevision = getRevisionNumber() + 1;
-			loadFileProperties();
+			loadProperties();
 			holdingPlace = createHoldingPlace(newRevision);
 			if(holdingPlace.exists()) {
 				if(forceCheckin) {
@@ -128,7 +128,7 @@ public class File extends Item {
 	public boolean checkoutByVersion(java.io.File checkoutTo, int viewVersion, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
 		holdingPlace = createHoldingPlace(viewVersion);
 		if(holdingPlace.exists()) {
-			loadFileProperties();
+			loadProperties();
 			if(null == checkoutTo) {
 				//TODO: build the default checkout directory location
 				throw new InvalidOperationException("Does not yet support null checkoutTo parameter");
@@ -285,7 +285,8 @@ public class File extends Item {
 		}
 	}
 
-	private void loadFileProperties() {
+	@Override
+	protected void loadProperties() {
 		if(null == itemProperties) {
 			itemProperties = new Properties();
 		}

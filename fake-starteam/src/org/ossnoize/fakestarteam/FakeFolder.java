@@ -51,7 +51,7 @@ public class FakeFolder extends Folder {
 			try {
 				holdingPlace = new File(serverArchive.getCanonicalPath() + File.separator + objectID);
 				validateHoldingPlace();
-				loadFolderProperties();
+				loadProperties();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
