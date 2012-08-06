@@ -221,6 +221,7 @@ public class GitImporter {
 					lastUID = f.getModifiedBy();
 					lastcommit = commit;
 				}
+				aFile.delete();
 			} catch (IOException io) {
 				io.printStackTrace();
 			} catch (InvalidPathException e1) {

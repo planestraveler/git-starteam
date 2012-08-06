@@ -67,7 +67,6 @@ public class Data implements FastImportObject {
 				out.write(buffer, 0, read);
 				read = fin.read(buffer);
 			}
-			file.delete();
 		}
 		out.write('\n');
 	}
