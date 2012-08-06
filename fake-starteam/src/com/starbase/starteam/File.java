@@ -430,6 +430,8 @@ public class File extends Item {
 			origin.update();
 		}
 		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(folder.getObjectID()));
+		
 		shareTo(folder);
+		super.moveTo(folder);
 	}
 }

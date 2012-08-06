@@ -239,4 +239,10 @@ public class Folder extends Item {
 		folder.update();
 		return super.shareTo(folder);
 	}
+	
+	@Override
+	public void moveTo(Folder folder) {
+		
+		super.moveTo(folder);
+	}
 }
