@@ -22,6 +22,7 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 
 	private Server server;
 	private boolean isNew;
+	private boolean expandKeywords;
 
 	protected Project() {
 	}
@@ -61,5 +62,13 @@ public class Project extends SimpleTypedResource implements ISecurableObject, IS
 	
 	public View getDefaultView() {
 		return null;
+	}
+
+	public void setExpandKeywords(boolean b) {
+		expandKeywords = b;
+	}
+	
+	public boolean isExpandKeywords() {
+		return expandKeywords;
 	}
 }
