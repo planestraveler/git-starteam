@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
@@ -175,6 +176,7 @@ public class GitImporter {
 		String lastComment = "";
 		int lastUID = -1;
 		lastcommit = null;
+		Vector<java.io.File> lastFiles = new Vector<java.io.File>(10);
 		for(Map.Entry<String, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
 			String cmt = f.getComment();
@@ -200,6 +202,7 @@ public class GitImporter {
 				fm.setPath(path);
 				if(null != lastcommit && lastComment.equalsIgnoreCase(cmt) && lastUID == f.getModifiedBy()) {
 					lastcommit.addFileOperation(fm);
+					lastFiles.add(aFile);
 				} else {
 					String ref = MessageFormat.format(headFormat, head);
 					Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(f.getModifiedTime().getLongValue()));
@@ -212,16 +215,20 @@ public class GitImporter {
 						lastcommit.writeTo(exportStream);
 						if(! isResume) {
 							isResume = true;
-						}		
+						}
+						for(java.io.File old : lastFiles) {
+							old.delete();
+						}
+						lastFiles.clear();
 						commit.setFromCommit(lastcommit);
 					}
+					lastFiles.add(aFile);
 					
 					/** Keep last for information **/
 					lastComment = cmt;
 					lastUID = f.getModifiedBy();
 					lastcommit = commit;
 				}
-				aFile.delete();
 			} catch (IOException io) {
 				io.printStackTrace();
 			} catch (InvalidPathException e1) {
