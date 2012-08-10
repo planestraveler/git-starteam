@@ -246,4 +246,11 @@ public class Folder extends Item {
 		
 		super.moveTo(folder);
 	}
+	
+	public java.lang.String getFolderHierarchy() {
+		if(null != parent) {
+			return parent.getFolderHierarchy() + getName() + File.separator;
+		}
+		return getName() + File.separator;
+	}
 }
