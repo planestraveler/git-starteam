@@ -95,6 +95,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		return max;
 	}
 	
+	protected void setView(View view) {
+		this.view = view;
+	}
+	
 	public int getModifiedBy() {
 		try {
 			return Integer.parseInt(itemProperties.getProperty(propertyKeys.MODIFIED_USER_ID));

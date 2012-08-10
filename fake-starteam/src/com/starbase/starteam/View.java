@@ -21,36 +21,58 @@ import com.starbase.util.OLEDate;
 public class View extends SimpleTypedResource implements ISecurableContainer, ISecurableObject {
 	
 	private Folder rootFolder;
+	private ViewConfiguration configuration;
+	private View otherView;
 	
 	protected View() {
+		this.configuration = ViewConfiguration.createTip();
+		this.otherView = null;
 	}
 	
 	public View(View parent, java.lang.String name, java.lang.String description, java.lang.String defaultWorkingFolder) {
-		
+		this.configuration = ViewConfiguration.createTip();
+		this.otherView = null;
+	}
+	
+	public View(View view, ViewConfiguration configuration) {
+		this.configuration = configuration;
+		this.otherView = view;
 	}
 
 	@Override
 	public int getID() {
+		if(null != otherView)
+			return otherView.getID();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public java.lang.String getName() {
+		if(null != otherView)
+			return otherView.getName();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public void update() {
+		if(null != otherView)
+			otherView.update();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public Project getProject() {
+		if(null != otherView)
+			return otherView.getProject();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public View getParentView() {
+		if(null != otherView)
+			return otherView.getParentView();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public String getDescription() {
+		if(null != otherView)
+			return otherView.getDescription();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
@@ -59,6 +81,8 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public String getDefaultPath() {
+		if(null != otherView)
+			return otherView.getDefaultPath();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
@@ -67,6 +91,8 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public void refresh() {
+		if(null != otherView)
+			otherView.refresh();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
@@ -75,14 +101,36 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public OLEDate getCreatedTime() {
+		if(null != otherView)
+			return otherView.getCreatedTime();
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public int getCreatedBy() {
+		if(null != otherView)
+			return otherView.getCreatedBy();
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public Folder getRootFolder() {
+		if(null != otherView) {
+			Folder root = otherView.getRootFolder();
+			root.setView(this);
+			return root;
+		}
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public RecycleBin getRecycleBin() {
+		if(null != otherView)
+			return otherView.getRecycleBin();
 		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	public ViewConfiguration getConfiguration() {
+		return configuration;
+	}
+	
+	public void discard() {
 	}
 }

@@ -131,7 +131,12 @@ public class SerializableView extends View implements Serializable {
 		}
 		return new OLEDate(createdDate);
 	}
-	
+
+	@Override
+	public int getCreatedBy() {
+		return createdBy;
+	}
+
 	@Override
 	public Folder getRootFolder() {
 		if(null == rootFolder) {
