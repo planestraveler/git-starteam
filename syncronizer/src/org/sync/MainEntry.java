@@ -16,17 +16,14 @@
 ******************************************************************************/
 package org.sync;
 
-import java.io.BufferedReader;
 import java.io.Console;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.starbase.starteam.Folder;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
+import com.starbase.starteam.ViewConfiguration;
 import com.starbase.util.OLEDate;
 
 import jargs.gnu.CmdLineParser;
@@ -135,7 +132,7 @@ public class MainEntry {
 								if(null != resume) {
 									// -R is for branch view
 									// 2000 mSec here is to avoid side effect in StarTeam View Configuration
-									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime + 2000)));
+									vc = new View(v, ViewConfiguration.createFromTime(new OLEDate(firstTime + 2000)));
 									g.setLastFilesLastSortedFileList(vc, folder);
 								} 
 								date = new java.util.Date(firstTime);
@@ -163,7 +160,7 @@ public class MainEntry {
 									vc = v;
 									vcTime = lastTime;
 								} else {
-									vc = new View(v, v.getConfiguration().createFromTime(new OLEDate(firstTime)));
+									vc = new View(v, ViewConfiguration.createFromTime(new OLEDate(firstTime)));
 									vcTime = firstTime;
 								}
 								if(null != head) {
