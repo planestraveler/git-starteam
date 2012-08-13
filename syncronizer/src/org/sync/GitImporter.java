@@ -16,8 +16,6 @@
 ******************************************************************************/
 package org.sync;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
@@ -40,11 +38,9 @@ import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.PropertyEnums;
 import com.starbase.starteam.Server;
-import com.starbase.starteam.Status;
 import com.starbase.starteam.View;
 import com.starbase.starteam.File;
 import com.starbase.starteam.CheckoutManager;
-import com.starbase.util.MD5;
 
 public class GitImporter {
 	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
@@ -364,30 +360,5 @@ public class GitImporter {
 
 	public void setHeadName(String head) {
 		alternateHead = head;
-	}
-	
-	private java.io.File forceEOLToCR(java.io.File iFile) throws IOException {
-		java.io.File ret = java.io.File.createTempFile("ForceEOL", ".tmp");
-		ret.deleteOnExit();
-		
-		FileInputStream fin = new FileInputStream(iFile);
-		FileOutputStream writer = new FileOutputStream(ret);
-		byte bytio[] = new byte[2048];
-		int read = fin.read(bytio);
-		while(read >= 0) {
-			for(int i=0; i < read; ++i) {
-				if(bytio[i] != 0x0D) {
-					writer.write(bytio[i]);
-				}
-			}
-			read = fin.read(bytio);
-		}
-		writer.close();
-		fin.close();
-		
-		// Save some space at least
-		iFile.delete();
-		
-		return ret;
 	}
 }
