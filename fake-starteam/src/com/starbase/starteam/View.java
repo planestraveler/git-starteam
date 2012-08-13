@@ -20,7 +20,6 @@ import com.starbase.util.OLEDate;
 
 public class View extends SimpleTypedResource implements ISecurableContainer, ISecurableObject {
 	
-	private Folder rootFolder;
 	private ViewConfiguration configuration;
 	private View otherView;
 	
