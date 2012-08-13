@@ -376,14 +376,14 @@ public class File extends Item {
 	
 	public int getStatus(java.io.File file) throws IOException {
 		OLEDate time = getModifiedTime();
-		long size = getSizeEx();
-		long lastModificed = file.lastModified();
 		if(!file.isFile()) {
 			return Status.MISSING;
 		}
+		long lastModificed = file.lastModified();
 		if(lastModificed > time.getLongValue()) {
 			return Status.MODIFIED;
 		}
+		long size = getSizeEx();
 		if(lastModificed == time.getLongValue()) {
 			if(file.length() == size) {
 				return Status.CURRENT;
