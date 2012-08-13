@@ -18,6 +18,7 @@ package org.ossnoize.fakestarteam.cui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Vector;
 
 import org.ossnoize.fakestarteam.ProjectProvider;
 import org.ossnoize.fakestarteam.SerializableUser;
@@ -58,6 +59,8 @@ public class Creator {
 		CmdLineParser.Option addFileInPath = parser.addStringOption("path");
 		CmdLineParser.Option comment = parser.addStringOption('m', "comment");
 		CmdLineParser.Option hierarchy = parser.addBooleanOption('H', "hierarchy");
+		CmdLineParser.Option deleteFile = parser.addStringOption('d', "delete-file");
+		CmdLineParser.Option deleteFolder = parser.addStringOption('D', "delete-folder");
 		
 		try {
 			parser.parse(args);
@@ -191,6 +194,39 @@ public class Creator {
 							}
 						}
 						if(found) {
+							Vector filesToDelete = parser.getOptionValues(deleteFile);
+							for(Object o : filesToDelete) {
+								if(o instanceof String) {
+									String filename = (String)o;
+									for(Item i : stFolder.getItems(stFolder.getTypeNames().FILE)) {
+										if(i instanceof com.starbase.starteam.File) {
+											com.starbase.starteam.File f = (com.starbase.starteam.File) i;
+											if(f.getName().equals(filename)) {
+												f.remove();
+												System.out.println("Removed file " + filename);
+											}
+										}
+									}
+								} else {
+									System.out.println("Object in delete file vector is not of type String but of type: " + o.getClass().getName());
+								}
+							}
+							
+							Vector foldersToDelete = parser.getOptionValues(deleteFolder);
+							for(Object o : foldersToDelete) {
+								if(o instanceof String) {
+									String foldername = (String)o;
+									for(Folder f : stFolder.getSubFolders()) {
+										if(f.getName().equals(foldername)) {
+											f.remove();
+											System.out.println("Removed folder " + foldername);
+										}
+									}
+								} else {
+									System.out.println("Object in delete folder vector is not of type String but of type " + o.getClass().getName());
+								}
+							}
+							
 							String commentToModification = (String) parser.getOptionValue(comment);
 							if(null == commentToModification) {
 								commentToModification = "";
