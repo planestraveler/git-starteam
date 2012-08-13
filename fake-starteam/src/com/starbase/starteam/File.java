@@ -94,6 +94,25 @@ public class File extends Item {
 	private java.io.File createHoldingPlace(int revision) throws IOException {
 		return createHoldingPlace(getObjectID(), revision);
 	}
+	
+	private java.io.File createHoldingPlace(OLEDate date) throws IOException {
+		java.io.File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
+		java.io.File folder = new java.io.File(storage.getCanonicalPath() + java.io.File.separator + getObjectID());
+		int lowestVersion = Integer.MAX_VALUE;
+		for(java.io.File version : folder.listFiles()) {
+			int nbVersion = Integer.parseInt(version.getName());
+			Properties props = new Properties();
+			java.io.File versionProperties = new java.io.File(version.getCanonicalPath() + java.io.File.separator + FILE_PROPERTIES);
+			FileInputStream versionStream = new FileInputStream(versionProperties);
+			props.load(versionStream);
+			versionStream.close();
+			long time = Long.parseLong(props.getProperty(propertyKeys.MODIFIED_TIME));
+			if(time <= date.getLongValue() && nbVersion < lowestVersion) {
+				lowestVersion = nbVersion;
+			}
+		}
+		return createHoldingPlace(lowestVersion);
+	}
 
 	private java.io.File createHoldingPlace(int id, int revision) throws IOException {
 		java.io.File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
@@ -140,6 +159,21 @@ public class File extends Item {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	public void checkoutByDate(java.io.File checkoutTo, OLEDate date, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
+		holdingPlace = createHoldingPlace(date);
+		if(holdingPlace.exists()) {
+			if(null == checkoutTo) {
+				throw new InvalidOperationException("Does not yet support null checkoutTo parameter");
+			}
+			copyFromGz(holdingPlace, checkoutTo);
+			if(!timeStampNow) {
+				checkoutTo.setLastModified(getModifiedTime().getLongValue());
+			}
+		} else {
+			throw new InvalidOperationException("The file does not exist in the repository");
 		}
 	}
 	
