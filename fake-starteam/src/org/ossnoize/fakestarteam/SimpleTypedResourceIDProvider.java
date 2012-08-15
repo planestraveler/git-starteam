@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -61,7 +62,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 	}
 	
 	private void postInit() {
-		existingResource = new HashMap<Integer, SimpleTypedResource>();
+		existingResource = new WeakHashMap<Integer, SimpleTypedResource>();
 	}
 	
 	private static boolean readFromFile() {
@@ -139,6 +140,13 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 			return existingResource.get(id);
 		}
 		return null;
+	}
+
+	public void clearExisting(int objectID) {
+		if(existingResource.containsKey(objectID)) {
+			existingResource.remove(objectID);
+		}
+		
 	}
 	
 }
