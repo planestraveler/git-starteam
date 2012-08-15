@@ -51,7 +51,7 @@ public class File extends Item {
 		super();
 		this.view = view;
 		try {
-			holdingPlace = createHoldingPlace(id, findLastRevision(id));
+			holdingPlace = createHoldingPlace(id, findRightRevision(id));
 		} catch (IOException e) {
 			throw new InvalidOperationException("Cannot initialize the " + id + " in " + parent);
 		}
@@ -120,7 +120,7 @@ public class File extends Item {
 	}
 
 	public void checkinFrom(java.io.File file, String reason, int lockStatus, boolean forceCheckin, boolean updateStatus) throws java.io.IOException {
-		if(!isNew()) {
+		if(!isNew() && !isFromHistory()) {
 			int newRevision = getRevisionNumber() + 1;
 			loadProperties();
 			holdingPlace = createHoldingPlace(newRevision);
@@ -139,7 +139,7 @@ public class File extends Item {
 			copyToGz(file);
 			update();
 		} else {
-			throw new InvalidOperationException("Cannot check-in a file that was not added");
+			throw new InvalidOperationException("Cannot check-in a file that was not added or from history");
 		}
 	}
 	

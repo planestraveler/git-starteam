@@ -194,7 +194,7 @@ public class Folder extends Item {
 	protected void loadProperties() {
 		FileInputStream fin = null;
 		try {
-			int lastRevision = findLastRevision(Integer.parseInt(holdingPlace.getName()));
+			int lastRevision = findRightRevision(Integer.parseInt(holdingPlace.getName()));
 			File folderProperty = new File(holdingPlace.getCanonicalPath() + File.separator + lastRevision + File.separator + FOLDER_PROPERTIES);
 			if(folderProperty.exists()) {
 				fin = new FileInputStream(folderProperty);
@@ -242,7 +242,6 @@ public class Folder extends Item {
 	
 	@Override
 	public void moveTo(Folder folder) {
-		
 		super.moveTo(folder);
 	}
 	
