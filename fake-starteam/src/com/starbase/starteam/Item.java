@@ -17,11 +17,14 @@
 package com.starbase.starteam;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import org.ossnoize.fakestarteam.FileUtility;
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
+import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
 import com.starbase.util.OLEDate;
@@ -74,6 +77,17 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		itemProperties.setProperty(propertyKeys.REVISION_NUMBER, Integer.toString(rev));
 	}
 	
+	protected int findRightRevision(int id) {
+		if(getView().getConfiguration().isTip()) {
+			isFromHistory = false;
+			return findLastRevision(id);
+		} else if (getView().getConfiguration().isTimeBased()) {
+			isFromHistory = true;
+			return findTimeRevision(id);
+		}
+		throw new InvalidOperationException("Cannot find a revision with this view configuration");
+	}
+	
 	protected int findLastRevision(int id) {
 		int max = 0;
 		java.io.File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
@@ -95,6 +109,49 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 			e.printStackTrace();
 		}
 		return max;
+	}
+	
+	protected int findTimeRevision(int id) {
+		int revision = 0;
+		java.io.File storage = InternalPropertiesProvider.getInstance().getStorageLocation();
+		OLEDate time = getView().getConfiguration().getTime();
+		if(null == time) {
+			throw new Error("Cannot find a time revision without a time parameter");
+		}
+		long javaTime = time.getLongValue();
+		long bestTime = Long.MIN_VALUE;
+		try {
+			java.io.File location = new java.io.File(storage.getCanonicalPath() + java.io.File.separator + id);
+			if(location.exists()) {
+				for(String name : location.list()) {
+					// check if it is a file
+					java.io.File aFile = new java.io.File(location.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + FILE_PROPERTIES);
+					if(!aFile.exists()) {
+						// if not then check if it is a folder
+						aFile = new java.io.File(location.getCanonicalPath() + java.io.File.separator + name + java.io.File.separator + FOLDER_PROPERTIES);
+					}
+					if(aFile.exists()) {
+						Properties prop = new Properties();
+						FileInputStream in = new FileInputStream(aFile);
+						try {
+							prop.load(in);
+							long modificationTime = Long.parseLong(prop.getProperty(propertyKeys.MODIFIED_TIME, "0"));
+							if(modificationTime <= javaTime && modificationTime > bestTime) {
+								bestTime = modificationTime;
+								revision = Integer.parseInt(name);
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						} finally {
+							FileUtility.close(in);
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return revision;
 	}
 	
 	protected void setView(View view) {
@@ -161,6 +218,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public boolean isNew() {
 		return isNew;
+	}
+	
+	public boolean isFromHistory() {
+		return isFromHistory;
 	}
 	
 	public Folder getParentFolder() {
