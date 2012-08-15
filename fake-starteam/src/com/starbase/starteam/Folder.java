@@ -31,7 +31,6 @@ import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 
 public class Folder extends Item {
-	private static final String FOLDER_PROPERTIES = "folder.properties";
 
 	protected Folder() {
 	}

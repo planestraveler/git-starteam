@@ -38,7 +38,6 @@ import com.starbase.util.OLEDate;
 
 public class File extends Item {
 
-	private static final String FILE_PROPERTIES = "file.properties";
 	private static final String FILE_STORED = "stored.gz";
 
 	public File(Folder parent) {
