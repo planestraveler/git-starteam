@@ -140,9 +140,14 @@ public class SerializableView extends View implements Serializable {
 	@Override
 	public Folder getRootFolder() {
 		if(null == rootFolder) {
-			rootFolder = new FakeFolder(this, rootFolderId, null);
+			rootFolder = createRootFolder(this);
 		}
 		return rootFolder;
+	}
+	
+	@Override
+	protected Folder createRootFolder(View v) {
+		return new FakeFolder(v, rootFolderId, null);
 	}
 	
 	@Override

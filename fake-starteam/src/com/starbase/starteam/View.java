@@ -113,10 +113,12 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	
 	public Folder getRootFolder() {
 		if(null != otherView) {
-			Folder root = otherView.getRootFolder();
-			root.setView(this);
-			return root;
+			return otherView.createRootFolder(this);
 		}
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
+	protected Folder createRootFolder(View v) {
 		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
