@@ -246,7 +246,11 @@ public class GitImporter {
 					lastcommit.writeTo(exportStream);
 					if(! isResume) {
 						isResume = true;
-					}		
+					}
+					for(java.io.File old : lastFiles) {
+						old.delete();
+					}
+					lastFiles.clear();
 					commit.setFromCommit(lastcommit);
 				}
 				for(String path : deletedFiles) {
@@ -268,6 +272,10 @@ public class GitImporter {
 		if(null != lastcommit) {
 			try {
 				lastcommit.writeTo(exportStream);
+				for(java.io.File old : lastFiles) {
+					old.delete();
+				}
+				lastFiles.clear();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
