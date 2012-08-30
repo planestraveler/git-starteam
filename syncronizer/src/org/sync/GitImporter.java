@@ -313,7 +313,6 @@ public class GitImporter {
 	}
 
 	private void recursiveFolderPopulation(Folder f, String folderPath) {
-		boolean first = true;
 		for(Folder subfolder : f.getSubFolders()) {
 			if(null != folder) {
 				subfolder.discard();
@@ -334,7 +333,6 @@ public class GitImporter {
 	}
 
 	private void recursiveFilePopulation(Folder f) {
-		boolean first = true;
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
