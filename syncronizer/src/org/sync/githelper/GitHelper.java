@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 public class GitHelper implements RepositoryHelper {
+	
+	private final static String STARTEAMFILEID = ".git" + File.separator + "StarteamFileId.gz";
 
 	private Thread gitQueryWorker;
 	private Thread gitErrorStreamEater;
@@ -227,6 +229,24 @@ public class GitHelper implements RepositoryHelper {
 		}
 		return true;
 	}
+
+	@Override
+	public void registerFileId(String filename, int fileId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unregisterFileId(String filename) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Integer getRegisteredFileId(String filename) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	private class GitLsFilesReader implements Runnable {
 
@@ -269,5 +289,6 @@ public class GitHelper implements RepositoryHelper {
 		}
 		
 	}
+
 
 }

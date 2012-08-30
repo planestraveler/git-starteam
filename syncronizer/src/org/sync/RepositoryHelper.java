@@ -34,7 +34,7 @@ public interface RepositoryHelper {
 	public boolean isSpecialFile(String filename);
 	
 	/**
-	 * git gc.
+	 * Do the repository garbage collection and the compression of it's database.
 	 */
 	public void gc();
 	
@@ -50,4 +50,28 @@ public interface RepositoryHelper {
 	 * @return The OutputStream representing the InputStream of the process.
 	 */
 	public OutputStream getFastImportStream();
+	
+	/**
+	 * Register in file hidden inside the repository (.git, .bazaar, ...) the list
+	 * of existing repository file and it's id.
+	 * 
+	 * @param filename the full path of the file and its name inside the repository
+	 * @param fileId the Starteam file id
+	 */
+	public void registerFileId(String filename, int fileId);
+	
+	/**
+	 * Remove the registered file from the repository.
+	 *  
+	 * @param filename the full path of the file and its name inside the repository
+	 */
+	public void unregisterFileId(String filename);
+	
+	/**
+	 * Return the registered file id from the repository tracked file.
+	 * 
+	 * @param filename the full path of the file and its name inside the repository
+	 * @return the id of the file or NULL if not found.
+	 */
+	public Integer getRegisteredFileId(String filename);
 }
