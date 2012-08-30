@@ -178,8 +178,19 @@ public class GitHelper implements RepositoryHelper {
 		process.command(gitExecutable, "gc");
 		process.directory(new File(gitRepositoryDir));
 		try {
-			process.start();
+			Process gitGc = process.start();
+			gitErrorStreamEater = new Thread(new ErrorEater(gitGc.getErrorStream()));
+			gitQueryWorker = new Thread(new ErrorEater(gitGc.getInputStream()));
+			gitErrorStreamEater.start();
+			gitQueryWorker.start();
+			gitGc.waitFor();
+			gitErrorStreamEater.join();
+			gitErrorStreamEater = null;
+			gitQueryWorker.join();
+			gitQueryWorker = null;
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
