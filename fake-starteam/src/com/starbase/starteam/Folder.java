@@ -129,10 +129,15 @@ public class Folder extends Item {
 						int id = Integer.parseInt(fileID);
 						SimpleTypedResource ressource =
 								SimpleTypedResourceIDProvider.getProvider().findExisting(id);
+
+						com.starbase.starteam.File aFile = null;
 						if(null != ressource && ressource instanceof com.starbase.starteam.File) {
-							generatedList.add((com.starbase.starteam.File)ressource);
+							aFile = ((com.starbase.starteam.File)ressource);
 						} else {
-							generatedList.add(new com.starbase.starteam.File(id, this.view));
+							aFile = new com.starbase.starteam.File(id, this.view);
+						}
+						if((this.view instanceof RecycleBin && aFile.isDeleted()) || !aFile.isDeleted()) {
+							generatedList.add(aFile);
 						}
 					} catch (NumberFormatException ne) {
 						throw new InvalidOperationException("Folder child id corrupted.");
