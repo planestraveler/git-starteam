@@ -18,22 +18,28 @@ package org.sync.githelper;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.sync.ErrorEater;
-import org.sync.RepositoryHelper;
+import org.sync.RepositoryHelper; 
+import org.sync.util.StarteamFileInfo;
 
-import java.io.File;
 import java.io.FilenameFilter;
 
 public class GitHelper implements RepositoryHelper {
 	
-	private final static String STARTEAMFILEID = ".git" + File.separator + "StarteamFileId.gz";
+	private final static String STARTEAMFILEINFO = ".git" + File.separator + "StarteamFileInfo.gz";
 
 	private Thread gitQueryWorker;
 	private Thread gitErrorStreamEater;
@@ -44,6 +50,7 @@ public class GitHelper implements RepositoryHelper {
 	private Thread gitFastImportOutputEater;
 	private Thread gitFastImportErrorEater;
 	private String gitRepositoryDir;
+	private Map<String, StarteamFileInfo> fileInformation;
 	
 	private final FilenameFilter gitFilter = new FilenameFilter() {
 		@Override
@@ -63,6 +70,7 @@ public class GitHelper implements RepositoryHelper {
 		}
 		
 		grabTrackedFiles();
+		loadFileInformation();
 	}
 
 	private boolean findExecutable(String preferedPath) {
@@ -231,21 +239,131 @@ public class GitHelper implements RepositoryHelper {
 	}
 
 	@Override
-	public void registerFileId(String filename, int fileId) {
-		// TODO Auto-generated method stub
-		
+	public boolean registerFileId(String filename, int fileId, int fileVersion) {
+		if(null == fileInformation) {
+			if(!loadFileInformation()) {
+				fileInformation = new HashMap<String, StarteamFileInfo>();
+			}
+			if(fileInformation.containsKey(filename)) {
+				fileInformation.put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
+				saveFileInformation();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean updateFileVersion(String filename, int fileVersion) {
+		if(null != fileInformation) {
+			if(fileInformation.containsKey(filename)) {
+				fileInformation.get(filename).setVersion(fileVersion);
+				saveFileInformation();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public void unregisterFileId(String filename) {
-		// TODO Auto-generated method stub
-		
+		if(null != fileInformation) {
+			fileInformation.remove(filename);
+			saveFileInformation();
+		}
 	}
 
 	@Override
 	public Integer getRegisteredFileId(String filename) {
-		// TODO Auto-generated method stub
+		if(null != fileInformation) {
+			if(fileInformation.containsKey(filename)) {
+				return fileInformation.get(filename).getId();
+			}
+		}
 		return null;
+	}
+	
+	@Override
+	public Integer getRegisteredFileVersion(String filename) {
+		if(null != fileInformation) {
+			if(fileInformation.containsKey(filename)) {
+				return fileInformation.get(filename).getVersion();
+			}
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private boolean loadFileInformation() {
+		FileInputStream fin = null;
+		ObjectInputStream objin = null;
+		
+		File objFile = new File(gitRepositoryDir + File.separator + ".git" + File.separator + STARTEAMFILEINFO);
+		if(!objFile.exists())
+			return false;
+		
+		try {
+			fin = new FileInputStream(objFile);
+			objin = new ObjectInputStream(fin);
+			
+			Object tempObject = objin.readObject();
+			if(tempObject instanceof Map) {
+				fileInformation = (Map<String, StarteamFileInfo>) tempObject;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			if(objin != null) {
+				try {
+					objin.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if(fin != null) {
+				try {
+					fin.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return true;
+	}
+	
+	private void saveFileInformation() {
+		if(null != fileInformation) {
+			FileOutputStream fout = null;
+			ObjectOutputStream objout = null;
+			
+			File objFile = new File(gitRepositoryDir + File.separator + ".git" + File.separator + STARTEAMFILEINFO);
+			
+			try {
+				fout = new FileOutputStream(objFile);
+				objout = new ObjectOutputStream(fout);
+				
+				objout.writeObject(fileInformation);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if(null != objout) {
+					try {
+						objout.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				if(null != fout) {
+					try {
+						fout.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 	
 	private class GitLsFilesReader implements Runnable {
@@ -289,6 +407,4 @@ public class GitHelper implements RepositoryHelper {
 		}
 		
 	}
-
-
 }

@@ -57,8 +57,19 @@ public interface RepositoryHelper {
 	 * 
 	 * @param filename the full path of the file and its name inside the repository
 	 * @param fileId the Starteam file id
+	 * @param fileVersion the Starteam file version
+	 * @return true if the file was correctly registered. False otherwise.
 	 */
-	public void registerFileId(String filename, int fileId);
+	public boolean registerFileId(String filename, int fileId, int fileVersion);
+	
+	/**
+	 * Save in file hidden inside the repository (.git, .bazaar, ...) the version of an
+	 * already registered file existing inside the repository.
+	 * 
+	 * @param filename the full path of the file and its name inside the repository
+	 * @param fileVersion the Starteam version of this file.
+	 */
+	public boolean updateFileVersion(String filename, int fileVersion);
 	
 	/**
 	 * Remove the registered file from the repository.
@@ -74,4 +85,12 @@ public interface RepositoryHelper {
 	 * @return the id of the file or NULL if not found.
 	 */
 	public Integer getRegisteredFileId(String filename);
+	
+	/**
+	 * Return the registered file version from the repository tracked file.
+	 * 
+	 * @param filename the full path of the file and its name inside the repository
+	 * @return the id of the file or NULL if not found.
+	 */
+	public Integer getRegisteredFileVersion(String filename);
 }
