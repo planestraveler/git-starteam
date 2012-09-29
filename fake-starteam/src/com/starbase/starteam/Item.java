@@ -312,7 +312,8 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public void remove() {
 		Folder trash = view.getRecycleBin().getRootFolder();
-		moveTo(trash);
+		shareTo(trash);
+		decrementRefCount();
 		itemProperties.setProperty(propertyKeys.DELETED_TIME, Long.toString(System.currentTimeMillis()));
 		itemProperties.setProperty(propertyKeys.DELETED_USER_ID, 
 				Integer.toString(InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID()));
