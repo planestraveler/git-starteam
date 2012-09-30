@@ -16,8 +16,37 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class TypeNames {
 	protected TypeNames() {}
+	protected static Set<String> typeNamesList;
+	static {
+		TypeNames enumeration = new TypeNames();
+		typeNamesList = new HashSet<String>();
+		typeNamesList.add(enumeration.AUDIT);
+		typeNamesList.add(enumeration.CHANGEREQUEST);
+		typeNamesList.add(enumeration.FILE);
+		typeNamesList.add(enumeration.FOLDER);
+		typeNamesList.add(enumeration.ITEM);
+		typeNamesList.add(enumeration.ITEM_REFERENCE);
+		typeNamesList.add(enumeration.ITEM_REVISION);
+		typeNamesList.add(enumeration.LABEL);
+		typeNamesList.add(enumeration.LINK);
+		typeNamesList.add(enumeration.PROJECT);
+		typeNamesList.add(enumeration.PROMOTIONMODEL);
+		typeNamesList.add(enumeration.PROMOTIONSTATE);
+		typeNamesList.add(enumeration.REQUIREMENT);
+		typeNamesList.add(enumeration.TASK);
+		typeNamesList.add(enumeration.TASKDEPENDENCY);
+		typeNamesList.add(enumeration.TOPIC);
+		typeNamesList.add(enumeration.TYPE);
+		typeNamesList.add(enumeration.USER);
+		typeNamesList.add(enumeration.USERACCOUNT);
+		typeNamesList.add(enumeration.VIEW);
+		typeNamesList.add(enumeration.WORKRECORD);
+	}
 	public final String	AUDIT = "Audit";
 	public final String CHANGEREQUEST = "ChangeRequest";
 	public final String FILE = "File";

@@ -74,6 +74,14 @@ public class Server {
 		return 0;
 	}
 	
+	public Type typeForName(String typeName) {
+		if(null == typeName)
+			throw new IllegalArgumentException("Typename cannot be null");
+		if(!TypeNames.typeNamesList.contains(typeName))
+			throw new TypeNotFoundException(typeName);
+		return new Type(typeName, this);
+	}
+	
 	public MyUserAccount getMyUserAccount() {
 		return new MyUserAccount(loggedUser);
 	}
