@@ -26,5 +26,10 @@ public class SimpleTypedResource extends TypedResource implements Cloneable {
 	public int getID() {
 		return 0;
 	}
+
+	@Override
+	public Type getType() {
+		return null;
+	}
 	
 }
