@@ -256,4 +256,9 @@ public class Folder extends Item {
 		}
 		return getName() + File.separator;
 	}
+	
+	@Override
+	public Type getType() {
+		return new Type(getTypeNames().FOLDER, view.getServer());
+	}
 }

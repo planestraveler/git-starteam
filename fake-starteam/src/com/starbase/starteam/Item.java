@@ -275,6 +275,11 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		return super.getTypeNames();
 	}
 	
+	@Override
+	public Type getType() {
+		return new Type(getTypeNames().ITEM, view.getServer());
+	}
+	
 	public Item shareTo(Folder folder) {
 		if(!(folder instanceof org.ossnoize.fakestarteam.TrashFolder))
 			incrementRefCount();

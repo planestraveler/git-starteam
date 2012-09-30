@@ -468,4 +468,9 @@ public class File extends Item {
 		shareTo(folder);
 		super.moveTo(folder);
 	}
+	
+	@Override
+	public Type getType() {
+		return new Type(getTypeNames().FILE, view.getServer());
+	}
 }
