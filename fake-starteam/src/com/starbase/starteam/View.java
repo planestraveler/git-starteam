@@ -16,6 +16,8 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
+import org.ossnoize.fakestarteam.InternalPropertiesProvider;
+
 import com.starbase.util.OLEDate;
 
 public class View extends SimpleTypedResource implements ISecurableContainer, ISecurableObject {
@@ -133,5 +135,9 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public void discard() {
+	}
+	
+	public Server getServer() {
+		return InternalPropertiesProvider.getInstance().getCurrentServer();
 	}
 }
