@@ -32,4 +32,18 @@ public class SimpleTypedResource extends TypedResource implements Cloneable {
 		return null;
 	}
 	
+	@Override
+	public int hashCode() {
+		return getID();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof SimpleTypedResource) {
+			SimpleTypedResource str = (SimpleTypedResource) obj;
+			return str.getID() == getID();
+		}
+		return false;
+	}
+	
 }
