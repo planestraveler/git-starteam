@@ -63,7 +63,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 	}
 	
 	private void postInit() {
-		existingResource = new WeakHashMap<View, Map<Integer,SimpleTypedResource>>();
+		existingResource = new HashMap<View, Map<Integer,SimpleTypedResource>>();
 	}
 	
 	private static boolean readFromFile() {
@@ -104,7 +104,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 		{
 			assignedResourceID.add(id);
 			if(!existingResource.containsKey(view)) {
-				existingResource.put(view, new WeakHashMap<Integer, SimpleTypedResource>());
+				existingResource.put(view, new HashMap<Integer, SimpleTypedResource>());
 			}
 			existingResource.get(view).put(id, resource);
 			saveNewID();
