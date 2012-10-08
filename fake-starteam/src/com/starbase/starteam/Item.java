@@ -168,12 +168,8 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	protected void setModifiedBy() {
-		if(null != view) {
-			int myUserID = view.getProject().getServer().getMyUserAccount().getID();
-			itemProperties.setProperty(propertyKeys.MODIFIED_USER_ID, Integer.toString(myUserID));
-		} else {
-			throw new InvalidOperationException("The item is not part of a view");
-		}
+		int myUserID = InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID();
+		itemProperties.setProperty(propertyKeys.MODIFIED_USER_ID, Integer.toString(myUserID));
 	}
 	
 	protected void setCreatedTime() {
