@@ -342,6 +342,8 @@ public class File extends Item {
 				} else {
 					parent = new FakeFolder(this.view, id, null);
 				}
+			} else {
+				throw new InvalidOperationException("Could not find the properties in the storage location: " + holdingPlace);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
