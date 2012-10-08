@@ -330,9 +330,9 @@ public class File extends Item {
 				fin = new FileInputStream(fileProperty);
 				itemProperties.load(fin);
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
-				SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
+				SimpleTypedResourceIDProvider.getProvider().registerExisting(view, id, this);
 				
-				SimpleTypedResource ressource = SimpleTypedResourceIDProvider.getProvider().findExisting(getParentObjectID());
+				SimpleTypedResource ressource = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
 				if(ressource instanceof Folder) {
 					parent = (Folder)ressource;
 				} else {
@@ -349,7 +349,7 @@ public class File extends Item {
 	private void registerNewID() {
 		itemProperties = new Properties();
 		itemProperties.setProperty(propertyKeys.OBJECT_ID,
-				Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
+				Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(view, this)));
 		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID,
 				Integer.toString(parent.getObjectID()));
 	}

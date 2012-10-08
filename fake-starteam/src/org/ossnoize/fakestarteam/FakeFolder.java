@@ -37,7 +37,7 @@ public class FakeFolder extends Folder {
 			throw new UnsupportedOperationException("The archive need to be a directory.");
 		}
 		if(0 == objectID) {
-			objectID = SimpleTypedResourceIDProvider.getProvider().registerNew(this);
+			objectID = SimpleTypedResourceIDProvider.getProvider().registerNew(view, this);
 			itemProperties.setProperty(propertyKeys.OBJECT_ID, Integer.toString(objectID));
 			setName(view.getName());
 			try {

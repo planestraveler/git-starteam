@@ -43,7 +43,7 @@ public class Folder extends Item {
 		itemProperties = new Properties();
 		// initialize the basic properties of the folder.
 		itemProperties.setProperty(propertyKeys.OBJECT_ID, 
-				Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(this)));
+				Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(parent.getView(), this)));
 		this.parent = parent;
 		view = parent.getView();
 		setName(name);
@@ -99,7 +99,7 @@ public class Folder extends Item {
 					try {
 						int id = Integer.parseInt(folderId);
 						SimpleTypedResource ressource =
-								SimpleTypedResourceIDProvider.getProvider().findExisting(id);
+								SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
 						if(null != ressource && ressource instanceof Folder) {
 							generatedList.add((Folder)ressource);
 						} else {
@@ -128,7 +128,7 @@ public class Folder extends Item {
 					try {
 						int id = Integer.parseInt(fileID);
 						SimpleTypedResource ressource =
-								SimpleTypedResourceIDProvider.getProvider().findExisting(id);
+								SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
 
 						com.starbase.starteam.File aFile = null;
 						if(null != ressource && ressource instanceof com.starbase.starteam.File) {
@@ -205,9 +205,9 @@ public class Folder extends Item {
 				fin = new FileInputStream(folderProperty);
 				itemProperties.load(fin);
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
-				SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
+				SimpleTypedResourceIDProvider.getProvider().registerExisting(view, id, this);
 				
-				SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(getParentObjectID());
+				SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
 				if(parent instanceof Folder) {
 					this.parent = (Folder)parent;
 				} else if(getParentObjectID() != 0) {

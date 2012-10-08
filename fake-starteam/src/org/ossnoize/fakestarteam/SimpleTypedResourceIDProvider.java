@@ -33,6 +33,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import com.starbase.starteam.SimpleTypedResource;
+import com.starbase.starteam.View;
 
 public class SimpleTypedResourceIDProvider implements Serializable {
 
@@ -44,7 +45,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 	private static SimpleTypedResourceIDProvider provider = null;
 	
 	private Set<Integer> assignedResourceID = new HashSet<Integer>();
-	private transient Map<Integer, SimpleTypedResource> existingResource; 
+	private transient Map<View, Map<Integer, SimpleTypedResource>> existingResource; 
 
 	private Random generator = new Random(); 
 	
@@ -62,7 +63,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 	}
 	
 	private void postInit() {
-		existingResource = new WeakHashMap<Integer, SimpleTypedResource>();
+		existingResource = new WeakHashMap<View, Map<Integer,SimpleTypedResource>>();
 	}
 	
 	private static boolean readFromFile() {
@@ -93,16 +94,19 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 		return ret;
 	}
 
-	public int registerNew(SimpleTypedResource resource) {
+	public int registerNew(View view, SimpleTypedResource resource) {
 		int id = generator.nextInt();
 		if(assignedResourceID.contains(id) || 0 == id)
 		{
-			return registerNew(resource);
+			return registerNew(view, resource);
 		}
 		else
 		{
 			assignedResourceID.add(id);
-			existingResource.put(id, resource);
+			if(!existingResource.containsKey(view)) {
+				existingResource.put(view, new WeakHashMap<Integer, SimpleTypedResource>());
+			}
+			existingResource.get(view).put(id, resource);
 			saveNewID();
 		}
 		return id;
@@ -127,24 +131,31 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 		}
 	}
 
-	public void registerExisting(int id, SimpleTypedResource resource) {
-		existingResource.put(id, resource);
+	public void registerExisting(View view, int id, SimpleTypedResource resource) {
+		if(!existingResource.containsKey(view)) {
+			existingResource.put(view, new WeakHashMap<Integer, SimpleTypedResource>());
+		}
+		existingResource.get(view).put(id, resource);
 		if(!assignedResourceID.contains(id)) {
 			assignedResourceID.add(id);
 			saveNewID();
 		}
 	}
 
-	public SimpleTypedResource findExisting(int id) {
-		if(existingResource.containsKey(id)) {
-			return existingResource.get(id);
+	public SimpleTypedResource findExisting(View view, int id) {
+		if(existingResource.containsKey(view)) {
+			if(existingResource.get(view).containsKey(id)) {
+				return existingResource.get(view).get(id);
+			}
 		}
 		return null;
 	}
 
-	public void clearExisting(int objectID) {
-		if(existingResource.containsKey(objectID)) {
-			existingResource.remove(objectID);
+	public void clearExisting(View view, int objectID) {
+		if(existingResource.containsKey(view)) {
+			if(existingResource.get(view).containsKey(objectID)) {
+				existingResource.get(view).remove(objectID);
+			}
 		}
 		
 	}

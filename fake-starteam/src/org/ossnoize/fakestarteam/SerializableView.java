@@ -54,7 +54,7 @@ public class SerializableView extends View implements Serializable {
 		this.name = name;
 		this.description = description;
 		this.defaultWorkingFolder = defaultWorkingFolder;
-		this.id = SimpleTypedResourceIDProvider.getProvider().registerNew(this);
+		this.id = SimpleTypedResourceIDProvider.getProvider().registerNew(this, this);
 		this.createdDate = new Date();
 		this.createdBy = InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID();
 		if(null != parent) {
@@ -89,7 +89,7 @@ public class SerializableView extends View implements Serializable {
 
 	void setProject(Project serializableProject) {
 		this.project = serializableProject;
-		SimpleTypedResourceIDProvider.getProvider().registerExisting(id, this);
+		SimpleTypedResourceIDProvider.getProvider().registerExisting(this, id, this);
 	}
 	
 	@Override
