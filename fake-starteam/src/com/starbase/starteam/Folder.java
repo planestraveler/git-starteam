@@ -205,6 +205,10 @@ public class Folder extends Item {
 				fin = new FileInputStream(folderProperty);
 				itemProperties.load(fin);
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
+				int viewid = Integer.parseInt(itemProperties.getProperty(propertyKeys._VIEW_ID));
+				if(viewid != view.getID()) {
+					throw new InvalidOperationException("The object is not registered on this view");
+				}
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(view, id, this);
 				
 				SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
@@ -222,6 +226,7 @@ public class Folder extends Item {
 				} else {
 					itemProperties.setProperty(propertyKeys.FOLDER_PATH, getName());
 				}
+				itemProperties.setProperty(propertyKeys._VIEW_ID, Integer.toString(view.getID()));
 				update();
 			}
 		} catch (IOException e) {

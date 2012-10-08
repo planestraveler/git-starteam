@@ -40,4 +40,5 @@ public class PropertyNames {
 	protected final java.lang.String _CHILD_FOLDER = ".Child Folder ID list";
 	protected final java.lang.String _FILES = ".Files ID list";
 	protected final java.lang.String _REF_COUNT = ".Reference Count";
+	protected final java.lang.String _VIEW_ID = ".View ID";
 }

@@ -39,6 +39,7 @@ public class FakeFolder extends Folder {
 		if(0 == objectID) {
 			objectID = SimpleTypedResourceIDProvider.getProvider().registerNew(view, this);
 			itemProperties.setProperty(propertyKeys.OBJECT_ID, Integer.toString(objectID));
+			itemProperties.setProperty(".View ID", Integer.toString(view.getID()));
 			setName(view.getName());
 			try {
 				holdingPlace = new File(serverArchive.getCanonicalPath() + File.separator + objectID);

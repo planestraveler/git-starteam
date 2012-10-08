@@ -330,6 +330,10 @@ public class File extends Item {
 				fin = new FileInputStream(fileProperty);
 				itemProperties.load(fin);
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
+				int viewid = Integer.parseInt(itemProperties.getProperty(propertyKeys._VIEW_ID));
+				if(viewid != view.getID()) {
+					throw new InvalidOperationException("This file is not part of the requested view");
+				}
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(view, id, this);
 				
 				SimpleTypedResource ressource = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
@@ -352,6 +356,7 @@ public class File extends Item {
 				Integer.toString(SimpleTypedResourceIDProvider.getProvider().registerNew(view, this)));
 		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID,
 				Integer.toString(parent.getObjectID()));
+		itemProperties.setProperty(propertyKeys._VIEW_ID, Integer.toString(view.getID()));
 	}
 
 	@Override
