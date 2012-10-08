@@ -33,4 +33,17 @@ public class Type extends NamedCacheRef {
 	public Server getServer() {
 		return server;
 	}
+	
+	public boolean isEqualTo(Type type) {
+		return typeName.equals(type.typeName);
+	}
+	
+	@Override
+	public boolean equals(Object type) {
+		if(type instanceof Type) {
+			Type other = (Type)type;
+			return other.isEqualTo(this);
+		}
+		return false;
+	}
 }
