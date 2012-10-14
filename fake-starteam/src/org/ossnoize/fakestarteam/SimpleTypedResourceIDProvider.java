@@ -104,7 +104,7 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 		{
 			assignedResourceID.add(id);
 			if(!existingResource.containsKey(view)) {
-				existingResource.put(view, new HashMap<Integer, SimpleTypedResource>());
+				existingResource.put(view, new WeakHashMap<Integer, SimpleTypedResource>());
 			}
 			existingResource.get(view).put(id, resource);
 			saveNewID();
