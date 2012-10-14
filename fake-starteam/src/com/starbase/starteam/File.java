@@ -337,15 +337,20 @@ public class File extends Item {
 				int id = Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 				int viewid = Integer.parseInt(itemProperties.getProperty(propertyKeys._VIEW_ID));
 				if(viewid != view.getID()) {
+					//TODO: When branching is figured out, verify that the file is from the parent.
 					throw new InvalidOperationException("This file is not part of the requested view");
 				}
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(view, id, this);
 				
-				SimpleTypedResource ressource = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
-				if(ressource instanceof Folder) {
-					parent = (Folder)ressource;
-				} else {
-					parent = new FakeFolder(this.view, id, null);
+				if(null == parent) {
+					SimpleTypedResource ressource = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
+					if(ressource instanceof Folder) {
+						parent = (Folder)ressource;
+					} else if (0 != getParentObjectID()) {
+						parent = new FakeFolder(this.view, getParentObjectID(), null);
+					} else {
+						throw new InvalidOperationException("Got an invalid parent id " + getParentObjectID() + " for the file object id " + id);
+					}
 				}
 			} else {
 				throw new InvalidOperationException("Could not find the properties in the storage location: " + holdingPlace);
