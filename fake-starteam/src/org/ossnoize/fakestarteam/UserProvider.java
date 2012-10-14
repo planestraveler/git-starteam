@@ -109,6 +109,15 @@ public class UserProvider {
 		users.put(lastUserID, new SerializableUser(uid, lastUserID));
 		writeUserList();
 	}
+	
+	public boolean deleteUser(int id) {
+		if(users.containsKey(id)) {
+			users.remove(id);
+			writeUserList();
+			return true;
+		}
+		return false;
+	}
 
 	public SerializableUser findUser(String uid) {
 		if(null == uid)
