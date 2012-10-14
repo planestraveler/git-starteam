@@ -17,8 +17,7 @@
 package com.starbase.starteam;
 
 public class RecycleBin extends View {
-	protected RecycleBin(View parentView, int trashCanId) {
+	protected RecycleBin(View parentView) {
+		super(parentView, parentView.getConfiguration());
 	}
-	
-	
 }

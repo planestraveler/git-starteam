@@ -129,7 +129,7 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	public RecycleBin getRecycleBin() {
 		if(null != otherView)
 			return otherView.getRecycleBin();
-		throw new UnsupportedOperationException("Not implemented at this level");
+		return new RecycleBin(this);
 	}
 	
 	public ViewConfiguration getConfiguration() {
