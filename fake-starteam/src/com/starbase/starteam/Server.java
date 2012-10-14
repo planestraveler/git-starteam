@@ -97,4 +97,8 @@ public class Server {
 	public PropertyEnums getPropertyEnums() {
 		return propertyEnums;
 	}
+
+	public void disconnect() {
+		connected = false;
+	}
 }
