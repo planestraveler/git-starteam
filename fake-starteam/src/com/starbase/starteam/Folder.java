@@ -136,7 +136,8 @@ public class Folder extends Item {
 						} else {
 							aFile = new com.starbase.starteam.File(id, this.view);
 						}
-						if((this.view instanceof RecycleBin && aFile.isDeleted()) || !aFile.isDeleted()) {
+						if((this.view instanceof RecycleBin && aFile.isDeleted()) || 
+						   (!(this.view instanceof RecycleBin) && !aFile.isDeleted())) {
 							generatedList.add(aFile);
 						}
 					} catch (NumberFormatException ne) {
