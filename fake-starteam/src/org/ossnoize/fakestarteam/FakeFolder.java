@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.ossnoize.fakestarteam.exception.ObjectIdNotFoundError;
+
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
 
@@ -51,6 +53,8 @@ public class FakeFolder extends Folder {
 		} else {
 			try {
 				holdingPlace = new File(serverArchive.getCanonicalPath() + File.separator + objectID);
+				if(!holdingPlace.exists())
+					throw new ObjectIdNotFoundError(objectID);
 				validateHoldingPlace();
 				loadProperties();
 			} catch (IOException e) {

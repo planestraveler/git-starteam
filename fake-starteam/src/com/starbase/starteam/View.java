@@ -16,7 +16,9 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
+import org.ossnoize.fakestarteam.FakeFolder;
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
+import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 
 import com.starbase.util.OLEDate;
 
@@ -135,6 +137,22 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public void discard() {
+	}
+	
+	public Item findItem(Type type, int itemID) {
+		SimpleTypedResource resource = SimpleTypedResourceIDProvider.getProvider().findExisting(this, itemID);
+		if(null != resource) {
+			if(resource.getType().isEqualTo(type)) {
+				return (Item) resource;
+			}
+		}
+		if(type.getName().equals(getTypeNames().FILE)) {
+			return new File(itemID, this);
+		}
+		if(type.getName().equals(getTypeNames().FOLDER)) {
+			return new FakeFolder(this, itemID, null);
+		}
+		return null;
 	}
 	
 	public Server getServer() {

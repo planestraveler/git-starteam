@@ -32,6 +32,7 @@ import org.ossnoize.fakestarteam.FileUtility;
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
+import org.ossnoize.fakestarteam.exception.ObjectIdNotFoundError;
 
 import com.starbase.util.MD5;
 import com.starbase.util.OLEDate;
@@ -52,6 +53,8 @@ public class File extends Item {
 		this.view = view;
 		try {
 			holdingPlace = createHoldingPlace(id, findRightRevision(id));
+			if(!holdingPlace.exists())
+				throw new ObjectIdNotFoundError(id);
 		} catch (IOException e) {
 			throw new InvalidOperationException("Cannot initialize the " + id + " in " + parent);
 		}
@@ -63,6 +66,8 @@ public class File extends Item {
 		this.view = view;
 		try {
 			holdingPlace = createHoldingPlace(id, revision);
+			if(!holdingPlace.exists())
+				throw new ObjectIdNotFoundError(id);
 		} catch (IOException e) {
 			throw new InvalidOperationException("Cannot initialize the " + id + " in " + parent + ": revision " + revision);
 		}
