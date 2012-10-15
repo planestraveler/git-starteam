@@ -323,6 +323,22 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		update();
 	}
 	
+	public OLEDate getDeletedTime() {
+		if(itemProperties.containsKey(propertyKeys.DELETED_TIME)) {
+			long date = Long.parseLong(itemProperties.getProperty(propertyKeys.DELETED_TIME));
+			return new OLEDate(date);
+		}
+		return new OLEDate(0);
+	}
+	
+	public int getDeletedUserId() {
+		if(itemProperties.containsKey(propertyKeys.DELETED_USER_ID)) {
+			int userId = Integer.parseInt(itemProperties.getProperty(propertyKeys.DELETED_USER_ID));
+			return userId;
+		}
+		return -1;
+	}
+	
 	public void discard() {
 		loadProperties();
 	}
