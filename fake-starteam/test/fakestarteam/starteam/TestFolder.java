@@ -36,6 +36,9 @@ public class TestFolder {
 			}
 			break;
 		}
+		if(null == project) {
+			fail("The test need to find a project to work");
+		}
 		if(null == view) {
 			fail("The test need to find a view to work");
 		}
