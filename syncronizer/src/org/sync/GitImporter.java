@@ -46,14 +46,14 @@ public class GitImporter {
 	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
 	private Server server;
 	private Project project;
-	Folder folder;
-	int folderNameLength;
+	private Folder folder;
+	private int folderNameLength;
 	private long lastModifiedTime = 0;
 	private Map<String, File> sortedFileList = new TreeMap<String, File>();
 	private Map<String, File> AddedSortedFileList = new TreeMap<String, File>();
 	private Map<String, File> lastSortedFileList = new TreeMap<String, File>();
-	Commit lastcommit;
-	OutputStream exportStream;
+	private Commit lastcommit;
+	private OutputStream exportStream;
 	private final String headFormat = "refs/heads/{0}";
 	private String alternateHead = null;
 	private boolean isResume = false;
