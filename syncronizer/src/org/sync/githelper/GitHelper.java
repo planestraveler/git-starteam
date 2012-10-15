@@ -39,7 +39,7 @@ import java.io.FilenameFilter;
 
 public class GitHelper implements RepositoryHelper {
 	
-	private final static String STARTEAMFILEINFO = ".git" + File.separator + "StarteamFileInfo.gz";
+	private final static String STARTEAMFILEINFO = "StarteamFileInfo.gz";
 
 	private Thread gitQueryWorker;
 	private Thread gitErrorStreamEater;
@@ -244,7 +244,7 @@ public class GitHelper implements RepositoryHelper {
 			if(!loadFileInformation()) {
 				fileInformation = new HashMap<String, StarteamFileInfo>();
 			}
-			if(fileInformation.containsKey(filename)) {
+			if(!fileInformation.containsKey(filename)) {
 				fileInformation.put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
 				saveFileInformation();
 				return true;
@@ -279,6 +279,8 @@ public class GitHelper implements RepositoryHelper {
 			if(fileInformation.containsKey(filename)) {
 				return fileInformation.get(filename).getId();
 			}
+		} else if (loadFileInformation()) {
+			return getRegisteredFileId(filename);
 		}
 		return null;
 	}
@@ -289,6 +291,8 @@ public class GitHelper implements RepositoryHelper {
 			if(fileInformation.containsKey(filename)) {
 				return fileInformation.get(filename).getVersion();
 			}
+		} else if (loadFileInformation()) {
+			return getRegisteredFileVersion(filename);
 		}
 		return null;
 	}
