@@ -19,6 +19,8 @@ package org.sync;
 import java.io.OutputStream;
 import java.util.Set;
 
+import com.starbase.util.MD5;
+
 public interface RepositoryHelper {
 
 	/**
@@ -93,4 +95,12 @@ public interface RepositoryHelper {
 	 * @return the id of the file or NULL if not found.
 	 */
 	public Integer getRegisteredFileVersion(String filename);
+
+	/**
+	 * Return the MD5 sum object from the repository tracked file. 
+	 * 
+	 * @param filename The full path of the file and its name inside the repository
+	 * @return the MD5 object generated for the file inside the repository.
+	 */
+	public MD5 getMD5Of(String filename);
 }

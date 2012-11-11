@@ -35,6 +35,8 @@ import org.sync.ErrorEater;
 import org.sync.RepositoryHelper; 
 import org.sync.util.StarteamFileInfo;
 
+import com.starbase.util.MD5;
+
 import java.io.FilenameFilter;
 
 public class GitHelper implements RepositoryHelper {
@@ -294,6 +296,11 @@ public class GitHelper implements RepositoryHelper {
 		} else if (loadFileInformation()) {
 			return getRegisteredFileVersion(filename);
 		}
+		return null;
+	}
+	
+	@Override
+	public MD5 getMD5Of(String filename) {
 		return null;
 	}
 	
