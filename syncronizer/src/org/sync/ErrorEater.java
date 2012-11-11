@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 public class ErrorEater implements Runnable {
 
 	private InputStream errorStream;
+	private boolean dontWrite;
 	
 	/**
 	 * Simple runner class to eat all error stream form subprocess and redirect it
@@ -32,6 +33,18 @@ public class ErrorEater implements Runnable {
 	 */
 	public ErrorEater(InputStream in) {
 		errorStream = in;
+		dontWrite = false;
+	}
+	
+	/**
+	 * Simple runner class to eat all error stream from subprocess and redirect it
+	 * to the error stream of the current running class or just dump it in the void.
+	 * @param in The error stream to read from.
+	 * @param dump if we should dump the stream or redirect it
+	 */
+	public ErrorEater(InputStream in, boolean dump) {
+		errorStream = in;
+		dontWrite = dump;
 	}
 	
 	@Override
@@ -44,7 +57,8 @@ public class ErrorEater implements Runnable {
 			buffer = new BufferedReader(reader);
 			String line = null;
 			while(null != (line = buffer.readLine())) {
-				System.err.println(line);
+				if(!dontWrite)
+					System.err.println(line);
 			}
 		} catch(IOException e) {
 			e.printStackTrace();
