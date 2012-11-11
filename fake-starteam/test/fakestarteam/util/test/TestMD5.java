@@ -81,5 +81,11 @@ public class TestMD5 {
 		test.setData(md5data);
 		assertArrayEquals(md5data, test.getData());
 	}
+	
+	@Test
+	public void testEquals() {
+		MD5 test = new MD5(md5data);
+		assertEquals(test, new MD5(md5data));
+	}
 
 }

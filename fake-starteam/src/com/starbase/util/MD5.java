@@ -101,4 +101,17 @@ public class MD5 {
 		return output;
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof MD5) {
+			MD5 other = (MD5)o;
+			for(int i=0; i < md5Sum.length; i++) {
+				if(other.md5Sum[i] != md5Sum[i])
+					return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
 }
