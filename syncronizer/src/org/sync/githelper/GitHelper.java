@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.sync.ErrorEater;
+import org.sync.MD5Builder;
 import org.sync.RepositoryHelper; 
 import org.sync.util.StarteamFileInfo;
 
@@ -300,7 +301,26 @@ public class GitHelper implements RepositoryHelper {
 	}
 	
 	@Override
-	public MD5 getMD5Of(String filename) {
+	public MD5 getMD5Of(String filename, String branchName) {
+		ProcessBuilder process = new ProcessBuilder();
+		process.command(gitExecutable, "show", branchName + ":" + filename);
+		process.directory(new File(gitRepositoryDir));
+		try {
+			Process show = process.start();
+			MD5Builder md5Builder = new MD5Builder(show.getInputStream());
+			Thread md5Thread = new Thread(md5Builder);
+			Thread errorEater = new Thread(new ErrorEater(show.getErrorStream()));
+			md5Thread.start();
+			errorEater.start();
+			show.waitFor();
+			md5Thread.join();
+			errorEater.join();
+			return md5Builder.getMD5();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	

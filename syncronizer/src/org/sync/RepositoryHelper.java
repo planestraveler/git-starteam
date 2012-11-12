@@ -100,7 +100,8 @@ public interface RepositoryHelper {
 	 * Return the MD5 sum object from the repository tracked file. 
 	 * 
 	 * @param filename The full path of the file and its name inside the repository
+	 * @param branchName the branch used by the process.
 	 * @return the MD5 object generated for the file inside the repository.
 	 */
-	public MD5 getMD5Of(String filename);
+	public MD5 getMD5Of(String filename, String branchName);
 }
