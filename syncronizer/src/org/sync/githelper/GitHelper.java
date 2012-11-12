@@ -121,23 +121,19 @@ public class GitHelper implements RepositoryHelper {
 	}
 
 	private boolean repositoryExists(boolean create) {
-		File dir = new File(gitRepositoryDir);
-		String[] gitDir = dir.list(gitFilter);
-		if(null != gitDir) {
-			if (gitDir.length == 1) {
-				return true;
-			} else if (create) {
-				ProcessBuilder process = new ProcessBuilder();
-				process.command(gitExecutable, "init");
-				process.directory(new File(gitRepositoryDir));
-				try {
-					process.start();
-				} catch (Exception e) {
-					e.printStackTrace();
-					return false;
-				}
-				return true;
+		if (isValidGitRepository()) {
+			return true;
+		} else if (create) {
+			ProcessBuilder process = new ProcessBuilder();
+			process.command(gitExecutable, "init");
+			process.directory(new File(gitRepositoryDir));
+			try {
+				process.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
 			}
+			return true;
 		}
 		return false;
 	}
@@ -164,6 +160,28 @@ public class GitHelper implements RepositoryHelper {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private boolean isValidGitRepository() {
+		ProcessBuilder process = new ProcessBuilder();
+		process.command(gitExecutable, "status");
+		process.directory(new File(gitRepositoryDir));
+		try {
+			Process status = process.start();
+			Thread statusOut = new Thread(new ErrorEater(status.getInputStream(), true));
+			Thread statusErr = new Thread(new ErrorEater(status.getErrorStream(), true));
+			statusOut.start();
+			statusErr.start();
+			int result = status.waitFor();
+			statusOut.join();
+			statusErr.join();
+			return (result == 0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	@Override
