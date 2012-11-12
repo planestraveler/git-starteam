@@ -56,6 +56,10 @@ public class InternalPropertiesProvider {
 		return Archive;
 	}
 	
+	/**
+	 * Return the object storage of this server
+	 * @return the File path to the object storage.
+	 */
 	public File getStorageLocation() {
 		return StorageLocation;
 	}
