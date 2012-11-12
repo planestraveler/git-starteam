@@ -35,7 +35,7 @@ public class MD5 {
 	public MD5(String stringMD5) {
 		BigInteger bigInt = new BigInteger(stringMD5, 16);
 		byte[] value = bigInt.toByteArray();
-		int decal = 16 - value.length;
+		int decal = value.length - 16;
 		System.arraycopy(value, decal, md5Sum, 0, md5Sum.length);
 	}
 	
