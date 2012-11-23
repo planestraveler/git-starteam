@@ -27,6 +27,8 @@ public class CheckoutOptions {
 	private int labelId;
 	private boolean labelBased;
 	private boolean isTip;
+	private boolean updateStatus;
+	private int lockType;
 
 	public CheckoutOptions(View view) {
 		this.view = view;
@@ -35,6 +37,8 @@ public class CheckoutOptions {
 		this.labelId = view.getConfiguration().getLabelID();
 		this.labelBased = view.getConfiguration().isLabelBased();
 		this.isTip = view.getConfiguration().isTip();
+		this.updateStatus = false;
+		this.lockType = 0;
 	}
 
 	public void setEOLConversionEnabled(boolean b) {
@@ -77,5 +81,17 @@ public class CheckoutOptions {
 	
 	public void setTips() {
 		isTip = true;
+	}
+
+	public boolean getUpdateStatus() {
+		return updateStatus;
+	}
+	
+	public void setUpdateStatus(boolean updateStatus) {
+		this.updateStatus = updateStatus;
+	}
+	
+	public int getLockType() {
+		return lockType;
 	}
 }
