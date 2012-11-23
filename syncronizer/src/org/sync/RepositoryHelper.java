@@ -16,42 +16,45 @@
 ******************************************************************************/
 package org.sync;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.util.Set;
 
 import com.starbase.util.MD5;
 
-public interface RepositoryHelper {
+public abstract class RepositoryHelper {
+
+	protected File fastExportOverrideToFile;
 
 	/**
 	 * Return the full list of path to files that are tracked in the repository.
 	 * @return a set of File path contained in the current version of the repository.
 	 */
-	public Set<String> getListOfTrackedFile();
+	public abstract Set<String> getListOfTrackedFile();
 	
 	/**
 	 * Tell if the file is a special target repository type file.
 	 * @return True if it is a special file, False otherwise.
 	 */
-	public boolean isSpecialFile(String filename);
+	public abstract boolean isSpecialFile(String filename);
 	
 	/**
 	 * Do the repository garbage collection and the compression of it's database.
 	 */
-	public void gc();
+	public abstract void gc();
 	
 	/**
 	 * Tell if the "git fast-import" process is still running.
 	 * @return True if it is running, False otherwise.
 	 */
-	public boolean isGitFastImportRunning();
+	public abstract boolean isFastImportRunning();
 	
 	/**
 	 * Create a fast-import process and dump all the repository information in the 
 	 * input stream of the process.
 	 * @return The OutputStream representing the InputStream of the process.
 	 */
-	public OutputStream getFastImportStream();
+	public abstract OutputStream getFastImportStream();
 	
 	/**
 	 * Register in file hidden inside the repository (.git, .bazaar, ...) the list
@@ -62,7 +65,7 @@ public interface RepositoryHelper {
 	 * @param fileVersion the Starteam file version
 	 * @return true if the file was correctly registered. False otherwise.
 	 */
-	public boolean registerFileId(String filename, int fileId, int fileVersion);
+	public abstract boolean registerFileId(String filename, int fileId, int fileVersion);
 	
 	/**
 	 * Save in file hidden inside the repository (.git, .bazaar, ...) the version of an
@@ -71,14 +74,14 @@ public interface RepositoryHelper {
 	 * @param filename the full path of the file and its name inside the repository
 	 * @param fileVersion the Starteam version of this file.
 	 */
-	public boolean updateFileVersion(String filename, int fileVersion);
+	public abstract boolean updateFileVersion(String filename, int fileVersion);
 	
 	/**
 	 * Remove the registered file from the repository.
 	 *  
 	 * @param filename the full path of the file and its name inside the repository
 	 */
-	public void unregisterFileId(String filename);
+	public abstract void unregisterFileId(String filename);
 	
 	/**
 	 * Return the registered file id from the repository tracked file.
@@ -86,7 +89,7 @@ public interface RepositoryHelper {
 	 * @param filename the full path of the file and its name inside the repository
 	 * @return the id of the file or NULL if not found.
 	 */
-	public Integer getRegisteredFileId(String filename);
+	public abstract Integer getRegisteredFileId(String filename);
 	
 	/**
 	 * Return the registered file version from the repository tracked file.
@@ -94,7 +97,7 @@ public interface RepositoryHelper {
 	 * @param filename the full path of the file and its name inside the repository
 	 * @return the id of the file or NULL if not found.
 	 */
-	public Integer getRegisteredFileVersion(String filename);
+	public abstract Integer getRegisteredFileVersion(String filename);
 
 	/**
 	 * Return the MD5 sum object from the repository tracked file. 
@@ -103,5 +106,14 @@ public interface RepositoryHelper {
 	 * @param branchName the branch used by the process.
 	 * @return the MD5 object generated for the file inside the repository.
 	 */
-	public MD5 getMD5Of(String filename, String branchName);
+	public abstract MD5 getMD5Of(String filename, String branchName);
+	
+	/**
+	 * Request that the stream be dumped into the following file
+	 * 
+	 * @param file The file where is to be written the fast-export
+	 **/	
+	public void setFastExportDumpFile(File file) {
+		fastExportOverrideToFile = file;
+	}
 }

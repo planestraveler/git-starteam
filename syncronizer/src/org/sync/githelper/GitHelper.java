@@ -40,7 +40,7 @@ import com.starbase.util.MD5;
 
 import java.io.FilenameFilter;
 
-public class GitHelper implements RepositoryHelper {
+public class GitHelper extends RepositoryHelper {
 	
 	private final static String STARTEAMFILEINFO = "StarteamFileInfo.gz";
 
@@ -246,7 +246,7 @@ public class GitHelper implements RepositoryHelper {
 	}
 	
 	@Override
-	public boolean isGitFastImportRunning() {
+	public boolean isFastImportRunning() {
 		try {
 			if(0 == gitFastImport.exitValue()) {
 				gitFastImport = null;
