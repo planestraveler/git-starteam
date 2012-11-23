@@ -35,10 +35,27 @@ public class CheckoutManager {
 	public void checkoutTo(File f, java.io.File aFile) {
 		if(options.isByTip()) {
 			try {
-				f.checkoutTo(aFile, 0, true, options.getEOLConversionEnabled(), true);
+				f.checkoutTo(aFile,
+						options.getLockType(),
+						true,
+						options.getEOLConversionEnabled(),
+						options.getUpdateStatus());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		} else if(options.isByDate()) {
+			try {
+				f.checkoutByDate(aFile,
+						options.getCheckoutDate(),
+						options.getLockType(),
+						false,
+						options.getEOLConversionEnabled(),
+						options.getUpdateStatus());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			throw new UnsupportedOperationException("Cannot checkout as requested " + options);
 		}
 	}
 }
