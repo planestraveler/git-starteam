@@ -14,7 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with Git-Starteam.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-package org.sync;
+package org.sync.util;
 
 import java.io.IOException;
 import java.io.InputStream;

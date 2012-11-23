@@ -32,8 +32,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.sync.ErrorEater;
-import org.sync.MD5Builder;
 import org.sync.RepositoryHelper; 
+import org.sync.util.MD5Builder;
 import org.sync.util.StarteamFileInfo;
 
 import com.starbase.util.MD5;
