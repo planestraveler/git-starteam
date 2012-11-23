@@ -164,7 +164,7 @@ public class GitHelper implements RepositoryHelper {
 	
 	private boolean isValidGitRepository() {
 		ProcessBuilder process = new ProcessBuilder();
-		process.command(gitExecutable, "status");
+		process.command(gitExecutable, "branch");
 		process.directory(new File(gitRepositoryDir));
 		try {
 			Process status = process.start();
