@@ -17,6 +17,7 @@
 package org.sync;
 
 import java.io.Console;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -51,6 +52,7 @@ public class MainEntry {
 		CmdLineParser.Option selectPath = parser.addStringOption('X', "path-to-program");
 		CmdLineParser.Option isCreateRepo = parser.addBooleanOption('c', "create-new-repo");
 		CmdLineParser.Option selectPassword = parser.addStringOption("password");
+		CmdLineParser.Option dumpToFile = parser.addStringOption('D', "dump");
 
 		try {
 			parser.parse(args);
@@ -78,6 +80,7 @@ public class MainEntry {
 		String pathToProgram = (String) parser.getOptionValue(selectPath);
 		Boolean createNewRepo = (Boolean) parser.getOptionValue(isCreateRepo);
 		String password = (String) parser.getOptionValue(selectPassword);
+		String dumpTo = (String) parser.getOptionValue(dumpToFile);
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -155,6 +158,9 @@ public class MainEntry {
 							long vcTime;
 							System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
 							g.openHelper();
+							if(null != dumpTo) {
+								g.setDumpFile(new File(dumpTo));
+							}
 							for(;firstTime < lastTime; firstTime += day) {
 								if(lastTime - firstTime <= day) {
 									vc = v;

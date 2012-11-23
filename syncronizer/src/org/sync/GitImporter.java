@@ -367,4 +367,12 @@ public class GitImporter {
 	public void setHeadName(String head) {
 		alternateHead = head;
 	}
+
+	public void setDumpFile(java.io.File file) {
+		if(null == helper) {
+			helper.setFastExportDumpFile(file);
+		} else {
+			throw new NullPointerException("Ensure that the helper is correctly started.");
+		}
+	}
 }

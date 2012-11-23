@@ -19,6 +19,7 @@ package org.sync.githelper;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -228,21 +229,30 @@ public class GitHelper extends RepositoryHelper {
 	
 	@Override
 	public OutputStream getFastImportStream() {
-		if(null == gitFastImport) {
-			ProcessBuilder process = new ProcessBuilder();
-			process.command(gitExecutable, "fast-import");
-			process.directory(new File(gitRepositoryDir));
+		if(null == fastExportOverrideToFile) {
+			if(null == gitFastImport) {
+				ProcessBuilder process = new ProcessBuilder();
+				process.command(gitExecutable, "fast-import");
+				process.directory(new File(gitRepositoryDir));
+				try {
+					gitFastImport = process.start();
+					gitFastImportOutputEater = new Thread(new ErrorEater(gitFastImport.getInputStream()));
+					gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream()));
+					gitFastImportOutputEater.start();
+					gitFastImportErrorEater.start();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			return gitFastImport.getOutputStream();
+		} else {
 			try {
-				gitFastImport = process.start();
-				gitFastImportOutputEater = new Thread(new ErrorEater(gitFastImport.getInputStream()));
-				gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream()));
-				gitFastImportOutputEater.start();
-				gitFastImportErrorEater.start();
-			} catch (IOException e) {
+				return new FileOutputStream(fastExportOverrideToFile);
+			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+			return null;
 		}
-		return gitFastImport.getOutputStream();
 	}
 	
 	@Override
