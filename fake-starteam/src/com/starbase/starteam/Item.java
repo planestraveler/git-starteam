@@ -342,6 +342,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public void discard() {
 		loadProperties();
+		SimpleTypedResourceIDProvider.getProvider().clearExisting(getView(), getObjectID());
 	}
 	
 	protected void loadProperties() {
