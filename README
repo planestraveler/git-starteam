@@ -64,10 +64,10 @@ TODO:
 * Finish basic support of file query in the Fake Starteam API.
  - Support for folder creation [DONE]
  - Support for file creation [DONE]
- - Support for acurrate file status [Done]
+ - Support for acurrate file status [DONE]
  - Support for label creation [Not Started]
  - Support for file deletion [Started]
- - Support for folder moving [Not Started]
+ - Support for folder moving [Started]
  - Support for file renaming [Started]
 * Create the fast-export based on the Starteam API.
  - Create basic object for fast-export stream. [DONE]
