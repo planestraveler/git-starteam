@@ -309,6 +309,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 
 	public void moveTo(Folder folder) {
 		decrementRefCount();
+		shareTo(folder);
 	}
 	
 	public void remove() {

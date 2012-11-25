@@ -222,8 +222,7 @@ public class Folder extends Item {
 				// initialize the basic properties of the folder.
 				if (null != parent)	{
 					itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(parent.getObjectID()));
-					itemProperties.setProperty(propertyKeys.FOLDER_PATH, 
-							parent.getParentFolderQualifiedName() + File.separatorChar + getName());
+					buildParentPath();
 				} else {
 					itemProperties.setProperty(propertyKeys.FOLDER_PATH, getName());
 				}
@@ -254,8 +253,22 @@ public class Folder extends Item {
 	@Override
 	public void moveTo(Folder folder) {
 		super.moveTo(folder);
+		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID,
+				Integer.toString(folder.getObjectID()));
+		parent = folder;
+		buildParentPath();
+		update();
 	}
 	
+	private void buildParentPath() {
+		itemProperties.setProperty(propertyKeys.FOLDER_PATH, 
+				parent.getParentFolderQualifiedName() + File.separatorChar + getName());
+		for(Folder f : getSubFolders()) {
+			f.buildParentPath();
+			f.update();
+		}
+	}
+
 	public java.lang.String getFolderHierarchy() {
 		if(null != parent) {
 			return parent.getFolderHierarchy() + getName() + File.separator;
