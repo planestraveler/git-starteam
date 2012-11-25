@@ -260,6 +260,21 @@ public class Folder extends Item {
 		update();
 	}
 	
+	@Override
+	public void remove() {
+		String childs = parent.itemProperties.getProperty(propertyKeys._CHILD_FOLDER);
+		String without = childs.replace(Integer.toString(getObjectID()), "");
+		parent.itemProperties.setProperty(propertyKeys._CHILD_FOLDER, without);
+		parent.update();
+		for(com.starbase.starteam.File f : getFiles()) {
+			f.remove();
+		}
+		for(Folder f : getSubFolders()) {
+			f.remove();
+		}
+		super.remove();
+	}
+	
 	private void buildParentPath() {
 		itemProperties.setProperty(propertyKeys.FOLDER_PATH, 
 				parent.getParentFolderQualifiedName() + File.separatorChar + getName());
