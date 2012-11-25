@@ -297,7 +297,7 @@ public class GitImporter {
 				e1.printStackTrace();
 			}
 			System.gc();
-			while(helper.isGitFastImportRunning());
+			while(helper.isFastImportRunning());
 		}
 		AddedSortedFileList.clear();
 	}
