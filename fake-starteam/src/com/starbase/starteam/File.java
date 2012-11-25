@@ -19,6 +19,7 @@ package com.starbase.starteam;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -87,6 +88,27 @@ public class File extends Item {
 			setCreatedTime();
 			setModifiedTime();
 			copyToGz(file);
+			isNew = false;
+			update();
+			shareTo(parent);
+		} else {
+			throw new InvalidOperationException("Cannot add a file that is already existing");
+		}
+	}
+	
+	public void addFromStream(InputStream stream, String fileName, String description, String comment, int lockStatus) throws java.io.IOException {
+		if(isNew()) {
+			registerNewID();
+			holdingPlace = createHoldingPlace(0);
+			loadProperties();
+			setRevisionNumber(0);
+			setComment(comment);
+			setDescription(description);
+			setName(fileName);
+			setModifiedBy();
+			setCreatedTime();
+			setModifiedTime();
+			copyToGz(stream);
 			isNew = false;
 			update();
 			shareTo(parent);
@@ -191,8 +213,12 @@ public class File extends Item {
 			throw new InvalidOperationException("The file does not exist in the repository");
 		}
 	}
-
+	
 	private void copyToGz(java.io.File file) throws IOException {
+		copyToGz(new FileInputStream(file));
+	}
+
+	private void copyToGz(InputStream stream) throws IOException {
 		MessageDigest digest;
 		int encoding = propertyEnums.FILE_ENCODING_ASCII;
 		try {
@@ -202,12 +228,12 @@ public class File extends Item {
 		}
 		GZIPOutputStream gzout = null;
 		FileOutputStream fout = null;
-		FileInputStream fin = null;
+		InputStream fin = null;
 		if(!holdingPlace.exists())
 			holdingPlace.mkdirs();
 		fout = new FileOutputStream(holdingPlace.getCanonicalPath() + java.io.File.separator + FILE_STORED);
 		gzout = new GZIPOutputStream(fout);
-		fin = new FileInputStream(file);
+		fin = stream;
 		
 		byte[] buffer = new byte[1024*64];
 		int read = fin.read(buffer);
