@@ -128,6 +128,22 @@ public class File extends Item {
 		String folder = storage.getCanonicalPath() + java.io.File.separator + id + java.io.File.separator + revision;
 		return new java.io.File(folder);
 	}
+	
+	public void checkinFromStream(InputStream stream, String reason, int lockStatus, boolean eol) throws java.io.IOException {
+		if(!isNew() && !isFromHistory()) {
+			int newRevision = getRevisionNumber() + 1;
+			loadProperties();
+			holdingPlace = createHoldingPlace(newRevision);
+			setRevisionNumber(newRevision);
+			setComment(reason);
+			setModifiedBy();
+			setModifiedTime();
+			copyToGz(stream);
+			update();
+		} else {
+			throw new InvalidOperationException("Cannot check-in a file that was not added or from history");
+		}
+	}
 
 	public void checkinFrom(java.io.File file, String reason, int lockStatus, boolean forceCheckin, boolean updateStatus) throws java.io.IOException {
 		if(!isNew() && !isFromHistory()) {
