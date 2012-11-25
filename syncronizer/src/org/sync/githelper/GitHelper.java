@@ -55,6 +55,7 @@ public class GitHelper extends RepositoryHelper {
 	private Thread gitFastImportErrorEater;
 	private String gitRepositoryDir;
 	private Map<String, StarteamFileInfo> fileInformation;
+	private int debugFileCounter = 0;
 	
 	private final FilenameFilter gitFilter = new FilenameFilter() {
 		@Override
@@ -247,7 +248,7 @@ public class GitHelper extends RepositoryHelper {
 			return gitFastImport.getOutputStream();
 		} else {
 			try {
-				return new FileOutputStream(fastExportOverrideToFile);
+				return new FileOutputStream(fastExportOverrideToFile.getPath() + "." + (debugFileCounter++));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -257,16 +258,19 @@ public class GitHelper extends RepositoryHelper {
 	
 	@Override
 	public boolean isFastImportRunning() {
-		try {
-			if(0 == gitFastImport.exitValue()) {
-				gitFastImport = null;
-				return false;
-			} else {
-				return true;
+		if(null == fastExportOverrideToFile) {
+			try {
+				if(0 == gitFastImport.exitValue()) {
+					gitFastImport = null;
+					return false;
+				} else {
+					return true;
+				}
+			} catch (IllegalThreadStateException e) {
 			}
-		} catch (IllegalThreadStateException e) {
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
