@@ -285,7 +285,7 @@ public class Creator {
 	}
 
 	private static void showContentOfFolder(Folder rootFolder, String ident) {
-		System.out.println(ident + "+" + rootFolder.getName());
+		System.out.println(ident + "+" + rootFolder.getName() + "\t" + rootFolder.getObjectID());
 		for(Folder f : rootFolder.getSubFolders()) {
 			showContentOfFolder(f, ident + " ");
 		}
