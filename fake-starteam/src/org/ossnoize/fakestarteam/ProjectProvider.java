@@ -118,4 +118,8 @@ public class ProjectProvider {
 			throw new InvalidOperationException("Project name should not be of zero length");
 		new SerializableProject(server, projectName, rootDirectory).update();
 	}
+
+	public Project findProject(String projectName) {
+		return projects.get(projectName);
+	}
 }
