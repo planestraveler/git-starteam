@@ -25,6 +25,8 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.ossnoize.fakestarteam.exception.InvalidOperationException;
+
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 
@@ -112,6 +114,8 @@ public class ProjectProvider {
 	}
 
 	public void createNewProject(Server server, String projectName, String rootDirectory) {
+		if(projectName.length() == 0)
+			throw new InvalidOperationException("Project name should not be of zero length");
 		new SerializableProject(server, projectName, rootDirectory).update();
 	}
 }
