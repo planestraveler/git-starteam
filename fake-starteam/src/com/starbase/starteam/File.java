@@ -76,31 +76,14 @@ public class File extends Item {
 	}
 
 	public void add(java.io.File file, String name, String desc, String reason, int lockStatus, boolean updateStatus) throws java.io.IOException {
-		if(isNew()) {
-			registerNewID();
-			holdingPlace = createHoldingPlace(0);
-			loadProperties();
-			setRevisionNumber(0);
-			setComment(reason);
-			setDescription(desc);
-			setName(name);
-			setModifiedBy();
-			setCreatedTime();
-			setModifiedTime();
-			copyToGz(file);
-			isNew = false;
-			update();
-			shareTo(parent);
-		} else {
-			throw new InvalidOperationException("Cannot add a file that is already existing");
-		}
+		addFromStream(new FileInputStream(file), name, desc, reason, lockStatus);
 	}
 	
 	public void addFromStream(InputStream stream, String fileName, String description, String comment, int lockStatus) throws java.io.IOException {
 		if(isNew()) {
 			registerNewID();
 			holdingPlace = createHoldingPlace(0);
-			loadProperties();
+			//loadProperties();
 			setRevisionNumber(0);
 			setComment(comment);
 			setDescription(description);
