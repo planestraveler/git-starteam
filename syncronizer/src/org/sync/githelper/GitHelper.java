@@ -27,11 +27,15 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 import org.sync.ErrorEater;
 import org.sync.RepositoryHelper; 
 import org.sync.util.MD5Builder;
@@ -355,6 +359,30 @@ public class GitHelper extends RepositoryHelper {
 		}
 		return null;
 	}
+
+	@Override
+	public Date getLastCommitOfBranch(String branchName) {
+		ProcessBuilder process = new ProcessBuilder();
+		process.command(gitExecutable, "log", "-1", "--date=iso8601", branchName);
+		process.directory(new File(gitRepositoryDir));
+		try {
+			Process log = process.start();
+			GitFirstLogInformationReader logReader = new GitFirstLogInformationReader(log.getInputStream());
+			Thread logReaderThread = new Thread(logReader);
+			Thread errorEater = new Thread(new ErrorEater(log.getErrorStream()));
+			logReaderThread.start();
+			errorEater.start();
+			log.waitFor();
+			logReaderThread.join();
+			errorEater.join();
+			return logReader.getCommitDate();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	@SuppressWarnings("unchecked")
 	private boolean loadFileInformation() {
@@ -469,5 +497,81 @@ public class GitHelper extends RepositoryHelper {
 			trackedFiles = listOfTrackedFiles;
 		}
 		
+	}
+
+	private class GitFirstLogInformationReader implements Runnable {
+		private static final String dateKey = "Date:";
+		private static final String shaKey = "commit";
+		private static final String authorKey = "Author:";
+		private java.util.Date commitDate;
+		private String author;
+		private String commitSHA;
+		private String comment;
+		private InputStream logStream;
+		
+		public GitFirstLogInformationReader(InputStream stream) {
+			logStream = stream;
+		}
+		
+		public Date getCommitDate() {
+			return commitDate;
+		}
+
+		public String getAuthor() {
+			return author;
+		}
+		
+		public String getCommitSHA() {
+			return commitSHA;
+		}
+		
+		public String getComment() {
+			return comment;
+		}
+		@Override
+		public void run() {
+			SimpleDateFormat dateFormatIso =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+			InputStreamReader reader = null;
+			BufferedReader buffer = null;
+			try {
+				reader = new InputStreamReader(logStream);
+				buffer = new BufferedReader(reader);
+				String line;
+				while((line = buffer.readLine()) != null) {
+					if(line.trim().startsWith(dateKey)) {
+						String isoDate = line.substring(dateKey.length()).trim();
+						try {
+							commitDate = dateFormatIso.parse(isoDate);
+						} catch (ParseException e) {
+							throw new InvalidOperationException("The date " + isoDate + " is not a valid (git wise) iso 8601 date");
+						}
+					} else if (line.trim().startsWith(shaKey)) {
+						commitSHA = line.substring(shaKey.length()).trim();
+						comment = ""; // new Commit
+					} else if (line.trim().startsWith(authorKey)) {
+						author = line.substring(authorKey.length()).trim();
+					} else {
+						comment = line.trim() + " ";
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if(buffer != null) {
+					try {
+						buffer.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				if(reader != null) {
+					try {
+						reader.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 }

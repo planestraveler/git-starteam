@@ -116,4 +116,6 @@ public abstract class RepositoryHelper {
 	public void setFastExportDumpFile(File file) {
 		fastExportOverrideToFile = file;
 	}
+	
+	public abstract java.util.Date getLastCommitOfBranch(String branchName);
 }
