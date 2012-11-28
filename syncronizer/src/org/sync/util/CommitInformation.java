@@ -21,7 +21,7 @@ package org.sync.util;
  * @author Steve Tousignant <s.tousignant@gmail.com>
  *
  */
-public class CommitInformation implements Comparable<CommitInformation> {
+public final class CommitInformation implements Comparable<CommitInformation> {
 
 	private long time;
 	private int uid;
