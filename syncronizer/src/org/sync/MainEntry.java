@@ -42,6 +42,7 @@ public class MainEntry {
 		CmdLineParser.Option selectPort = parser.addIntegerOption('P', "port");
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
+		CmdLineParser.Option selectTimeBasedImport = parser.addBooleanOption('T', "time-based");
 		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
 		CmdLineParser.Option selectFolder = parser.addStringOption('f', "folder");
 		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
@@ -71,6 +72,7 @@ public class MainEntry {
 		String project = (String) parser.getOptionValue(selectProject);
 		String view = (String) parser.getOptionValue(selectView);
 		String time = (String) parser.getOptionValue(selectTime);
+		Boolean timeBased = (Boolean) parser.getOptionValue(selectTimeBasedImport);
 		String folder = (String) parser.getOptionValue(selectFolder);
 		String domain = (String) parser.getOptionValue(selectDomain);
 		Boolean keyword = (Boolean) parser.getOptionValue(isExpandKeywords);
@@ -124,62 +126,22 @@ public class MainEntry {
 						p.setExpandKeywords(true);
 					}
 					GitImporter g = new GitImporter(starteam, p);
+					if(null != head) {
+						g.setHeadName(head);
+					}
+					if(null != resume) {
+						g.setResume(resume);
+					}
+					if(null != dumpTo) {
+						g.setDumpFile(new File(dumpTo));
+					}
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
-							View vc;
-							long hour = 3600000L; // mSec
-							long day = 24 * hour; // 86400000 mSec
-							long firstTime = v.getCreatedTime().getLongValue();
-							System.err.println("View Created Time: " + new java.util.Date(firstTime));
-							if (null == date){
-								if(null != resume) {
-									// -R is for branch view
-									// 2000 mSec here is to avoid side effect in StarTeam View Configuration
-									vc = new View(v, ViewConfiguration.createFromTime(new OLEDate(firstTime + 2000)));
-									g.setLastFilesLastSortedFileList(vc, folder);
-								} 
-								date = new java.util.Date(firstTime);
-								date.setHours(23);
-								date.setMinutes(59);
-								date.setSeconds(59);
+							if(timeBased) {
+								g.generateDayByDayImport(v, date, folder, domain);
+							} else {
+								g.generateFastImportStream(v, folder, domain);
 							}
-							firstTime = date.getTime();
-							
-							GitImporter gi = new GitImporter(starteam, p);
-							gi.setFolder(v, folder);
-							gi.recursiveLastModifiedTime(gi.getFolder());
-							long lastTime = gi.getLastModifiedTime();
-
-							// in case View life less than 24 hours
-							if(firstTime > lastTime) {
-								firstTime = v.getCreatedTime().getLongValue();
-							}
-	
-							long vcTime;
-							System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
-							g.openHelper();
-							if(null != dumpTo) {
-								g.setDumpFile(new File(dumpTo));
-							}
-							for(;firstTime < lastTime; firstTime += day) {
-								if(lastTime - firstTime <= day) {
-									vc = v;
-									vcTime = lastTime;
-								} else {
-									vc = new View(v, ViewConfiguration.createFromTime(new OLEDate(firstTime)));
-									vcTime = firstTime;
-								}
-								if(null != head) {
-									g.setHeadName(head);
-								}
-								if(null != resume) {
-									g.setResume(resume);
-								}
-								System.err.println("View Configuration Time: " + new java.util.Date(vcTime));
-								g.generateFastImportStream(vc, vcTime, folder, domain);
-								vc.discard();
-							}
-							g.closeHelper();
 							break;
 						}
 					}
