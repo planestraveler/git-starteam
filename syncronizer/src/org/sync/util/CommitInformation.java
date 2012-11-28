@@ -51,14 +51,13 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 		return comment;
 	}
 	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof CommitInformation) {
-			CommitInformation info = (CommitInformation) obj;
-			return uid == info.uid &&
-					(comment.length() == 0 || info.comment.length() == 0 || info.comment.equalsIgnoreCase(comment));
-		}
-		return false;
+	/**
+	 * This method will return if the 2 commit information that are compared are equivalent
+	 * @return true if the uid are the same and the 2 comment correlate;
+	 */
+	public boolean equivalent(CommitInformation info) {
+		return uid == info.uid &&
+				(comment.length() == 0 || info.comment.length() == 0 || info.comment.equalsIgnoreCase(comment));
 	}
 	
 	@Override
