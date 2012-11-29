@@ -153,7 +153,7 @@ public class GitHelper extends RepositoryHelper {
 		try {
 			Process lsFiles = process.start();
 			gitQueryWorker = new Thread(new GitLsFilesReader(lsFiles.getInputStream()));
-			gitErrorStreamEater = new Thread(new ErrorEater(lsFiles.getErrorStream()));
+			gitErrorStreamEater = new Thread(new ErrorEater(lsFiles.getErrorStream(), "ls-files"));
 			gitQueryWorker.start();
 			gitErrorStreamEater.start();
 			trackedFilesReturnCode = lsFiles.waitFor();
@@ -175,7 +175,7 @@ public class GitHelper extends RepositoryHelper {
 		try {
 			Process status = process.start();
 			Thread statusOut = new Thread(new ErrorEater(status.getInputStream(), true));
-			Thread statusErr = new Thread(new ErrorEater(status.getErrorStream(), true));
+			Thread statusErr = new Thread(new ErrorEater(status.getErrorStream(), "branch"));
 			statusOut.start();
 			statusErr.start();
 			int result = status.waitFor();
@@ -216,8 +216,8 @@ public class GitHelper extends RepositoryHelper {
 		process.directory(new File(gitRepositoryDir));
 		try {
 			Process gitGc = process.start();
-			gitErrorStreamEater = new Thread(new ErrorEater(gitGc.getErrorStream()));
-			gitQueryWorker = new Thread(new ErrorEater(gitGc.getInputStream()));
+			gitErrorStreamEater = new Thread(new ErrorEater(gitGc.getErrorStream(), "gc"));
+			gitQueryWorker = new Thread(new ErrorEater(gitGc.getInputStream(), "gc"));
 			gitErrorStreamEater.start();
 			gitQueryWorker.start();
 			gitGc.waitFor();
@@ -241,8 +241,8 @@ public class GitHelper extends RepositoryHelper {
 				process.directory(new File(gitRepositoryDir));
 				try {
 					gitFastImport = process.start();
-					gitFastImportOutputEater = new Thread(new ErrorEater(gitFastImport.getInputStream()));
-					gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream()));
+					gitFastImportOutputEater = new Thread(new ErrorEater(gitFastImport.getInputStream(), "fast-import"));
+					gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream(), "fast-import"));
 					gitFastImportOutputEater.start();
 					gitFastImportErrorEater.start();
 				} catch (IOException e) {
@@ -345,7 +345,7 @@ public class GitHelper extends RepositoryHelper {
 			Process show = process.start();
 			MD5Builder md5Builder = new MD5Builder(show.getInputStream());
 			Thread md5Thread = new Thread(md5Builder);
-			Thread errorEater = new Thread(new ErrorEater(show.getErrorStream()));
+			Thread errorEater = new Thread(new ErrorEater(show.getErrorStream(), "show"));
 			md5Thread.start();
 			errorEater.start();
 			show.waitFor();
@@ -357,7 +357,7 @@ public class GitHelper extends RepositoryHelper {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new MD5();
 	}
 
 	@Override
@@ -369,7 +369,7 @@ public class GitHelper extends RepositoryHelper {
 			Process log = process.start();
 			GitFirstLogInformationReader logReader = new GitFirstLogInformationReader(log.getInputStream());
 			Thread logReaderThread = new Thread(logReader);
-			Thread errorEater = new Thread(new ErrorEater(log.getErrorStream()));
+			Thread errorEater = new Thread(new ErrorEater(log.getErrorStream(), "log"));
 			logReaderThread.start();
 			errorEater.start();
 			log.waitFor();
