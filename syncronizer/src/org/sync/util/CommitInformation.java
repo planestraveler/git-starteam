@@ -59,17 +59,26 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 		return uid == info.uid &&
 				(comment.length() == 0 || info.comment.length() == 0 || info.comment.equalsIgnoreCase(comment));
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof CommitInformation) {
+			CommitInformation info = (CommitInformation) obj;
+			return time == info.getTime() && uid == info.getUid() && comment.equalsIgnoreCase(info.getComment());
+		}
+		return false;
+	}
+
 	@Override
 	public int compareTo(CommitInformation o) {
 		if(time == o.time) {
 			if(uid == o.uid) {
 				if(comment.length() == 0) {
-					return path.compareTo(o.path);
+					return path.compareTo(o.getPath());
 				} else if (o.comment.length() == 0) {
-					return path.compareTo(o.path);
+					return path.compareTo(o.getPath());
 				} else if (comment.equalsIgnoreCase(o.comment)) {
-					return path.compareTo(o.path);
+					return path.compareTo(o.getPath());
 				}
 				return comment.compareTo(o.comment);
 			} else if (uid > o.uid) {

@@ -32,6 +32,7 @@ public class CommitInformationTest {
 	private CommitInformation commitE;
 	private CommitInformation commitF;
 	private CommitInformation commitG;
+	private CommitInformation commitH;
 
 	@Before
 	public void setUp() throws Exception {
@@ -42,6 +43,7 @@ public class CommitInformationTest {
 		commitE = new CommitInformation(12347, 12, "TestA", "/path/to/file/testE");
 		commitF = new CommitInformation(12347, 12, "", "/path/to/file/testA");
 		commitG = new CommitInformation(12378, 11, "", "/path/to/file/testD");
+		commitH = new CommitInformation(12378, 11, "ConflictB", "/path/to/file/testH");
 	}
 
 	@After
@@ -50,8 +52,17 @@ public class CommitInformationTest {
 
 	@Test
 	public void testEqualsObject() {
-		assertEquals(commitA, new CommitInformation(78557, 12, "TestA", "/path/to/an/other/File"));
+		assertEquals(commitA, new CommitInformation(12345, 12, "TestA", "/path/to/an/other/File"));
 		assertNotSame(commitD, commitA);
+		assertNotSame(commitA, "This is a commit message");
+		assertTrue(commitD.compareTo(commitH) < 0);
+		assertTrue(commitH.compareTo(commitD) > 0);
+	}
+	
+	@Test
+	public void testEquivalentObject() {
+		assertTrue(commitA.equivalent(new CommitInformation(78557, 12, "TestA", "/path/to/an/orther/File")));
+		assertFalse(commitD.equivalent(commitA));
 	}
 
 	@Test
@@ -77,12 +88,14 @@ public class CommitInformationTest {
 	public void testAlmostSameTimeUIDDifferentFile() {
 		assertTrue(commitB.compareTo(commitE) < 0);
 		assertTrue(commitE.compareTo(commitB) > 0);
+		assertNotSame(commitB, commitE);
 	}
 	
 	@Test
 	public void testAlmostSameTimeDifferentUID() {
 		assertTrue(commitD.compareTo(commitC) < 0);
 		assertTrue(commitC.compareTo(commitD) > 0);
+		assertNotSame(commitD, commitC);
 	}
 	
 	@Test
@@ -94,6 +107,7 @@ public class CommitInformationTest {
 	public void testAlmostSameTimeUIDNoCommentDifferentFile() {
 		assertTrue(commitF.compareTo(commitE) < 0);
 		assertTrue(commitE.compareTo(commitF) > 0);
+		assertNotSame(commitF, commitE);
 	}
 
 }
