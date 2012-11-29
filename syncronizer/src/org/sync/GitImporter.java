@@ -322,6 +322,7 @@ public class GitImporter {
 				}
 				ith.remove();
 				sortedFileList.put(info, (File)item);
+				AddedSortedFileList.put(info, (File)item);
 			}
 		}
 	}
