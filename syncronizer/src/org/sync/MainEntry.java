@@ -142,6 +142,8 @@ public class MainEntry {
 							} else {
 								g.generateFastImportStream(v, folder, domain);
 							}
+							// process is finished we can close now.
+							g.dispose();
 							break;
 						}
 					}

@@ -34,6 +34,7 @@ import org.ossnoize.git.fastimport.FileModification;
 import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
+import org.sync.util.CommitInformation;
 
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
@@ -51,16 +52,17 @@ import com.starbase.starteam.ViewConfiguration;
 import com.starbase.util.OLEDate;
 
 public class GitImporter {
-	private static final String revisionKeyFormat = "{0,number,000000000000000}|{1,number,000000}|{2}|{3}";
 	private Server server;
 	private Project project;
 	private Folder folder;
 	private int folderNameLength;
 	private long lastModifiedTime = 0;
-	private Map<String, File> sortedFileList = new TreeMap<String, File>();
-	private Map<String, File> AddedSortedFileList = new TreeMap<String, File>();
-	private Map<String, File> lastSortedFileList = new TreeMap<String, File>();
-	private Commit lastcommit;
+	private Map<CommitInformation, File> sortedFileList = new TreeMap<CommitInformation, File>();
+	private Map<CommitInformation, File> AddedSortedFileList = new TreeMap<CommitInformation, File>();
+	private Map<CommitInformation, File> lastSortedFileList = new TreeMap<CommitInformation, File>();
+	private Commit lastCommit; 
+	// get the really old time as base information;
+	private CommitInformation lastInformation = new CommitInformation(Long.MIN_VALUE, Integer.MIN_VALUE, "", "");
 	private OutputStream exportStream;
 	private final String headFormat = "refs/heads/{0}";
 	private String alternateHead = null;
@@ -74,15 +76,7 @@ public class GitImporter {
 	public GitImporter(Server s, Project p) {
 		server = s;
 		project = p;
-	}
-
-	public void openHelper() {
 		helper = RepositoryHelperFactory.getFactory().createHelper();
-	}
-	
-	public void closeHelper() {
-		helper.gc();
-		RepositoryHelperFactory.getFactory().clearCachedHelper();
 	}
 	
 	public long getLastModifiedTime() {
@@ -162,42 +156,18 @@ public class GitImporter {
 		lastSortedFileList.putAll(sortedFileList);
 		recoverDeleteInformation(deletedFiles, view);
 
-		if(AddedSortedFileList.size() > 0 || deletedFiles.size() > 0) {
-			try {
-				exportStream = helper.getFastImportStream();
-			} catch (NullPointerException e) {
-				e.printStackTrace();
-				return;
-			}
-		}
+		exportStream = helper.getFastImportStream();
 		
 		String head = view.getName();
 		if(null != alternateHead) {
 			head = alternateHead;
 		}
-		String lastComment = "";
-		int lastUID = -1;
-		lastcommit = null;
 		Vector<java.io.File> lastFiles = new Vector<java.io.File>(10);
-		for(Map.Entry<String, File> e : AddedSortedFileList.entrySet()) {
+		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
-			String cmt;
-			String userName;
-			int userId;
-			long modificationTime;
-			if(!f.isDeleted()) {
-				cmt = f.getComment();
-				userId = f.getModifiedBy();
-				userName = server.getUser(f.getModifiedBy()).getName();
-				modificationTime = f.getModifiedTime().getLongValue();
-			} else {
-				cmt = "";
-				userId = f.getDeletedUserId();
-				userName = server.getUser(f.getDeletedUserId()).getName();
-				modificationTime = f.getDeletedTime().getLongValue();
-			}
-			String userEmail = userName.replaceAll(" ", ".");
-			userEmail += "@" + domain;
+			CommitInformation current = e.getKey();
+			String userName = server.getUser(current.getUid()).getName();
+			String userEmail = userName.replaceAll(" ", ".") + "@" + domain;
 			String path = f.getParentFolderHierarchy() + f.getName();
 			path = path.replace('\\', '/');
 			// Strip the view name from the path
@@ -236,39 +206,36 @@ public class GitImporter {
 					fo = fm;
 				}
 				fo.setPath(path);
-				if(null != lastcommit && (cmt.length() == 0 || lastComment.equalsIgnoreCase(cmt)) && lastUID == userId) {
-					lastcommit.addFileOperation(fo);
+				if(null != lastCommit && lastInformation.equivalent(current)) {
+					lastCommit.addFileOperation(fo);
 					if(null != aFile)
 						lastFiles.add(aFile);
 				} else {
 					String ref = MessageFormat.format(headFormat, head);
-					Commit commit = new Commit(userName, userEmail, cmt, ref, new java.util.Date(modificationTime));
+					Commit commit = new Commit(userName, userEmail, current.getComment(), ref, new java.util.Date(current.getTime()));
 					commit.addFileOperation(fo);
-					if(null == lastcommit) {
+					if(null == lastCommit) {
 						if(isResume) {
 							commit.resumeOnTopOfRef();
 						}
 					} else {
-						lastcommit.writeTo(exportStream);
-						if(! isResume) {
-							isResume = true;
-						}
+						lastCommit.writeTo(exportStream);
 						for(java.io.File old : lastFiles) {
 							old.delete();
 						}
 						lastFiles.clear();
-						commit.setFromCommit(lastcommit);
+						commit.setFromCommit(lastCommit);
 					}
 					if(null != aFile)
 						lastFiles.add(aFile);
 					
 					/** Keep last for information **/
-					lastComment = cmt;
-					lastUID = f.getModifiedBy();
-					lastcommit = commit;
+					lastCommit = commit;
+					lastInformation = current;
 				}
 			} catch (IOException io) {
 				io.printStackTrace();
+				System.err.println("Git outputstream just crash unexpectedly. Stopping process");
 			} catch (InvalidPathException e1) {
 				e1.printStackTrace();
 			}
@@ -285,20 +252,17 @@ public class GitImporter {
 						"Cleaning files move along",
 						ref,
 						new java.util.Date(view.getConfiguration().getTime().getLongValue()));
-				if(null == lastcommit) {
+				if(null == lastCommit) {
 					if(isResume) {
 						commit.resumeOnTopOfRef();
 					}
 				} else {
-					lastcommit.writeTo(exportStream);
-					if(! isResume) {
-						isResume = true;
-					}
+					lastCommit.writeTo(exportStream);
 					for(java.io.File old : lastFiles) {
 						old.delete();
 					}
 					lastFiles.clear();
-					commit.setFromCommit(lastcommit);
+					commit.setFromCommit(lastCommit);
 				}
 				for(String path : deletedFiles) {
 					if(!helper.isSpecialFile(path)) {
@@ -311,14 +275,14 @@ public class GitImporter {
 						}
 					}
 				}
-				lastcommit = commit;
+				lastCommit = commit;
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 		}
-		if(null != lastcommit) {
+		if(null != lastCommit) {
 			try {
-				lastcommit.writeTo(exportStream);
+				lastCommit.writeTo(exportStream);
 				for(java.io.File old : lastFiles) {
 					old.delete();
 				}
@@ -326,9 +290,6 @@ public class GitImporter {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			if(! isResume) {
-				isResume = true;
-			}		
 		} else {
 			if(AddedSortedFileList.size() > 0) {
 				System.err.println("There was no new revision in the starteam view.");
@@ -337,16 +298,18 @@ public class GitImporter {
 //				System.err.println("The starteam view specified was empty.");
 			}
 		}
-		if(AddedSortedFileList.size() > 0 || deletedFiles.size() > 0) {
-			try {
-				exportStream.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			System.gc();
-			while(helper.isFastImportRunning());
-		}
+
 		AddedSortedFileList.clear();
+		System.gc();
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		exportStream.close();
+		while(helper.isFastImportRunning()) {
+			Thread.sleep(500); // active wait but leave him a chance to actually finish.
+		}
+		super.finalize();
 	}
 	
 	private void recoverDeleteInformation(Set<String> listOfFiles, View view) {
@@ -356,24 +319,23 @@ public class GitImporter {
 			String path = ith.next();
 			Integer fileID = helper.getRegisteredFileId(path);
 			if(null != fileID) {
+				CommitInformation info;
 				Item item = recycleBin.findItem(fileType, fileID);
 				if(item.isDeleted()) {
-					//TODO: add delete information when figured out how.
-					int userID = item.getDeletedUserId();
-					long time = item.getDeletedTime().getLongValue();
-					String comment = ""; // we never have comment of the delete in starteam.
-					String key = MessageFormat.format(revisionKeyFormat, time, userID, comment, path);
-					sortedFileList.put(key, (File)item);
+					info = new CommitInformation(item.getDeletedTime().getLongValue(), 
+												 item.getDeletedUserId(),
+												 "",
+												 path);
 				} else {
 					item = view.findItem(fileType, fileID);
-					int userID = item.getModifiedBy();
-					long time = item.getDeletedTime().getLongValue();
-					String comment = ""; // Best guess we have is that the file has moved.
-					String key = MessageFormat.format(revisionKeyFormat, time, userID, comment, path);
+					info = new CommitInformation(item.getDeletedTime().getLongValue(),
+												 item.getModifiedBy(),
+												 "",
+												 path);
 					System.err.println(path + " has moved to " + item.getParentFolderHierarchy());
-					sortedFileList.put(key, (File)item);
 				}
 				ith.remove();
+				sortedFileList.put(info, (File)item);
 			}
 		}
 	}
@@ -406,8 +368,7 @@ public class GitImporter {
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
-				long modifiedTime = i.getModifiedTime().getLongValue();
-				int userid = i.getModifiedBy();
+
 				String path = i.getParentFolderHierarchy() + historyFile.getName();
 				path = path.replace('\\', '/');
 				//path = path.substring(1);
@@ -418,15 +379,14 @@ public class GitImporter {
 					deletedFiles.remove(path);
 				}
 				files.add(path);
-				String comment = i.getComment();
-				i.discard();
-				String key = MessageFormat.format(revisionKeyFormat, modifiedTime, userid, comment, path);
-				if(! lastSortedFileList.containsKey(key)) {
-					AddedSortedFileList.put(key, historyFile);
+				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), i.getComment(), path);
+				if(! lastSortedFileList.containsKey(info)) {
+					AddedSortedFileList.put(info, historyFile);
 //					System.err.println("Found file marked as: " + key);
 				}
-				sortedFileList.put(key, historyFile);
+				sortedFileList.put(info, historyFile);
 			}
+			i.discard();
 		}
 		for(Folder subfolder : f.getSubFolders()) {
 			recursiveFilePopulation(subfolder);
@@ -479,7 +439,6 @@ public class GitImporter {
 
 		long vcTime;
 		System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
-		openHelper();
 		for(;firstTime < lastTime; firstTime += day) {
 			if(lastTime - firstTime <= day) {
 				vc = view;
@@ -492,7 +451,15 @@ public class GitImporter {
 			generateFastImportStream(vc, baseFolder, domain);
 			vc.discard();
 		}
-		closeHelper();
-
+		helper.gc();
+	}
+	
+	public void dispose() {
+		try {
+			exportStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		exportStream = null;
 	}
 }
