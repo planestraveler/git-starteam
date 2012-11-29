@@ -35,6 +35,7 @@ import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.util.CommitInformation;
+import org.sync.util.TempFileManager;
 
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
@@ -162,7 +163,6 @@ public class GitImporter {
 		if(null != alternateHead) {
 			head = alternateHead;
 		}
-		Vector<java.io.File> lastFiles = new Vector<java.io.File>(10);
 		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
 			CommitInformation current = e.getKey();
@@ -187,7 +187,7 @@ public class GitImporter {
 					fo = new FileDelete();
 					helper.unregisterFileId(path);
 				} else {
-					aFile = java.io.File.createTempFile("StarteamFile", ".tmp");
+					aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
 					cm.checkoutTo(f, aFile);
 					
 					Integer fileid = helper.getRegisteredFileId(path);
@@ -208,8 +208,6 @@ public class GitImporter {
 				fo.setPath(path);
 				if(null != lastCommit && lastInformation.equivalent(current)) {
 					lastCommit.addFileOperation(fo);
-					if(null != aFile)
-						lastFiles.add(aFile);
 				} else {
 					String ref = MessageFormat.format(headFormat, head);
 					Commit commit = new Commit(userName, userEmail, current.getComment(), ref, new java.util.Date(current.getTime()));
@@ -220,15 +218,9 @@ public class GitImporter {
 						}
 					} else {
 						lastCommit.writeTo(exportStream);
-						for(java.io.File old : lastFiles) {
-							old.delete();
-						}
-						lastFiles.clear();
+						TempFileManager.getInstance().deleteTempFiles();
 						commit.setFromCommit(lastCommit);
 					}
-					if(null != aFile)
-						lastFiles.add(aFile);
-					
 					/** Keep last for information **/
 					lastCommit = commit;
 					lastInformation = current;
@@ -258,11 +250,8 @@ public class GitImporter {
 					}
 				} else {
 					lastCommit.writeTo(exportStream);
-					for(java.io.File old : lastFiles) {
-						old.delete();
-					}
-					lastFiles.clear();
 					commit.setFromCommit(lastCommit);
+					TempFileManager.getInstance().deleteTempFiles();
 				}
 				for(String path : deletedFiles) {
 					if(!helper.isSpecialFile(path)) {
@@ -283,10 +272,7 @@ public class GitImporter {
 		if(null != lastCommit) {
 			try {
 				lastCommit.writeTo(exportStream);
-				for(java.io.File old : lastFiles) {
-					old.delete();
-				}
-				lastFiles.clear();
+				TempFileManager.getInstance().deleteTempFiles();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
