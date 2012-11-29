@@ -25,6 +25,7 @@ public class ErrorEater implements Runnable {
 
 	private InputStream errorStream;
 	private boolean dontWrite;
+	private String process;
 	
 	/**
 	 * Simple runner class to eat all error stream form subprocess and redirect it
@@ -32,21 +33,42 @@ public class ErrorEater implements Runnable {
 	 * @param in The error stream to read from.
 	 */
 	public ErrorEater(InputStream in) {
-		errorStream = in;
-		dontWrite = false;
+		this(in, "no identified", false);
+	}
+
+	/**
+	 * Simple runner class to eat all stream and push it in the error stream of the
+	 * current running class.
+	 * @param in The error stream to read from.
+	 * @param processName The name of the process launched.
+	 */
+	public ErrorEater(InputStream in, String processName) {
+		this(in, processName, false);
 	}
 	
 	/**
-	 * Simple runner class to eat all error stream from subprocess and redirect it
-	 * to the error stream of the current running class or just dump it in the void.
+	 * Simple runner class to eat all stream from subprocess and redirect it
+	 * to the error stream of the current running process or just dump it in the void.
 	 * @param in The error stream to read from.
-	 * @param dump if we should dump the stream or redirect it
+	 * @param dump If we don't write to the current process error stream.
 	 */
 	public ErrorEater(InputStream in, boolean dump) {
-		errorStream = in;
-		dontWrite = dump;
+		this(in, "not identified", dump);
 	}
 	
+	/**
+	 * Simple runner class to eat all stream and push it in the error stream of the
+	 * current running class.
+	 * @param in The stream to read from.
+	 * @param processName The name of the process launched.
+	 * @param dump If we don't write to the current process error stream.
+	 */
+	public ErrorEater(InputStream in, String processName, boolean dump) {
+		errorStream = in;
+		dontWrite = dump;
+		process = processName;
+	}
+
 	@Override
 	public void run() {
 		InputStreamReader reader = null;
@@ -58,7 +80,7 @@ public class ErrorEater implements Runnable {
 			String line = null;
 			while(null != (line = buffer.readLine())) {
 				if(!dontWrite)
-					System.err.println(line);
+					System.err.println(process + ":" + line);
 			}
 		} catch(IOException e) {
 			e.printStackTrace();
