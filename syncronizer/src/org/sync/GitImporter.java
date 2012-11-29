@@ -410,7 +410,16 @@ public class GitImporter {
 		View vc;
 		long hour = 3600000L; // mSec
 		long day = 24 * hour; // 86400000 mSec
-		long firstTime = view.getCreatedTime().getLongValue();
+		long firstTime;
+		if(isResume) {
+			String head = view.getName();
+			if(null != alternateHead) {
+				head = alternateHead;
+			}
+			firstTime = helper.getLastCommitOfBranch(head).getTime();
+		} else {
+			firstTime = view.getCreatedTime().getLongValue();
+		}
 		System.err.println("View Created Time: " + new java.util.Date(firstTime));
 		if (null == date){
 			if(isResume) {
@@ -431,7 +440,6 @@ public class GitImporter {
 		setFolder(view, baseFolder);
 		recursiveLastModifiedTime(getFolder());
 		long lastTime = getLastModifiedTime();
-
 		// in case View life less than 24 hours
 		if(firstTime > lastTime) {
 			firstTime = view.getCreatedTime().getLongValue();
