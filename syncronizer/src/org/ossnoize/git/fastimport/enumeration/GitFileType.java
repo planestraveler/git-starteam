@@ -19,7 +19,8 @@ package org.ossnoize.git.fastimport.enumeration;
 public enum GitFileType {
 
 	Normal("100644"),
-	Executable("100755");
+	Executable("100755"),
+	SymbolicLink("120000");
 	
 	private String OctalRepresentation;
 
