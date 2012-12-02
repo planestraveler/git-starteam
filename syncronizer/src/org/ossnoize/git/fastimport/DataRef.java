@@ -16,41 +16,11 @@
 ******************************************************************************/
 package org.ossnoize.git.fastimport;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-public class MarkID implements DataRef {
+public interface DataRef extends FastImportObject {
 
 	/**
-	 * Mark ID 0 is reserved so start at 1
+	 * The property referenced by this object
+	 * @return the data reference as &lt;sha1&gt; or &lt;markid&gt;
 	 */
-	private static long MarkID = 1;
-	public static MarkID getNextMarkID() {
-		if(MarkID < 0) {
-			throw new Error("Mark has wrapped around");
-		}
-		return new MarkID(MarkID++);
-	}
-
-	private String Id;
-	
-	private MarkID(long id) {
-		Id = ":" + id;
-	}
-	
-	@Override
-	public void writeTo(OutputStream out) throws IOException {
-		out.write(Id.getBytes());
-	}
-	
-	@Override
-	public String toString() {
-		return Id;
-	}
-
-	@Override
-	public String getId() {
-		return Id;
-	}
-
+	public String getId();
 }

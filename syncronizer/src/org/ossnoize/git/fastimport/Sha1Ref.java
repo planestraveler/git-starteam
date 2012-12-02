@@ -18,39 +18,31 @@ package org.ossnoize.git.fastimport;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.regex.Pattern;
 
-public class MarkID implements DataRef {
+import org.ossnoize.git.fastimport.exception.InvalidSha1;
 
-	/**
-	 * Mark ID 0 is reserved so start at 1
-	 */
-	private static long MarkID = 1;
-	public static MarkID getNextMarkID() {
-		if(MarkID < 0) {
-			throw new Error("Mark has wrapped around");
+
+public class Sha1Ref implements DataRef {
+	private final static Pattern validate = Pattern.compile("[0-9a-fA-F]{40}");
+
+	private String sha1;
+
+	public Sha1Ref(String sha1) {
+		if(!validate.matcher(sha1).matches()) {
+			throw new InvalidSha1("This is not a valid sha1: " + sha1);
 		}
-		return new MarkID(MarkID++);
-	}
-
-	private String Id;
-	
-	private MarkID(long id) {
-		Id = ":" + id;
+		this.sha1 = sha1;
 	}
 	
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
-		out.write(Id.getBytes());
-	}
-	
-	@Override
-	public String toString() {
-		return Id;
+		out.write(sha1.getBytes());
 	}
 
 	@Override
 	public String getId() {
-		return Id;
+		return sha1;
 	}
 
 }
