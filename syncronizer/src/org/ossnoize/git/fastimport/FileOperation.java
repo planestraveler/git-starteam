@@ -36,4 +36,12 @@ public abstract class FileOperation implements FastImportObject {
 			throw new InvalidPathException(MessageFormat.format("The path {0} should not contains relative reference (.. or .) in it.", path));
 		Path = path;
 	}
+	
+	public String getPath() {
+		return Path;
+	}
+	
+	public abstract boolean isInline();
+	
+	public abstract MarkID getMark();
 }

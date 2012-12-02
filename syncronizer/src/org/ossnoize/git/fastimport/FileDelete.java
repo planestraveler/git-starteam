@@ -18,4 +18,14 @@ public class FileDelete extends FileOperation {
 		
 		out.write(builder.toString().getBytes());
 	}
+
+	@Override
+	public boolean isInline() {
+		return true;
+	}
+
+	@Override
+	public MarkID getMark() {
+		return null;
+	}
 }

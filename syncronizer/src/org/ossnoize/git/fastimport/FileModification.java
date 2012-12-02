@@ -74,5 +74,18 @@ public class FileModification extends FileOperation {
 	public void setFileType(GitFileType type) {
 		FileType = type;
 	}
+
+	@Override
+	public boolean isInline() {
+		return Type == FileModificationType.Inline;
+	}
+
+	@Override
+	public MarkID getMark() {
+		if(Content instanceof Markable) {
+			return ((Markable)Content).getMarkID();
+		}
+		return null;
+	}
 	
 }
