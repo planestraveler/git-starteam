@@ -92,13 +92,18 @@ public class MD5 {
 		System.arraycopy(digest, 0, md5Sum, 0, md5Sum.length);
 	}
 	
-	public java.lang.String toHexString() {
+	public String toHexString() {
 		BigInteger bigInt = new BigInteger(1, md5Sum);
 		String output = bigInt.toString(16);
-		if(output.length() < 32) {
+		while(output.length() < 32) {
 			output = "0" + output;
 		}
 		return output;
+	}
+	
+	@Override
+	public String toString() {
+		return toHexString();
 	}
 	
 	@Override
