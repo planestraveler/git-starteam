@@ -33,7 +33,7 @@ public class ErrorEater implements Runnable {
 	 * @param in The error stream to read from.
 	 */
 	public ErrorEater(InputStream in) {
-		this(in, "no identified", false);
+		this(in, "not identified", false);
 	}
 
 	/**
