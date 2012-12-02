@@ -245,6 +245,10 @@ public class GitHelper extends RepositoryHelper {
 					gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream(), "fast-import"));
 					gitFastImportOutputEater.start();
 					gitFastImportErrorEater.start();
+					OutputStream out = gitFastImport.getOutputStream();
+					// Validate Feature needed;
+					Feature feature = new Feature(FeatureType.CatBlob);
+					feature.writeTo(out);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
