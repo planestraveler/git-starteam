@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
 import org.ossnoize.git.fastimport.FileDelete;
@@ -196,8 +197,11 @@ public class GitImporter {
 					} else {
 						helper.updateFileVersion(path, f.getRevisionNumber());
 					}
+					Blob fileToStage = new Blob(new Data(aFile));
 					
-					FileModification fm = new FileModification(new Data(aFile));
+					helper.writeBlob(fileToStage);
+					
+					FileModification fm = new FileModification(fileToStage);
 					if(aFile.canExecute()) {
 						fm.setFileType(GitFileType.Executable);
 					} else {

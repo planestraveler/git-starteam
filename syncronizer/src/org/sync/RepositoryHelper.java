@@ -17,8 +17,14 @@
 package org.sync;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.Set;
+
+import org.ossnoize.git.fastimport.Blob;
+import org.ossnoize.git.fastimport.Commit;
+import org.ossnoize.git.fastimport.DataRef;
 
 import com.starbase.util.MD5;
 
@@ -115,6 +121,11 @@ public abstract class RepositoryHelper {
 	 **/	
 	public void setFastExportDumpFile(File file) {
 		fastExportOverrideToFile = file;
+	}
+	
+	public void writeBlob(Blob fileToStage) throws IOException {
+		OutputStream fastImportStream = getFastImportStream();
+		fileToStage.writeTo(fastImportStream);
 	}
 	
 	public abstract java.util.Date getLastCommitOfBranch(String branchName);
