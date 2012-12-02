@@ -2,6 +2,7 @@ package org.ossnoize.git.fastimport;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,6 +15,7 @@ public class Commit implements Markable {
 	private final static String FROM_SP = "from ";
 	private final static String MERGE_SP = "merge ";
 	private final static SimpleDateFormat DATEFORMAT = new SimpleDateFormat("Z");
+	private final static String headFormat = "refs/heads/{0}{1}";
 
 	private Mark mark;
 	private String authorName;
@@ -70,7 +72,7 @@ public class Commit implements Markable {
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
 		StringBuilder commitMsg = new StringBuilder();
-		commitMsg.append(COMMIT).append(" ").append(reference).append('\n');
+		commitMsg.append(COMMIT).append(" ").append(MessageFormat.format(headFormat, reference, "")).append('\n');
 		out.write(commitMsg.toString().getBytes());
 		mark.writeTo(out);
 		commitMsg = new StringBuilder();
@@ -92,8 +94,7 @@ public class Commit implements Markable {
 			out.write('\n');
 		} else if(resumeFastImport) {
 			out.write(FROM_SP.getBytes());
-			out.write(reference.getBytes());
-			out.write("^0".getBytes());
+			out.write(MessageFormat.format(headFormat, reference, "^0").getBytes());
 			out.write('\n');
 		}
 		if(null != merge) {
@@ -114,5 +115,13 @@ public class Commit implements Markable {
 
 	public void resumeOnTopOfRef() {
 		resumeFastImport = true;
+	}
+	
+	public List<FileOperation> getFileOperation() {
+		return listOfOperation;
+	}
+	
+	public String getReference() {
+		return reference;
 	}
 }

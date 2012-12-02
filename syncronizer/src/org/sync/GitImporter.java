@@ -66,7 +66,6 @@ public class GitImporter {
 	// get the really old time as base information;
 	private CommitInformation lastInformation = new CommitInformation(Long.MIN_VALUE, Integer.MIN_VALUE, "", "");
 	private OutputStream exportStream;
-	private final String headFormat = "refs/heads/{0}";
 	private String alternateHead = null;
 	private boolean isResume = false;
 	private RepositoryHelper helper;
@@ -213,8 +212,7 @@ public class GitImporter {
 				if(null != lastCommit && lastInformation.equivalent(current)) {
 					lastCommit.addFileOperation(fo);
 				} else {
-					String ref = MessageFormat.format(headFormat, head);
-					Commit commit = new Commit(userName, userEmail, current.getComment(), ref, new java.util.Date(current.getTime()));
+					Commit commit = new Commit(userName, userEmail, current.getComment(), head, new java.util.Date(current.getTime()));
 					commit.addFileOperation(fo);
 					if(null == lastCommit) {
 						if(isResume) {
@@ -232,6 +230,7 @@ public class GitImporter {
 			} catch (IOException io) {
 				io.printStackTrace();
 				System.err.println("Git outputstream just crash unexpectedly. Stopping process");
+				System.exit(-1);
 			} catch (InvalidPathException e1) {
 				e1.printStackTrace();
 			}
@@ -242,18 +241,17 @@ public class GitImporter {
 		if(deletedFiles.size() > 0) {
 			try {
 				System.err.println("Janitor was needed for cleanup");
-				String ref = MessageFormat.format(headFormat, head);
 				Commit commit = new Commit("File Janitor",
 						"janitor@" + domain,
 						"Cleaning files move along",
-						ref,
+						head,
 						new java.util.Date(view.getConfiguration().getTime().getLongValue()));
 				if(null == lastCommit) {
 					if(isResume) {
 						commit.resumeOnTopOfRef();
 					}
 				} else {
-					lastCommit.writeTo(exportStream);
+					helper.writeCommit(lastCommit);
 					commit.setFromCommit(lastCommit);
 					TempFileManager.getInstance().deleteTempFiles();
 				}
