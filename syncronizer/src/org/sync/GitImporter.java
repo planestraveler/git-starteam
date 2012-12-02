@@ -404,7 +404,13 @@ public class GitImporter {
 			if(null != alternateHead) {
 				head = alternateHead;
 			}
-			firstTime = helper.getLastCommitOfBranch(head).getTime();
+			java.util.Date lastCommit = helper.getLastCommitOfBranch(head);
+			if(null != lastCommit) {
+				firstTime = lastCommit.getTime();
+			} else {
+				System.err.println("Cannot resume an import in a non existing branch");
+				return;
+			}
 		} else {
 			firstTime = view.getCreatedTime().getLongValue();
 		}
