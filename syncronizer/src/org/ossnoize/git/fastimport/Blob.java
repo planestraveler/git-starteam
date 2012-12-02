@@ -22,10 +22,12 @@ import java.io.OutputStream;
 public class Blob implements Markable {
 
 	private static final String BLOB = "blob\n";
+	private boolean wasWritten;
 	private Mark MarkId;
 	private Data Content;
 
 	public Blob() {
+		wasWritten = false;
 		MarkId = new Mark();
 	}
 	
@@ -39,9 +41,12 @@ public class Blob implements Markable {
 	}
 	
 	public void writeTo(OutputStream out) throws IOException {
-		out.write(BLOB.getBytes());
-		MarkId.writeTo(out);
-		Content.writeTo(out);
+		if(!wasWritten) {
+			out.write(BLOB.getBytes());
+			MarkId.writeTo(out);
+			Content.writeTo(out);
+			wasWritten = true;
+		}
 	}
 
 	@Override
