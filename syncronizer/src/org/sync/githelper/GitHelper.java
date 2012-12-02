@@ -244,15 +244,13 @@ public class GitHelper extends RepositoryHelper {
 		process.directory(new File(gitRepositoryDir));
 		try {
 			Process gitGc = process.start();
-			gitErrorStreamEater = new Thread(new ErrorEater(gitGc.getErrorStream(), "gc"));
-			gitQueryWorker = new Thread(new ErrorEater(gitGc.getInputStream(), "gc"));
+			Thread gitErrorStreamEater = new Thread(new ErrorEater(gitGc.getErrorStream(), "gc"));
+			Thread gitQueryWorker = new Thread(new ErrorEater(gitGc.getInputStream(), "gc"));
 			gitErrorStreamEater.start();
 			gitQueryWorker.start();
 			gitGc.waitFor();
 			gitErrorStreamEater.join();
-			gitErrorStreamEater = null;
 			gitQueryWorker.join();
-			gitQueryWorker = null;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
