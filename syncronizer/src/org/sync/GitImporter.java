@@ -156,13 +156,12 @@ public class GitImporter {
 		lastSortedFileList.clear();
 		lastSortedFileList.putAll(sortedFileList);
 		recoverDeleteInformation(deletedFiles, view);
-
-		exportStream = helper.getFastImportStream();
 		
 		String head = view.getName();
 		if(null != alternateHead) {
 			head = alternateHead;
 		}
+		exportStream = helper.getFastImportStream();
 		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
 			CommitInformation current = e.getKey();
@@ -219,7 +218,7 @@ public class GitImporter {
 							commit.resumeOnTopOfRef();
 						}
 					} else {
-						lastCommit.writeTo(exportStream);
+						helper.writeCommit(lastCommit);
 						TempFileManager.getInstance().deleteTempFiles();
 						commit.setFromCommit(lastCommit);
 					}
@@ -273,7 +272,7 @@ public class GitImporter {
 		}
 		if(null != lastCommit) {
 			try {
-				lastCommit.writeTo(exportStream);
+				helper.writeCommit(lastCommit);
 				TempFileManager.getInstance().deleteTempFiles();
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -452,11 +451,6 @@ public class GitImporter {
 	}
 	
 	public void dispose() {
-		try {
-			exportStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		exportStream = null;
+		helper.dispose();
 	}
 }

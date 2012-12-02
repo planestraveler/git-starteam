@@ -27,15 +27,29 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.security.DigestException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.ossnoize.fakestarteam.exception.InvalidOperationException;
+import org.ossnoize.git.fastimport.CatBlob;
+import org.ossnoize.git.fastimport.Commit;
+import org.ossnoize.git.fastimport.DataRef;
+import org.ossnoize.git.fastimport.Feature;
+import org.ossnoize.git.fastimport.FileDelete;
+import org.ossnoize.git.fastimport.FileOperation;
+import org.ossnoize.git.fastimport.Sha1Ref;
+import org.ossnoize.git.fastimport.enumeration.FeatureType;
 import org.sync.ErrorEater;
 import org.sync.RepositoryHelper; 
 import org.sync.util.MD5Builder;
@@ -49,36 +63,28 @@ public class GitHelper extends RepositoryHelper {
 	
 	private final static String STARTEAMFILEINFO = "StarteamFileInfo.gz";
 
-	private Thread gitQueryWorker;
-	private Thread gitErrorStreamEater;
-	private HashSet<String> trackedFiles;
-	private int trackedFilesReturnCode;
 	private String gitExecutable;
 	private Process gitFastImport;
 	private Thread gitFastImportOutputEater;
 	private Thread gitFastImportErrorEater;
 	private String gitRepositoryDir;
+	private GitFastImportOutputReader gitResponse;
 	private Map<String, StarteamFileInfo> fileInformation;
 	private int debugFileCounter = 0;
-	
-	private final FilenameFilter gitFilter = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			return name.equals(".git");
-		}
-	};
-	
+	private Map<String, Map<String, DataRef>> trackedFiles;
+	private MD5 catBlobMD5;
+
 	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
 		gitRepositoryDir = System.getProperty("user.dir");
-		
+		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
+
 		if (!findExecutable(preferedPath)) {
 			throw new Exception("Git executable not found.");
 		}
 		if (!repositoryExists(createRepo)) {
 			throw new Exception("Destination repository not found in '" + gitRepositoryDir + "'");
 		}
-		
-		grabTrackedFiles();
+
 		loadFileInformation();
 	}
 
@@ -144,23 +150,22 @@ public class GitHelper extends RepositoryHelper {
 		return false;
 	}
 	
-	private void grabTrackedFiles() {
-		trackedFilesReturnCode = Integer.MAX_VALUE;
-		trackedFiles = null;
+	private void grabTrackedFiles(String head) {
 		ProcessBuilder process = new ProcessBuilder();
-		process.command(gitExecutable, "ls-files");
+		process.command(gitExecutable, "ls-tree", "--full-tree" ,"-r", head);
 		process.directory(new File(gitRepositoryDir));
 		try {
 			Process lsFiles = process.start();
-			gitQueryWorker = new Thread(new GitLsFilesReader(lsFiles.getInputStream()));
-			gitErrorStreamEater = new Thread(new ErrorEater(lsFiles.getErrorStream(), "ls-files"));
+			Thread gitQueryWorker = new Thread(new GitLsFilesReader(lsFiles.getInputStream(), head));
+			Thread gitErrorStreamEater = new Thread(new ErrorEater(lsFiles.getErrorStream(), "ls-tree"));
 			gitQueryWorker.start();
 			gitErrorStreamEater.start();
-			trackedFilesReturnCode = lsFiles.waitFor();
+			int returnCode = lsFiles.waitFor();
 			gitQueryWorker.join();
-			gitQueryWorker = null;
 			gitErrorStreamEater.join();
-			gitErrorStreamEater = null;
+			if(0 != returnCode) {
+				trackedFiles.put(head, new HashMap<String, DataRef>());
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -191,12 +196,18 @@ public class GitHelper extends RepositoryHelper {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Set<String> getListOfTrackedFile() {
-		if(Integer.MAX_VALUE == trackedFilesReturnCode) {
-			return null;
+	public void dispose() {
+		super.dispose();
+		try {
+			int endCode = gitFastImport.waitFor();
+			if(endCode != 0) {
+				System.err.println("Git fast-import has finished anormally with code:" + endCode);
+			}
+			gitFastImportOutputEater.join();
+			gitFastImportErrorEater.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-		return (Set<String>) trackedFiles.clone();
 	}
 
 	@Override
@@ -207,6 +218,23 @@ public class GitHelper extends RepositoryHelper {
 		else if (testFile.getName().equalsIgnoreCase(".gitattributes"))
 			return true;
 		return false;
+	}
+	
+	@Override
+	public void writeCommit(Commit commit) throws IOException {
+		super.writeCommit(commit);
+		
+		String headName = commit.getReference();
+		for(FileOperation ops : commit.getFileOperation()) {
+			if(null != ops.getMark()) {
+				if(!trackedFiles.containsKey(headName)) {
+					trackedFiles.put(headName, new HashMap<String, DataRef>());
+				}
+				trackedFiles.get(headName).put(ops.getPath(), ops.getMark());
+			} else if(ops instanceof FileDelete) {
+				trackedFiles.get(headName).remove(ops.getPath());
+			}
+		}
 	}
 	
 	@Override
@@ -233,7 +261,7 @@ public class GitHelper extends RepositoryHelper {
 	}
 	
 	@Override
-	public OutputStream getFastImportStream() {
+	protected OutputStream getFastImportStream() {
 		if(null == fastExportOverrideToFile) {
 			if(null == gitFastImport) {
 				ProcessBuilder process = new ProcessBuilder();
@@ -241,7 +269,8 @@ public class GitHelper extends RepositoryHelper {
 				process.directory(new File(gitRepositoryDir));
 				try {
 					gitFastImport = process.start();
-					gitFastImportOutputEater = new Thread(new ErrorEater(gitFastImport.getInputStream(), "fast-import"));
+					gitResponse = new GitFastImportOutputReader(gitFastImport.getInputStream());
+					gitFastImportOutputEater = new Thread(gitResponse);
 					gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream(), "fast-import"));
 					gitFastImportOutputEater.start();
 					gitFastImportErrorEater.start();
@@ -339,27 +368,41 @@ public class GitHelper extends RepositoryHelper {
 		}
 		return null;
 	}
+
+	@Override
+	public Set<String> getListOfTrackedFile(String head) {
+		if(!trackedFiles.containsKey(head)) {
+			grabTrackedFiles(head);
+		}
+		if(!trackedFiles.containsKey(head)) {
+			return null;
+		}
+		return trackedFiles.get(head).keySet();
+	}
 	
 	@Override
-	public MD5 getMD5Of(String filename, String branchName) {
-		ProcessBuilder process = new ProcessBuilder();
-		process.command(gitExecutable, "show", branchName + ":" + filename);
-		process.directory(new File(gitRepositoryDir));
-		try {
-			Process show = process.start();
-			MD5Builder md5Builder = new MD5Builder(show.getInputStream());
-			Thread md5Thread = new Thread(md5Builder);
-			Thread errorEater = new Thread(new ErrorEater(show.getErrorStream(), "show"));
-			md5Thread.start();
-			errorEater.start();
-			show.waitFor();
-			md5Thread.join();
-			errorEater.join();
-			return md5Builder.getMD5();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+	public MD5 getMD5Of(String filename, String head) throws IOException {
+		if(!trackedFiles.containsKey(head)) {
+			grabTrackedFiles(head);
+		}
+		if(!trackedFiles.containsKey(head))
+			return new MD5();
+		if(trackedFiles.get(head).containsKey(filename)) {
+			catBlobMD5 = new MD5();
+			OutputStream fastImport = getFastImportStream();
+			gitResponse.setCurrentHead(head);
+			CatBlob blobRequest = new CatBlob(trackedFiles.get(head).get(filename));
+			blobRequest.writeTo(fastImport);
+			synchronized (catBlobMD5) {
+				if(catBlobMD5.toHexString().equals("00000000000000000000000000000000")) {
+					try {
+						catBlobMD5.wait(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			return catBlobMD5;
 		}
 		return new MD5();
 	}
@@ -464,41 +507,51 @@ public class GitHelper extends RepositoryHelper {
 	private class GitLsFilesReader implements Runnable {
 
 		private InputStream input;
-		private GitLsFilesReader(InputStream in) {
-			input = in;
+		private String head;
+		private GitLsFilesReader(InputStream in, String head) {
+			this.input = in;
+			this.head = head;
 		}
 		
 		@Override
 		public void run() {
-			HashSet<String> listOfTrackedFiles = new HashSet<String>();
-			InputStreamReader reader = null;
-			BufferedReader buffer = null;
-			
-			try {
-				reader = new InputStreamReader(input);
-				buffer = new BufferedReader(reader);
+			synchronized (trackedFiles) {
+				InputStreamReader reader = null;
+				BufferedReader buffer = null;
 				
-				String file = null;
-				while(null != (file = buffer.readLine())) {
-					listOfTrackedFiles.add(file);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				if(null != buffer) {
-					try {
-						buffer.close();
-					} catch (IOException e) {
+				try {
+					reader = new InputStreamReader(input);
+					buffer = new BufferedReader(reader);
+					
+					String file = null;
+					while(null != (file = buffer.readLine())) {
+						String path = file.substring(53).trim();
+						String sha1 = file.substring(12, 52).trim();
+						String type = file.substring(6,12).trim();
+						if(type.equalsIgnoreCase("blob")) {
+							if(!trackedFiles.containsKey(head)) {
+								trackedFiles.put(head, new HashMap<String, DataRef>());
+							}
+							trackedFiles.get(head).put(path, new Sha1Ref(sha1));
+						}
 					}
-				}
-				if(null != reader) {
-					try {
-						reader.close();
-					} catch (IOException e) {
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					if(null != buffer) {
+						try {
+							buffer.close();
+						} catch (IOException e) {
+						}
+					}
+					if(null != reader) {
+						try {
+							reader.close();
+						} catch (IOException e) {
+						}
 					}
 				}
 			}
-			trackedFiles = listOfTrackedFiles;
 		}
 		
 	}
@@ -509,7 +562,7 @@ public class GitHelper extends RepositoryHelper {
 		private static final String authorKey = "Author:";
 		private java.util.Date commitDate;
 		private String author;
-		private String commitSHA;
+		private DataRef commitSHA;
 		private String comment;
 		private InputStream logStream;
 		
@@ -525,7 +578,7 @@ public class GitHelper extends RepositoryHelper {
 			return author;
 		}
 		
-		public String getCommitSHA() {
+		public DataRef getCommitSHA() {
 			return commitSHA;
 		}
 		
@@ -550,7 +603,7 @@ public class GitHelper extends RepositoryHelper {
 							throw new InvalidOperationException("The date " + isoDate + " is not a valid (git wise) iso 8601 date");
 						}
 					} else if (line.trim().startsWith(shaKey)) {
-						commitSHA = line.substring(shaKey.length()).trim();
+						commitSHA = new Sha1Ref(line.substring(shaKey.length()).trim());
 						comment = ""; // new Commit
 					} else if (line.trim().startsWith(authorKey)) {
 						author = line.substring(authorKey.length()).trim();
@@ -575,6 +628,68 @@ public class GitHelper extends RepositoryHelper {
 						e.printStackTrace();
 					}
 				}
+			}
+		}
+	}
+
+	private class GitFastImportOutputReader implements Runnable {
+		
+		private InputStream stream;
+		private String currentHead;
+		private Pattern catBlob = Pattern.compile("^[0-9a-fA-F]{40} blob [0-9]+$");
+		private Pattern ls = Pattern.compile("^[0-9]{6} [a-z]+ [0-9a-fA-F]{40}\t.+$");
+
+		public GitFastImportOutputReader(InputStream stream) {
+			this.stream = stream;
+		}
+		
+		public void setCurrentHead(String currentHead) {
+			this.currentHead = currentHead;
+		}
+		
+		public void run() {
+			StringBuilder firstResponse = new StringBuilder(50);
+			try {
+				int character;
+				do {
+					character = stream.read();
+					while(character >= 0) {
+						if(character == '\n') {
+							break;
+						}
+						firstResponse.append((char)character);
+						character = stream.read();
+					}
+					if(catBlob.matcher(firstResponse).matches()) {
+						MessageDigest digest = MessageDigest.getInstance("MD5");
+						String length = firstResponse.substring(46);
+						int qtyOfBytes = Integer.parseInt(length);
+						byte[] buffer = new byte[1024];
+						int read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
+						while(qtyOfBytes > 0) {
+							digest.update(buffer, 0, read);
+							qtyOfBytes -= read;
+							if(qtyOfBytes > 0)
+								read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
+						}
+						synchronized (catBlobMD5) {
+							catBlobMD5.setData(digest.digest());
+							catBlobMD5.notify();
+						}
+					} else if (ls.matcher(firstResponse).matches()) {
+						String type = firstResponse.substring(6, 10);
+						if(type.equalsIgnoreCase("blob")) {
+							String sha1 = firstResponse.substring(13,53);
+							String filename = firstResponse.substring(54).trim();
+							trackedFiles.get(currentHead).put(filename, new Sha1Ref(sha1));
+						}
+					}
+					firstResponse.setLength(0);
+				} while(character >= 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
 			}
 		}
 	}

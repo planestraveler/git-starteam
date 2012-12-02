@@ -31,12 +31,13 @@ import com.starbase.util.MD5;
 public abstract class RepositoryHelper {
 
 	protected File fastExportOverrideToFile;
+	protected Commit lastCommit;
 
 	/**
 	 * Return the full list of path to files that are tracked in the repository.
 	 * @return a set of File path contained in the current version of the repository.
 	 */
-	public abstract Set<String> getListOfTrackedFile();
+	public abstract Set<String> getListOfTrackedFile(String head);
 	
 	/**
 	 * Tell if the file is a special target repository type file.
@@ -60,7 +61,7 @@ public abstract class RepositoryHelper {
 	 * input stream of the process.
 	 * @return The OutputStream representing the InputStream of the process.
 	 */
-	public abstract OutputStream getFastImportStream();
+	protected abstract OutputStream getFastImportStream();
 	
 	/**
 	 * Register in file hidden inside the repository (.git, .bazaar, ...) the list
@@ -109,10 +110,10 @@ public abstract class RepositoryHelper {
 	 * Return the MD5 sum object from the repository tracked file. 
 	 * 
 	 * @param filename The full path of the file and its name inside the repository
-	 * @param branchName the branch used by the process.
+	 * @param head the branch we are referring to.
 	 * @return the MD5 object generated for the file inside the repository.
 	 */
-	public abstract MD5 getMD5Of(String filename, String branchName);
+	public abstract MD5 getMD5Of(String filename, String head) throws IOException;
 	
 	/**
 	 * Request that the stream be dumped into the following file
@@ -123,10 +124,23 @@ public abstract class RepositoryHelper {
 		fastExportOverrideToFile = file;
 	}
 	
+	public void writeCommit(Commit commit) throws IOException {
+		OutputStream fastImportStream = getFastImportStream();
+		commit.writeTo(fastImportStream);
+	}
+	
 	public void writeBlob(Blob fileToStage) throws IOException {
 		OutputStream fastImportStream = getFastImportStream();
 		fileToStage.writeTo(fastImportStream);
 	}
 	
 	public abstract java.util.Date getLastCommitOfBranch(String branchName);
+
+	public void dispose() {
+		try {
+			getFastImportStream().close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
