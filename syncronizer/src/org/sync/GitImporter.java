@@ -18,15 +18,12 @@ package org.sync;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.MessageFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Vector;
-
 import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
@@ -41,12 +38,10 @@ import org.sync.util.TempFileManager;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Project;
-import com.starbase.starteam.PropertyEnums;
 import com.starbase.starteam.RecycleBin;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.Status;
 import com.starbase.starteam.Type;
-import com.starbase.starteam.TypeNames;
 import com.starbase.starteam.View;
 import com.starbase.starteam.File;
 import com.starbase.starteam.CheckoutManager;

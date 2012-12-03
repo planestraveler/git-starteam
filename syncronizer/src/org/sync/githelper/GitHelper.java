@@ -27,16 +27,13 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -52,12 +49,9 @@ import org.ossnoize.git.fastimport.Sha1Ref;
 import org.ossnoize.git.fastimport.enumeration.FeatureType;
 import org.sync.ErrorEater;
 import org.sync.RepositoryHelper; 
-import org.sync.util.MD5Builder;
 import org.sync.util.StarteamFileInfo;
 
 import com.starbase.util.MD5;
-
-import java.io.FilenameFilter;
 
 public class GitHelper extends RepositoryHelper {
 	

@@ -19,12 +19,10 @@ package org.sync;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 import java.util.Set;
 
 import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Commit;
-import org.ossnoize.git.fastimport.DataRef;
 
 import com.starbase.util.MD5;
 

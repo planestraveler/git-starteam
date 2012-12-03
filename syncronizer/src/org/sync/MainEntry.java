@@ -24,9 +24,6 @@ import java.util.Date;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
-import com.starbase.starteam.ViewConfiguration;
-import com.starbase.util.OLEDate;
-
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
