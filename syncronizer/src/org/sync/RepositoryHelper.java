@@ -22,14 +22,15 @@ import java.io.OutputStream;
 import java.util.Set;
 
 import org.ossnoize.git.fastimport.Blob;
+import org.ossnoize.git.fastimport.Checkpoint;
 import org.ossnoize.git.fastimport.Commit;
-
 import com.starbase.util.MD5;
 
 public abstract class RepositoryHelper {
+	protected final static long timeForEachCheckpoint = 1000L*60L*60L*3L; // 3 Hours
 
 	protected File fastExportOverrideToFile;
-	protected Commit lastCommit;
+	protected long commitingSince = 0;
 
 	/**
 	 * Return the full list of path to files that are tracked in the repository.
@@ -125,6 +126,14 @@ public abstract class RepositoryHelper {
 	public void writeCommit(Commit commit) throws IOException {
 		OutputStream fastImportStream = getFastImportStream();
 		commit.writeTo(fastImportStream);
+		if(commitingSince <= 0) {
+			commitingSince = System.currentTimeMillis();
+		}
+		if((System.currentTimeMillis() - commitingSince) >= timeForEachCheckpoint) {
+			// if we are doing this process for 3 hours
+			Checkpoint checkpoint = new Checkpoint();
+			checkpoint.writeTo(fastImportStream);
+		}
 	}
 	
 	public void writeBlob(Blob fileToStage) throws IOException {
