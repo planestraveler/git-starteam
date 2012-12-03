@@ -27,12 +27,14 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 	private int uid;
 	private String comment;
 	private String path;
+	private boolean fileMove;
 
 	public CommitInformation(long time, int uid, String comment, String path) {
 		this.time = time;
 		this.uid = uid;
 		this.comment = comment;
 		this.path = path;
+		this.fileMove = false;
 	}
 	
 	public long getTime() {
@@ -91,5 +93,11 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 		return -1;
 	}
 
-	
+	public void setFileMove(boolean b) {
+		fileMove = b;
+	}
+
+	public boolean isFileMove() {
+		return fileMove;
+	}
 }

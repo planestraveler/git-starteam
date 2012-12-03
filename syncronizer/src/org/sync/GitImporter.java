@@ -182,8 +182,9 @@ public class GitImporter {
 				}
 				FileOperation fo = null;
 				java.io.File aFile = null;
-				if(f.isDeleted()) {
+				if(f.isDeleted() || current.isFileMove()) {
 					fo = new FileDelete();
+					fo.setPath(current.getPath());
 					helper.unregisterFileId(path);
 				} else {
 					aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
@@ -205,9 +206,9 @@ public class GitImporter {
 					} else {
 						fm.setFileType(GitFileType.Normal);
 					}
+					fm.setPath(path);
 					fo = fm;
 				}
-				fo.setPath(path);
 				if(null != lastCommit && lastInformation.equivalent(current)) {
 					lastCommit.addFileOperation(fo);
 				} else {
@@ -315,10 +316,11 @@ public class GitImporter {
 												 path);
 				} else {
 					item = view.findItem(fileType, fileID);
-					info = new CommitInformation(item.getDeletedTime().getLongValue(),
+					info = new CommitInformation(item.getModifiedTime().getLongValue(),
 												 item.getModifiedBy(),
 												 "",
 												 path);
+					info.setFileMove(true);
 					System.err.println(path + " has moved to " + item.getParentFolderHierarchy());
 				}
 				ith.remove();
