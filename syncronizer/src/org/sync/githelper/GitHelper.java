@@ -314,11 +314,11 @@ public class GitHelper extends RepositoryHelper {
 			if(!loadFileInformation()) {
 				fileInformation = new HashMap<String, StarteamFileInfo>();
 			}
-			if(!fileInformation.containsKey(filename)) {
-				fileInformation.put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
-				saveFileInformation();
-				return true;
-			}
+		}
+		if(!fileInformation.containsKey(filename)) {
+			fileInformation.put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
+			saveFileInformation();
+			return true;
 		}
 		return false;
 	}
