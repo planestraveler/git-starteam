@@ -137,7 +137,7 @@ public class MainEntry {
 					}
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
-							if(timeBased) {
+							if(null != timeBased && timeBased) {
 								g.generateDayByDayImport(v, date, folder, domain);
 							} else {
 								g.generateFastImportStream(v, folder, domain);
@@ -163,6 +163,7 @@ public class MainEntry {
 		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
 		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
+		System.out.println("[-T]\t\t\tDo a day by day importation of the starteam view");
 		System.out.println("[-k]\t\t\tSet to enable keyword expansion in text files");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation for branch view");
