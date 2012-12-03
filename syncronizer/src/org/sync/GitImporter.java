@@ -307,7 +307,7 @@ public class GitImporter {
 			String path = ith.next();
 			Integer fileID = helper.getRegisteredFileId(path);
 			if(null != fileID) {
-				CommitInformation info;
+				CommitInformation info = null;
 				Item item = recycleBin.findItem(fileType, fileID);
 				if(null != item && item.isDeleted()) {
 					info = new CommitInformation(item.getDeletedTime().getLongValue(), 
@@ -316,16 +316,20 @@ public class GitImporter {
 												 path);
 				} else {
 					item = view.findItem(fileType, fileID);
-					info = new CommitInformation(item.getModifiedTime().getLongValue(),
-												 item.getModifiedBy(),
-												 "",
-												 path);
-					info.setFileMove(true);
-					System.err.println(path + " has moved to " + item.getParentFolderHierarchy());
+					if(null != item) {
+						info = new CommitInformation(item.getModifiedTime().getLongValue(),
+													 item.getModifiedBy(),
+													 "",
+													 path);
+						info.setFileMove(true);
+						System.err.println(path + " has moved to " + item.getParentFolderHierarchy());
+					}
 				}
-				ith.remove();
-				sortedFileList.put(info, (File)item);
-				AddedSortedFileList.put(info, (File)item);
+				if(info != null) {
+					ith.remove();
+					sortedFileList.put(info, (File)item);
+					AddedSortedFileList.put(info, (File)item);
+				}
 			}
 		}
 	}
