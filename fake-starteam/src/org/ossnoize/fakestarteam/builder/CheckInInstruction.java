@@ -27,6 +27,8 @@ public abstract class CheckInInstruction {
 	
 	public abstract void checkin(View view) throws IOException;
 	
+	public abstract long getTimeOfCheckIn();
+	
 	public Folder findFolderIn(Folder base, String name) {
 		for(Folder f : base.getSubFolders()) {
 			if(f.getName().equalsIgnoreCase(name)) {

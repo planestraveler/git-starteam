@@ -18,6 +18,7 @@ package org.ossnoize.fakestarteam;
 
 import java.io.File;
 import com.starbase.starteam.Server;
+import com.starbase.util.OLEDate;
 
 public class InternalPropertiesProvider {
 
@@ -33,8 +34,10 @@ public class InternalPropertiesProvider {
 	private File Archive;
 	private File StorageLocation;
 	private Server server;
+	private OLEDate currentTime;
 	
 	private InternalPropertiesProvider() {
+		currentTime = new OLEDate(System.currentTimeMillis());
 	}
 
 	private void validateArchive() {
@@ -74,5 +77,13 @@ public class InternalPropertiesProvider {
 	
 	public Server getCurrentServer() {
 		return server;
+	}
+	
+	public void setCurrentTime(long time) {
+		currentTime = new OLEDate(time);
+	}
+	
+	public OLEDate getCurrentTime() {
+		return currentTime;
 	}
 }

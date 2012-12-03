@@ -18,6 +18,7 @@ package org.ossnoize.fakestarteam.builder.checkin;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Calendar;
 
 import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
@@ -44,5 +45,12 @@ public class Id4 extends CheckInInstruction {
 		File glslParser = new File(glsl);
 		glslParser.addFromStream(parserVersion.openStream(),
 				"glsl_parser.yy", "GLSL Parser", "Parser should always be with lexer", 0);
+	}
+
+	@Override
+	public long getTimeOfCheckIn() {
+		Calendar time = Calendar.getInstance();
+		time.set(2010, 6, 14, 9, 15);
+		return time.getTimeInMillis();
 	}
 }

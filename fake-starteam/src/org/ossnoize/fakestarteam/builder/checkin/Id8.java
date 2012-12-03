@@ -18,6 +18,7 @@ package org.ossnoize.fakestarteam.builder.checkin;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Calendar;
 
 import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
@@ -42,6 +43,13 @@ public class Id8 extends CheckInInstruction {
 		URL msvcpVersion = new URL("http://source.winehq.org/git/wine.git/blob_plain/6b5e9e3e3f45fa9f700f6d1904c82a21b3ffd0f8:/dlls/msvcp100/msvcp.h");
 		File msvcpH = findFileIn(msvcp100, "msvcp.h");
 		msvcpH.checkinFromStream(msvcpVersion.openStream(), "Fixed stream-off size definition", 0, false);
+	}
+
+	@Override
+	public long getTimeOfCheckIn() {
+		Calendar time = Calendar.getInstance();
+		time.set(2010, 6, 18, 14, 0);
+		return time.getTimeInMillis();
 	}
 
 }

@@ -18,7 +18,9 @@ package org.ossnoize.fakestarteam.builder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 
+import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.ProjectProvider;
 import org.ossnoize.fakestarteam.SerializableUser;
 import org.ossnoize.fakestarteam.UserProvider;
@@ -29,7 +31,6 @@ import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
 
 public class StarteamProjectBuilder {
-	private final long timeDelay = 1500;
 	
 	private Server server;
 	private String username;
@@ -51,12 +52,10 @@ public class StarteamProjectBuilder {
 				Object obj = klass.newInstance();
 				if (obj instanceof CheckInInstruction) {
 					CheckInInstruction instruction = (CheckInInstruction) obj;
+					InternalPropertiesProvider.getInstance().setCurrentTime(instruction.getTimeOfCheckIn());
 					try {
 						instruction.checkin(currentView);
-						Thread.sleep(timeDelay);
 					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
@@ -71,6 +70,9 @@ public class StarteamProjectBuilder {
 	}
 	
 	private void createProject(String projectName) {
+		Calendar projectCreationTime = Calendar.getInstance();
+		projectCreationTime.set(2010, 5, 1, 1, 0);
+		InternalPropertiesProvider.getInstance().setCurrentTime(projectCreationTime.getTimeInMillis());
 		buildProject = ProjectProvider.getInstance().findProject(projectName);
 		if(null == buildProject) {
 			ProjectProvider.getInstance().createNewProject(server, projectName, File.separator);

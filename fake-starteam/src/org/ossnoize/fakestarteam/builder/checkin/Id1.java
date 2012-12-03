@@ -18,6 +18,7 @@ package org.ossnoize.fakestarteam.builder.checkin;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Calendar;
 
 import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
@@ -72,6 +73,13 @@ public class Id1 extends CheckInInstruction {
 				"glsl_lexer.ll",
 				"First version of glsl mesa lexer",
 				"First version of glsl mesa lexer", 0);
+	}
+
+	@Override
+	public long getTimeOfCheckIn() {
+		Calendar time = Calendar.getInstance();
+		time.set(2010, 6, 12, 12, 35);
+		return time.getTimeInMillis();
 	}
 
 }

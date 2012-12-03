@@ -173,7 +173,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	protected void setCreatedTime() {
-		itemProperties.setProperty(propertyKeys.CREATED_TIME, Long.toString(System.currentTimeMillis()));
+		itemProperties.setProperty(propertyKeys.CREATED_TIME, Long.toString(InternalPropertiesProvider.getInstance().getCurrentServer().getCurrentTime().getLongValue()));
 	}
 	
 	public OLEDate getCreatedTime() {
@@ -185,7 +185,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	protected void setModifiedTime() {
-		itemProperties.setProperty(propertyKeys.MODIFIED_TIME, Long.toString(System.currentTimeMillis()));
+		itemProperties.setProperty(propertyKeys.MODIFIED_TIME, Long.toString(InternalPropertiesProvider.getInstance().getCurrentServer().getCurrentTime().getLongValue()));
 	}
 	
 	public OLEDate getModifiedTime() {

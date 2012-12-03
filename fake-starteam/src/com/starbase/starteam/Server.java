@@ -21,6 +21,8 @@ import org.ossnoize.fakestarteam.ProjectProvider;
 import org.ossnoize.fakestarteam.SerializableUser;
 import org.ossnoize.fakestarteam.UserProvider;
 
+import com.starbase.util.OLEDate;
+
 public class Server {
 
 	private String Address;
@@ -69,7 +71,11 @@ public class Server {
 			if(u.isCorrectPassword(password)) {
 				loggedUser = u;
 				return u.getID();	
+			} else {
+				System.err.println("Wrong password");
 			}
+		} else {
+			System.err.println("Unknown user");
 		}
 		return 0;
 	}
@@ -100,5 +106,9 @@ public class Server {
 
 	public void disconnect() {
 		connected = false;
+	}
+	
+	public OLEDate getCurrentTime() {
+		return InternalPropertiesProvider.getInstance().getCurrentTime();
 	}
 }

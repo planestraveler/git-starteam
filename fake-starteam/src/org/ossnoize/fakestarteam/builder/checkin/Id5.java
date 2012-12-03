@@ -18,6 +18,7 @@ package org.ossnoize.fakestarteam.builder.checkin;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Calendar;
 
 import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
@@ -48,6 +49,13 @@ public class Id5 extends CheckInInstruction {
 				"msvcp100.c",
 				"Stub of msvcp100 dlls",
 				"", 0);
+	}
+
+	@Override
+	public long getTimeOfCheckIn() {
+		Calendar time = Calendar.getInstance();
+		time.set(2010, 6, 15, 10, 0);
+		return time.getTimeInMillis();
 	}
 
 }

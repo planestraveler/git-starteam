@@ -18,6 +18,7 @@ package org.ossnoize.fakestarteam.builder.checkin;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Calendar;
 
 import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
@@ -52,5 +53,12 @@ public class Id3 extends CheckInInstruction {
 		
 		URL folderVersion2 = new URL("https://raw.github.com/planestraveler/git-starteam/182e12e0f5dcb189241ed09cf8ec23a05188baa3/fake-starteam/src/com/starbase/starteam/Folder.java");
 		folderClass.checkinFromStream(folderVersion2.openStream(), "Upgrade the version", 0, false);
+	}
+
+	@Override
+	public long getTimeOfCheckIn() {
+		Calendar time = Calendar.getInstance();
+		time.set(2010, 6, 13, 12, 00);
+		return time.getTimeInMillis();
 	}
 }

@@ -53,7 +53,7 @@ public class SerializableView extends View implements Serializable {
 		this.description = description;
 		this.defaultWorkingFolder = defaultWorkingFolder;
 		this.id = SimpleTypedResourceIDProvider.getProvider().registerNew(this, this);
-		this.createdDate = new Date();
+		this.createdDate = new Date(InternalPropertiesProvider.getInstance().getCurrentTime().getLongValue());
 		this.createdBy = InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID();
 		if(null != parent) {
 			project = parent.getProject();

@@ -17,6 +17,7 @@
 package org.ossnoize.fakestarteam.builder.checkin;
 
 import java.io.IOException;
+import java.util.Calendar;
 
 import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
@@ -33,5 +34,12 @@ public class Id7 extends CheckInInstruction {
 		Folder wine = findFolderIn(cpp, "wine");
 		Folder c = new Folder(src, "c", null);
 		wine.moveTo(c);
+	}
+
+	@Override
+	public long getTimeOfCheckIn() {
+		Calendar time = Calendar.getInstance();
+		time.set(2010, 6, 17, 12, 35);
+		return time.getTimeInMillis();
 	}
 }

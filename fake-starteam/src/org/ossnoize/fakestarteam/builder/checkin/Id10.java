@@ -18,6 +18,7 @@ package org.ossnoize.fakestarteam.builder.checkin;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Calendar;
 
 import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
@@ -55,5 +56,13 @@ public class Id10 extends CheckInInstruction {
 		viewClass.addFromStream(viewVersion.openStream(), "View.java", "Class reprensenting the view of starteam", "", 0);
 		
 	}
+
+	@Override
+	public long getTimeOfCheckIn() {
+		Calendar time = Calendar.getInstance();
+		time.set(2010, 6, 20, 12, 35);
+		return time.getTimeInMillis();
+	}
+	
 
 }
