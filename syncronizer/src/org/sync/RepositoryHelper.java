@@ -133,6 +133,7 @@ public abstract class RepositoryHelper {
 			// if we are doing this process for 3 hours
 			Checkpoint checkpoint = new Checkpoint();
 			checkpoint.writeTo(fastImportStream);
+			commitingSince = System.currentTimeMillis();
 		}
 	}
 	
