@@ -20,4 +20,8 @@ public class RecycleBin extends View {
 	protected RecycleBin(View parentView) {
 		super(parentView, parentView.getConfiguration());
 	}
+
+	public void setIncludeDeletedItems(boolean b) {
+		
+	}
 }
