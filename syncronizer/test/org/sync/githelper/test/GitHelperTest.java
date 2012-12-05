@@ -39,6 +39,7 @@ public class GitHelperTest {
 
 	@After
 	public void tearDown() throws Exception {
+		test.dispose();
 		test = null;
 	}
 
