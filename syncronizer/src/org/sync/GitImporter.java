@@ -187,7 +187,7 @@ public class GitImporter {
 					
 					Integer fileid = helper.getRegisteredFileId(path);
 					if(null == fileid) {
-						helper.registerFileId(path, f.getObjectID(), f.getRevisionNumber());
+						helper.registerFileId(path, f.getItemID(), f.getRevisionNumber());
 					} else {
 						helper.updateFileVersion(path, f.getRevisionNumber());
 					}
