@@ -18,6 +18,7 @@ package org.sync;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -424,10 +425,12 @@ public class GitImporter {
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(firstTime + 2000)));
 				setLastFilesLastSortedFileList(vc, baseFolder);
 			} 
-			date = new java.util.Date(firstTime);
-			date.setHours(23);
-			date.setMinutes(59);
-			date.setSeconds(59);
+			Calendar time = Calendar.getInstance();
+			time.setTimeInMillis(firstTime);
+			time.set(Calendar.HOUR_OF_DAY, 23);
+			time.set(Calendar.MINUTE, 59);
+			time.set(Calendar.SECOND, 59);
+			date = time.getTime();
 		}
 		firstTime = date.getTime();
 		
@@ -443,15 +446,17 @@ public class GitImporter {
 
 		long vcTime;
 		System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
-		for(;firstTime < lastTime; firstTime += day) {
+		Calendar timeIncrement = Calendar.getInstance();
+		timeIncrement.setTimeInMillis(firstTime);
+		for(;timeIncrement.getTimeInMillis() < lastTime; timeIncrement.add(Calendar.DAY_OF_YEAR, 1)) {
 			if(lastTime - firstTime <= day) {
 				vc = view;
 				vcTime = lastTime;
 			} else {
-				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(firstTime)));
-				vcTime = firstTime;
+				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(timeIncrement.getTimeInMillis())));
+				vcTime = timeIncrement.getTimeInMillis();
 			}
-			System.err.println("View Configuration Time: " + new java.util.Date(vcTime));
+			System.err.println("View Configuration Time: " + timeIncrement.getTime());
 			generateFastImportStream(vc, baseFolder, domain);
 			vc.discard();
 		}
