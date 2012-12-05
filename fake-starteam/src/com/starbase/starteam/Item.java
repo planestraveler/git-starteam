@@ -201,6 +201,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		return hashCode();
 	}
 	
+	public int getItemID() {
+		return getObjectID();
+	}
+	
 	public int getObjectID() {
 		return Integer.parseInt(itemProperties.getProperty(propertyKeys.OBJECT_ID));
 	}
