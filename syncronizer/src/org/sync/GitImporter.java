@@ -297,6 +297,7 @@ public class GitImporter {
 	
 	private void recoverDeleteInformation(Set<String> listOfFiles, View view) {
 		RecycleBin recycleBin = view.getRecycleBin();
+		recycleBin.setIncludeDeletedItems(true);
 		Type fileType = server.typeForName(recycleBin.getTypeNames().FILE);
 		for(Iterator<String> ith = listOfFiles.iterator(); ith.hasNext(); ) {
 			String path = ith.next();

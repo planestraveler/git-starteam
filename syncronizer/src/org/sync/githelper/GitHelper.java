@@ -592,7 +592,7 @@ public class GitHelper extends RepositoryHelper {
 						try {
 							commitDate = dateFormatIso.parse(isoDate);
 						} catch (ParseException e) {
-							throw new InvalidOperationException("The date " + isoDate + " is not a valid (git wise) iso 8601 date");
+							throw new Error("The date " + isoDate + " is not a valid (git wise) iso 8601 date");
 						}
 					} else if (line.trim().startsWith(shaKey)) {
 						commitSHA = new Sha1Ref(line.substring(shaKey.length()).trim());
