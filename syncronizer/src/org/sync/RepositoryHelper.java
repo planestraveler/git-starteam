@@ -31,6 +31,7 @@ public abstract class RepositoryHelper {
 
 	protected File fastExportOverrideToFile;
 	protected long commitingSince = 0;
+	protected String repositoryDir;
 
 	/**
 	 * Return the full list of path to files that are tracked in the repository.
@@ -47,7 +48,7 @@ public abstract class RepositoryHelper {
 	/**
 	 * Do the repository garbage collection and the compression of it's database.
 	 */
-	public abstract void gc();
+	public abstract int gc();
 	
 	/**
 	 * Tell if the "git fast-import" process is still running.
@@ -150,5 +151,9 @@ public abstract class RepositoryHelper {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void setWorkingDirectory(String dir) {
+		repositoryDir = dir;
 	}
 }

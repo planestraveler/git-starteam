@@ -67,4 +67,10 @@ public class GitHelperTest {
 		assertEquals(new MD5("da26078a58263879cb5c55331ae52385"), test.getMD5Of("testfiles/ipsum3.txt", "master"));
 	}
 
+	@Test
+	public void testGC() {
+		assertEquals(0, test.gc());
+		test.setWorkingDirectory(System.getProperty("java.io.tmpdir"));
+		assertEquals(128, test.gc());
+	}
 }

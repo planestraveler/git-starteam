@@ -61,7 +61,6 @@ public class GitHelper extends RepositoryHelper {
 	private Process gitFastImport;
 	private Thread gitFastImportOutputEater;
 	private Thread gitFastImportErrorEater;
-	private String gitRepositoryDir;
 	private GitFastImportOutputReader gitResponse;
 	private Map<String, StarteamFileInfo> fileInformation;
 	private int debugFileCounter = 0;
@@ -69,14 +68,14 @@ public class GitHelper extends RepositoryHelper {
 	private MD5 catBlobMD5;
 
 	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
-		gitRepositoryDir = System.getProperty("user.dir");
+		setWorkingDirectory(System.getProperty("user.dir"));
 		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
 
 		if (!findExecutable(preferedPath)) {
 			throw new Exception("Git executable not found.");
 		}
 		if (!repositoryExists(createRepo)) {
-			throw new Exception("Destination repository not found in '" + gitRepositoryDir + "'");
+			throw new Exception("Destination repository not found in '" + repositoryDir + "'");
 		}
 
 		loadFileInformation();
@@ -132,7 +131,7 @@ public class GitHelper extends RepositoryHelper {
 		} else if (create) {
 			ProcessBuilder process = new ProcessBuilder();
 			process.command(gitExecutable, "init");
-			process.directory(new File(gitRepositoryDir));
+			process.directory(new File(repositoryDir));
 			try {
 				process.start();
 			} catch (Exception e) {
@@ -147,7 +146,7 @@ public class GitHelper extends RepositoryHelper {
 	private void grabTrackedFiles(String head) {
 		ProcessBuilder process = new ProcessBuilder();
 		process.command(gitExecutable, "ls-tree", "--full-tree" ,"-r", head);
-		process.directory(new File(gitRepositoryDir));
+		process.directory(new File(repositoryDir));
 		try {
 			Process lsFiles = process.start();
 			Thread gitQueryWorker = new Thread(new GitLsFilesReader(lsFiles.getInputStream(), head));
@@ -170,7 +169,7 @@ public class GitHelper extends RepositoryHelper {
 	private boolean isValidGitRepository() {
 		ProcessBuilder process = new ProcessBuilder();
 		process.command(gitExecutable, "branch");
-		process.directory(new File(gitRepositoryDir));
+		process.directory(new File(repositoryDir));
 		try {
 			Process status = process.start();
 			Thread statusOut = new Thread(new ErrorEater(status.getInputStream(), true));
@@ -232,17 +231,18 @@ public class GitHelper extends RepositoryHelper {
 	}
 	
 	@Override
-	public void gc() {
+	public int gc() {
+		int ret = Integer.MIN_VALUE;
 		ProcessBuilder process = new ProcessBuilder();
 		process.command(gitExecutable, "gc");
-		process.directory(new File(gitRepositoryDir));
+		process.directory(new File(repositoryDir));
 		try {
 			Process gitGc = process.start();
 			Thread gitErrorStreamEater = new Thread(new ErrorEater(gitGc.getErrorStream(), "gc"));
 			Thread gitQueryWorker = new Thread(new ErrorEater(gitGc.getInputStream(), "gc"));
 			gitErrorStreamEater.start();
 			gitQueryWorker.start();
-			gitGc.waitFor();
+			ret = gitGc.waitFor();
 			gitErrorStreamEater.join();
 			gitQueryWorker.join();
 		} catch (IOException e) {
@@ -250,6 +250,7 @@ public class GitHelper extends RepositoryHelper {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		return ret;
 	}
 	
 	@Override
@@ -258,7 +259,7 @@ public class GitHelper extends RepositoryHelper {
 			if(null == gitFastImport) {
 				ProcessBuilder process = new ProcessBuilder();
 				process.command(gitExecutable, "fast-import");
-				process.directory(new File(gitRepositoryDir));
+				process.directory(new File(repositoryDir));
 				try {
 					gitFastImport = process.start();
 					gitResponse = new GitFastImportOutputReader(gitFastImport.getInputStream());
@@ -403,7 +404,7 @@ public class GitHelper extends RepositoryHelper {
 	public Date getLastCommitOfBranch(String branchName) {
 		ProcessBuilder process = new ProcessBuilder();
 		process.command(gitExecutable, "log", "-1", "--date=iso8601", branchName);
-		process.directory(new File(gitRepositoryDir));
+		process.directory(new File(repositoryDir));
 		try {
 			Process log = process.start();
 			GitFirstLogInformationReader logReader = new GitFirstLogInformationReader(log.getInputStream());
@@ -428,7 +429,7 @@ public class GitHelper extends RepositoryHelper {
 		FileInputStream fin = null;
 		ObjectInputStream objin = null;
 		
-		File objFile = new File(gitRepositoryDir + File.separator + ".git" + File.separator + STARTEAMFILEINFO);
+		File objFile = new File(repositoryDir + File.separator + ".git" + File.separator + STARTEAMFILEINFO);
 		if(!objFile.exists())
 			return false;
 		
@@ -468,7 +469,7 @@ public class GitHelper extends RepositoryHelper {
 			FileOutputStream fout = null;
 			ObjectOutputStream objout = null;
 			
-			File objFile = new File(gitRepositoryDir + File.separator + ".git" + File.separator + STARTEAMFILEINFO);
+			File objFile = new File(repositoryDir + File.separator + ".git" + File.separator + STARTEAMFILEINFO);
 			
 			try {
 				fout = new FileOutputStream(objFile);
