@@ -19,11 +19,15 @@ package org.sync;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Checkpoint;
 import org.ossnoize.git.fastimport.Commit;
+import org.sync.util.StarteamFileInfo;
+
 import com.starbase.util.MD5;
 
 public abstract class RepositoryHelper {
@@ -31,6 +35,7 @@ public abstract class RepositoryHelper {
 
 	protected File fastExportOverrideToFile;
 	protected long commitingSince = 0;
+	protected Map<String, StarteamFileInfo> fileInformation;
 	protected String repositoryDir;
 
 	/**
@@ -64,6 +69,17 @@ public abstract class RepositoryHelper {
 	protected abstract OutputStream getFastImportStream();
 	
 	/**
+	 * Load the saved file information from the previous fast-export run.
+	 * @return The file was found and loaded correctly
+	 */
+	protected abstract boolean loadFileInformation();
+
+	/**
+	 * Save the file information into an hidden file inside the repository folder.
+	 */
+	protected abstract void saveFileInformation();
+
+	/**
 	 * Register in file hidden inside the repository (.git, .bazaar, ...) the list
 	 * of existing repository file and it's id.
 	 * 
@@ -72,8 +88,20 @@ public abstract class RepositoryHelper {
 	 * @param fileVersion the Starteam file version
 	 * @return true if the file was correctly registered. False otherwise.
 	 */
-	public abstract boolean registerFileId(String filename, int fileId, int fileVersion);
-	
+	public boolean registerFileId(String filename, int fileId, int fileVersion) {
+		if(null == fileInformation) {
+			if(!loadFileInformation()) {
+				fileInformation = new HashMap<String, StarteamFileInfo>();
+			}
+		}
+		if(!fileInformation.containsKey(filename)) {
+			fileInformation.put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
+			saveFileInformation();
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Save in file hidden inside the repository (.git, .bazaar, ...) the version of an
 	 * already registered file existing inside the repository.
@@ -81,30 +109,62 @@ public abstract class RepositoryHelper {
 	 * @param filename the full path of the file and its name inside the repository
 	 * @param fileVersion the Starteam version of this file.
 	 */
-	public abstract boolean updateFileVersion(String filename, int fileVersion);
-	
+	public boolean updateFileVersion(String filename, int fileVersion) {
+		if(null != fileInformation) {
+			if(fileInformation.containsKey(filename)) {
+				fileInformation.get(filename).setVersion(fileVersion);
+				saveFileInformation();
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Remove the registered file from the repository.
 	 *  
 	 * @param filename the full path of the file and its name inside the repository
 	 */
-	public abstract void unregisterFileId(String filename);
-	
+	public void unregisterFileId(String filename) {
+		if(null != fileInformation) {
+			fileInformation.remove(filename);
+			saveFileInformation();
+		}
+	}
+
 	/**
 	 * Return the registered file id from the repository tracked file.
 	 * 
 	 * @param filename the full path of the file and its name inside the repository
 	 * @return the id of the file or NULL if not found.
 	 */
-	public abstract Integer getRegisteredFileId(String filename);
-	
+	public Integer getRegisteredFileId(String filename) {
+		if(null != fileInformation) {
+			if(fileInformation.containsKey(filename)) {
+				return fileInformation.get(filename).getId();
+			}
+		} else if (loadFileInformation()) {
+			return getRegisteredFileId(filename);
+		}
+		return null;
+	}
+
 	/**
 	 * Return the registered file version from the repository tracked file.
 	 * 
 	 * @param filename the full path of the file and its name inside the repository
 	 * @return the id of the file or NULL if not found.
 	 */
-	public abstract Integer getRegisteredFileVersion(String filename);
+	public Integer getRegisteredFileVersion(String filename) {
+		if(null != fileInformation) {
+			if(fileInformation.containsKey(filename)) {
+				return fileInformation.get(filename).getVersion();
+			}
+		} else if (loadFileInformation()) {
+			return getRegisteredFileVersion(filename);
+		}
+		return null;
+	}
 
 	/**
 	 * Return the MD5 sum object from the repository tracked file. 

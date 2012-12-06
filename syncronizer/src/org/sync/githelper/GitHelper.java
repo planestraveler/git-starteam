@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.ossnoize.fakestarteam.exception.InvalidOperationException;
 import org.ossnoize.git.fastimport.CatBlob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.DataRef;
@@ -62,7 +61,6 @@ public class GitHelper extends RepositoryHelper {
 	private Thread gitFastImportOutputEater;
 	private Thread gitFastImportErrorEater;
 	private GitFastImportOutputReader gitResponse;
-	private Map<String, StarteamFileInfo> fileInformation;
 	private int debugFileCounter = 0;
 	private Map<String, Map<String, DataRef>> trackedFiles;
 	private MD5 catBlobMD5;
@@ -304,65 +302,6 @@ public class GitHelper extends RepositoryHelper {
 	}
 
 	@Override
-	public boolean registerFileId(String filename, int fileId, int fileVersion) {
-		if(null == fileInformation) {
-			if(!loadFileInformation()) {
-				fileInformation = new HashMap<String, StarteamFileInfo>();
-			}
-		}
-		if(!fileInformation.containsKey(filename)) {
-			fileInformation.put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
-			saveFileInformation();
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean updateFileVersion(String filename, int fileVersion) {
-		if(null != fileInformation) {
-			if(fileInformation.containsKey(filename)) {
-				fileInformation.get(filename).setVersion(fileVersion);
-				saveFileInformation();
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public void unregisterFileId(String filename) {
-		if(null != fileInformation) {
-			fileInformation.remove(filename);
-			saveFileInformation();
-		}
-	}
-
-	@Override
-	public Integer getRegisteredFileId(String filename) {
-		if(null != fileInformation) {
-			if(fileInformation.containsKey(filename)) {
-				return fileInformation.get(filename).getId();
-			}
-		} else if (loadFileInformation()) {
-			return getRegisteredFileId(filename);
-		}
-		return null;
-	}
-	
-	@Override
-	public Integer getRegisteredFileVersion(String filename) {
-		if(null != fileInformation) {
-			if(fileInformation.containsKey(filename)) {
-				return fileInformation.get(filename).getVersion();
-			}
-		} else if (loadFileInformation()) {
-			return getRegisteredFileVersion(filename);
-		}
-		return null;
-	}
-
-	@Override
 	public Set<String> getListOfTrackedFile(String head) {
 		if(!trackedFiles.containsKey(head)) {
 			grabTrackedFiles(head);
@@ -424,8 +363,9 @@ public class GitHelper extends RepositoryHelper {
 		return null;
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
-	private boolean loadFileInformation() {
+	protected boolean loadFileInformation() {
 		FileInputStream fin = null;
 		ObjectInputStream objin = null;
 		
@@ -464,7 +404,8 @@ public class GitHelper extends RepositoryHelper {
 		return true;
 	}
 	
-	private void saveFileInformation() {
+	@Override
+	protected void saveFileInformation() {
 		if(null != fileInformation) {
 			FileOutputStream fout = null;
 			ObjectOutputStream objout = null;
