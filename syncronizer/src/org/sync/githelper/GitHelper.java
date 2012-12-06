@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,6 +55,7 @@ import com.starbase.util.MD5;
 
 public class GitHelper extends RepositoryHelper {
 	
+	private final static String STARTEAMFILEINFODIR = "starteam";
 	private final static String STARTEAMFILEINFO = "StarteamFileInfo.gz";
 
 	private String gitExecutable;
@@ -64,6 +66,7 @@ public class GitHelper extends RepositoryHelper {
 	private int debugFileCounter = 0;
 	private Map<String, Map<String, DataRef>> trackedFiles;
 	private MD5 catBlobMD5;
+	private boolean isBare;
 
 	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
 		setWorkingDirectory(System.getProperty("user.dir"));
@@ -91,7 +94,6 @@ public class GitHelper extends RepositoryHelper {
 				try {
 					gitExecutable = gitExec.getCanonicalPath();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -182,6 +184,66 @@ public class GitHelper extends RepositoryHelper {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+		return false;
+	}
+
+	private boolean isBareRepository() {
+		File repo = new File(repositoryDir);
+		if(repo.isDirectory()) {
+			for(File f : repo.listFiles()) {
+				// first possible case, it is a normal repository.
+				if(f.getName().equalsIgnoreCase(".git") && f.isDirectory()) {
+					File config = new File(f.getAbsolutePath() + File.separator + "config");
+					if(config.exists()) {
+						return checkIsBare(config);
+					}
+				}
+				if(f.getName().equalsIgnoreCase("config") && f.isFile()) {
+					return checkIsBare(f);
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean checkIsBare(File config) {
+		FileReader freader = null;
+		BufferedReader buffer = null;
+
+		try {
+			freader = new FileReader(config);
+			buffer = new BufferedReader(freader);
+
+			String line;
+			while(null != (line = buffer.readLine())) {
+				int equalsPosition = line.indexOf('=');
+				if(equalsPosition >= 0) {
+					String var = line.substring(0, equalsPosition).trim();
+					String value = line.substring(equalsPosition).trim();
+
+					if(var.equalsIgnoreCase("bare")) {
+						return value.equalsIgnoreCase("true");
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if(null != buffer) {
+				try {
+					buffer.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if(null != freader) {
+				try {
+					freader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return false;
 	}
@@ -362,14 +424,23 @@ public class GitHelper extends RepositoryHelper {
 		}
 		return null;
 	}
+
+	private File buildStarteamInfoDir() {
+		File objDir = new File(repositoryDir + (isBare?File.separator + ".git":"") + File.separator + STARTEAMFILEINFODIR);
+		if(objDir.exists()) {
+			objDir.mkdir();
+		}
+		File objFile = new File(objDir.getAbsolutePath() + File.separator + STARTEAMFILEINFO);
+		return objFile;
+	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
 	protected boolean loadFileInformation() {
 		FileInputStream fin = null;
 		ObjectInputStream objin = null;
-		
-		File objFile = new File(repositoryDir + File.separator + ".git" + File.separator + STARTEAMFILEINFO);
+
+		File objFile = buildStarteamInfoDir();
 		if(!objFile.exists())
 			return false;
 		
@@ -403,15 +474,14 @@ public class GitHelper extends RepositoryHelper {
 		}
 		return true;
 	}
-	
+
 	@Override
 	protected void saveFileInformation() {
 		if(null != fileInformation) {
 			FileOutputStream fout = null;
 			ObjectOutputStream objout = null;
 			
-			File objFile = new File(repositoryDir + File.separator + ".git" + File.separator + STARTEAMFILEINFO);
-			
+			File objFile = buildStarteamInfoDir();
 			try {
 				fout = new FileOutputStream(objFile);
 				objout = new ObjectOutputStream(fout);
@@ -436,6 +506,12 @@ public class GitHelper extends RepositoryHelper {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void setWorkingDirectory(String dir) {
+		super.setWorkingDirectory(dir);
+		isBare = isBareRepository();
 	}
 	
 	private class GitLsFilesReader implements Runnable {
