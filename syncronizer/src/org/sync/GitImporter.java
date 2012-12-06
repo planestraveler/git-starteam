@@ -60,7 +60,7 @@ public class GitImporter {
 	private Map<CommitInformation, File> lastSortedFileList = new TreeMap<CommitInformation, File>();
 	private Commit lastCommit; 
 	// get the really old time as base information;
-	private CommitInformation lastInformation = new CommitInformation(Long.MIN_VALUE, Integer.MIN_VALUE, "", "");
+	private CommitInformation lastInformation = null;
 	private OutputStream exportStream;
 	private String alternateHead = null;
 	private boolean isResume = false;
@@ -135,6 +135,7 @@ public class GitImporter {
 		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."
 		CheckoutManager cm = new CheckoutManager(view);
 		cm.getOptions().setEOLConversionEnabled(false);
+		lastInformation = new CommitInformation(Long.MIN_VALUE, Integer.MIN_VALUE, "", "");
 
 		folder = null;
 		setFolder(view, folderPath);
