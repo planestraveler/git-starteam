@@ -24,6 +24,8 @@ public abstract class FileOperation implements FastImportObject {
 	protected String Path;
 
 	public void setPath(String path) throws InvalidPathException {
+		if(null == path)
+			throw new NullPointerException("The path cannot be a null value");
 		if(path.endsWith("/"))
 			throw new InvalidPathException(MessageFormat.format("The path {0} end with \"/\".", path));
 		if(path.startsWith("/"))
