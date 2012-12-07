@@ -309,7 +309,7 @@ public class GitImporter {
 				Item item = recycleBin.findItem(fileType, fileID);
 				if(null != item && item.isDeleted()) {
 					info = new CommitInformation(item.getDeletedTime().getLongValue(), 
-												 item.getDeletedUserId(),
+												 item.getDeletedUserID(),
 												 "",
 												 path);
 				} else {
