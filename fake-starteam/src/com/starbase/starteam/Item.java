@@ -336,7 +336,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		return new OLEDate(0);
 	}
 	
-	public int getDeletedUserId() {
+	public int getDeletedUserID() {
 		if(itemProperties.containsKey(propertyKeys.DELETED_USER_ID)) {
 			int userId = Integer.parseInt(itemProperties.getProperty(propertyKeys.DELETED_USER_ID));
 			return userId;
