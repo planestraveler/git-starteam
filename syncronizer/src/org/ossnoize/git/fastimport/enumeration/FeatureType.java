@@ -18,8 +18,8 @@ package org.ossnoize.git.fastimport.enumeration;
 
 public enum FeatureType {
 	CatBlob("cat-blob", false),
-	Done("done", false);
-	
+	Done("done", false),
+	DateFormat("date-format", true);
 
 	private String feature;
 	private boolean arguments;

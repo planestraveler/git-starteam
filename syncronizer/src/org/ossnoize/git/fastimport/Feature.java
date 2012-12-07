@@ -40,7 +40,7 @@ public class Feature implements FastImportObject {
 		StringBuilder feature = new StringBuilder(32);
 		feature.append(FEATURE_SP).append(type.getName());
 		if(type.hasArguments() && null != arguments) {
-			feature.append(' ').append(arguments);
+			feature.append('=').append(arguments);
 		}
 		feature.append('\n');
 		out.write(feature.toString().getBytes());

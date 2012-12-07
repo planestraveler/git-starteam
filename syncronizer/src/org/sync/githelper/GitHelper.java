@@ -333,6 +333,8 @@ public class GitHelper extends RepositoryHelper {
 					// Validate Feature needed;
 					Feature feature = new Feature(FeatureType.CatBlob);
 					feature.writeTo(out);
+					feature = new Feature(FeatureType.DateFormat, "raw");
+					feature.writeTo(out);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
