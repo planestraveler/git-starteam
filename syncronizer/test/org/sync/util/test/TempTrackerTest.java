@@ -14,41 +14,32 @@
     You should have received a copy of the GNU General Public License
     along with Git-Starteam.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-package org.sync.util;
+package org.sync.util.test;
+
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-public final class TempFileManager {
+import org.junit.Test;
+import org.sync.util.TempFileManager;
 
-	private static TempFileManager Reference = new TempFileManager();
-	public static TempFileManager getInstance() {
-		return Reference;
+public class TempTrackerTest {
+
+	@Test
+	public void test() throws IOException {
+		File temp = TempFileManager.getInstance().createTempFile("test", ".txt");
+		assertEquals(true, temp.exists());
+		
+		FileWriter writer = new FileWriter(temp);
+		writer.write("test document");
+		writer.close();
+		assertEquals(1, TempFileManager.getInstance().tempFileCount());
+		
+		TempFileManager.getInstance().deleteTempFiles();
+		
+		assertEquals(0, TempFileManager.getInstance().tempFileCount());
 	}
 
-	private List<File> tempFiles;
-
-	private TempFileManager() {
-		tempFiles = new ArrayList<File>();
-	}
-
-	public File createTempFile(String name, String extension) throws IOException {
-		File ret = File.createTempFile(name, extension);
-		ret.deleteOnExit();
-		tempFiles.add(ret);
-		return ret;
-	}
-
-	public void deleteTempFiles() {
-		for(File f : tempFiles) {
-			f.delete();
-		}
-		tempFiles.clear();
-	}
-
-	public int tempFileCount() {
-		return tempFiles.size();
-	}
 }
