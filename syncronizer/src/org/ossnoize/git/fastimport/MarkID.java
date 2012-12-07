@@ -26,7 +26,7 @@ public class MarkID implements DataRef {
 	 */
 	private static long MarkID = 1;
 	public static MarkID getNextMarkID() {
-		if(MarkID < 0) {
+		if(MarkID <= 0) {
 			throw new Error("Mark has wrapped around");
 		}
 		return new MarkID(MarkID++);
