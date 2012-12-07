@@ -69,15 +69,11 @@ public class GitHelper extends RepositoryHelper {
 	private boolean isBare;
 
 	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
-		setWorkingDirectory(System.getProperty("user.dir"));
-		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
-
 		if (!findExecutable(preferedPath)) {
 			throw new Exception("Git executable not found.");
 		}
-		if (!repositoryExists(createRepo)) {
-			throw new Exception("Destination repository not found in '" + repositoryDir + "'");
-		}
+		setWorkingDirectory(System.getProperty("user.dir"), createRepo);
+		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
 
 		loadFileInformation();
 	}
@@ -130,10 +126,15 @@ public class GitHelper extends RepositoryHelper {
 			return true;
 		} else if (create) {
 			ProcessBuilder process = new ProcessBuilder();
-			process.command(gitExecutable, "init");
+			process.command(gitExecutable, "init", "--bare");
 			process.directory(new File(repositoryDir));
 			try {
-				process.start();
+				Process init = process.start();
+				Thread errorEater = new Thread(new ErrorEater(init.getErrorStream(), "init"));
+				Thread stdOutEater = new Thread(new ErrorEater(init.getInputStream(), "init", true));
+				init.waitFor();
+				errorEater.join();
+				stdOutEater.join();
 			} catch (Exception e) {
 				e.printStackTrace();
 				return false;
@@ -188,7 +189,8 @@ public class GitHelper extends RepositoryHelper {
 		return false;
 	}
 
-	private boolean isBareRepository() {
+	@Override
+	public boolean isBareRepository() {
 		File repo = new File(repositoryDir);
 		if(repo.isDirectory()) {
 			for(File f : repo.listFiles()) {
@@ -220,7 +222,7 @@ public class GitHelper extends RepositoryHelper {
 				int equalsPosition = line.indexOf('=');
 				if(equalsPosition >= 0) {
 					String var = line.substring(0, equalsPosition).trim();
-					String value = line.substring(equalsPosition).trim();
+					String value = line.substring(equalsPosition+1).trim();
 
 					if(var.equalsIgnoreCase("bare")) {
 						return value.equalsIgnoreCase("true");
@@ -509,8 +511,12 @@ public class GitHelper extends RepositoryHelper {
 	}
 
 	@Override
-	public void setWorkingDirectory(String dir) {
-		super.setWorkingDirectory(dir);
+	public void setWorkingDirectory(String dir, boolean create) {
+		super.setWorkingDirectory(dir, create);
+		
+		if (!repositoryExists(create)) {
+			System.err.println("Destination repository not found in '" + repositoryDir + "'");
+		}
 		isBare = isBareRepository();
 	}
 	

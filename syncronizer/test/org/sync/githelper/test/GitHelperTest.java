@@ -18,6 +18,7 @@ package org.sync.githelper.test;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
@@ -71,7 +72,17 @@ public class GitHelperTest {
 	@Test
 	public void testGC() {
 		assertEquals(0, test.gc());
-		test.setWorkingDirectory(System.getProperty("java.io.tmpdir"));
+		test.setWorkingDirectory(System.getProperty("java.io.tmpdir"), false);
 		assertEquals(128, test.gc());
+	}
+	
+	@Test
+	public void testIsBare() throws IOException {
+		assertEquals(false, test.isBareRepository());
+		File bareRepo = new File(System.getProperty("java.io.tmpdir") + File.separator + "bareRepo");
+		bareRepo.mkdir();
+		test.setWorkingDirectory(bareRepo.getAbsolutePath(), true);
+		assertEquals(true, test.isBareRepository());
+		bareRepo.delete();
 	}
 }

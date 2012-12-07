@@ -62,6 +62,12 @@ public abstract class RepositoryHelper {
 	public abstract boolean isFastImportRunning();
 	
 	/**
+	 * Inform the user that the repository is a bare one
+	 * @return True if it is a bare repository
+	 */
+	public abstract boolean isBareRepository();
+	
+	/**
 	 * Create a fast-import process and dump all the repository information in the 
 	 * input stream of the process.
 	 * @return The OutputStream representing the InputStream of the process.
@@ -209,11 +215,10 @@ public abstract class RepositoryHelper {
 		try {
 			getFastImportStream().close();
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	
-	public void setWorkingDirectory(String dir) {
+	public void setWorkingDirectory(String dir, boolean create) {
 		repositoryDir = dir;
 	}
 }
