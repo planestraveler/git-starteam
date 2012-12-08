@@ -35,7 +35,7 @@ public class Data implements FastImportObject {
 		file = f;
 	}
 	
-	public OutputStream getOutputStream() throws IOException {
+	public OutputStream getOutputStream() {
 		if(null != Container) {
 			return Container;
 		}
