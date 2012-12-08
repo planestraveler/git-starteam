@@ -27,21 +27,26 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sync.RepositoryHelper;
 import org.sync.githelper.GitHelper;
+import org.sync.util.FileUtility;
 
 import com.starbase.util.MD5;
 
 public class GitHelperTest {
 	private RepositoryHelper test;
-
+	private File bareRepo;
+	
 	@Before
 	public void setUp() throws Exception {
 		test = new GitHelper(null, false);
+		bareRepo = new File(System.getProperty("java.io.tmpdir") + File.separator + "bareRepo");
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		test.dispose();
 		test = null;
+		FileUtility.rmDir(bareRepo);
+		bareRepo = null;
 	}
 
 	@Test(timeout=1000)
@@ -79,7 +84,6 @@ public class GitHelperTest {
 	@Test
 	public void testIsBare() throws IOException {
 		assertEquals(false, test.isBareRepository());
-		File bareRepo = new File(System.getProperty("java.io.tmpdir") + File.separator + "bareRepo");
 		bareRepo.mkdir();
 		test.setWorkingDirectory(bareRepo.getAbsolutePath(), true);
 		assertEquals(true, test.isBareRepository());

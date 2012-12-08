@@ -49,6 +49,7 @@ import org.ossnoize.git.fastimport.Sha1Ref;
 import org.ossnoize.git.fastimport.enumeration.FeatureType;
 import org.sync.ErrorEater;
 import org.sync.RepositoryHelper; 
+import org.sync.util.FileUtility;
 import org.sync.util.StarteamFileInfo;
 
 import com.starbase.util.MD5;
@@ -232,20 +233,7 @@ public class GitHelper extends RepositoryHelper {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(null != buffer) {
-				try {
-					buffer.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if(null != freader) {
-				try {
-					freader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			FileUtility.close(buffer, freader);
 		}
 		return false;
 	}
@@ -461,20 +449,7 @@ public class GitHelper extends RepositoryHelper {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} finally {
-			if(objin != null) {
-				try {
-					objin.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if(fin != null) {
-				try {
-					fin.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			FileUtility.close(objin, fin);
 		}
 		return true;
 	}
@@ -494,20 +469,7 @@ public class GitHelper extends RepositoryHelper {
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
-				if(null != objout) {
-					try {
-						objout.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				if(null != fout) {
-					try {
-						fout.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+				FileUtility.close(objout, fout);
 			}
 		}
 	}
@@ -556,18 +518,7 @@ public class GitHelper extends RepositoryHelper {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} finally {
-					if(null != buffer) {
-						try {
-							buffer.close();
-						} catch (IOException e) {
-						}
-					}
-					if(null != reader) {
-						try {
-							reader.close();
-						} catch (IOException e) {
-						}
-					}
+					FileUtility.close(buffer, reader);
 				}
 			}
 		}
@@ -632,20 +583,7 @@ public class GitHelper extends RepositoryHelper {
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
-				if(buffer != null) {
-					try {
-						buffer.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				if(reader != null) {
-					try {
-						reader.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+				FileUtility.close(buffer, reader);
 			}
 		}
 	}
