@@ -52,12 +52,14 @@ public class FileModification extends FileOperation {
 		}
 		StringBuilder builder = new StringBuilder();
 		builder.append('M').append(' ').append(FileType.getOctalRepresentation());
-		if(Type == FileModificationType.Inline) {
+		switch (Type) {
+		case Inline:
 			builder.append(' ').append("inline");
 			builder.append(' ').append(Path).append("\n");
 			out.write(builder.toString().getBytes());
 			Content.writeTo(out);
-		} else if (Type == FileModificationType.Referenced) {
+			break;
+		case Referenced:
 			if(Content instanceof Markable) {
 				Markable marked = (Markable)Content;
 				builder.append(' ').append(marked.getMarkID());
@@ -66,7 +68,8 @@ public class FileModification extends FileOperation {
 			} else {
 				throw new IOException("The content is not a Blob or a markable Git object");
 			}
-		} else {
+			break;
+		default:
 			throw new IOException("Unknown File modification type " + Type);
 		}
 	}
