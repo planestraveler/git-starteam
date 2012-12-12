@@ -66,13 +66,13 @@ TODO:
  - Support for file creation [DONE]
  - Support for acurrate file status [DONE]
  - Support for label creation [Not Started]
- - Support for file deletion [Started]
- - Support for folder moving [Started]
- - Support for file renaming [Started]
+ - Support for file deletion [DONE]
+ - Support for folder moving [DONE]
+ - Support for file renaming [DONE]
 * Create the fast-export based on the Starteam API.
  - Create basic object for fast-export stream. [DONE]
  - Create CLI for importing from a Project / View / View Configuration (Time) / Folder.
-  * Syncronization of the tip [Almost Done]
+  * Syncronization of the tip [Done]
   * Syncronization by time of commit [Done]
   * Syncronization by Folder [Done]
   * Syncronization by branched View [Done]
