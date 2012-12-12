@@ -201,6 +201,7 @@ public abstract class RepositoryHelper {
 			Checkpoint checkpoint = new Checkpoint();
 			checkpoint.writeTo(fastImportStream);
 			commitingSince = System.currentTimeMillis();
+			System.err.println("Checkpoint done");
 		}
 	}
 	
