@@ -172,9 +172,11 @@ public class GitImporter {
 			
 			try {
 				if(f.getStatus() == Status.CURRENT) {
+					f.discard();
 					continue;
 				}
 				if(f.getStatusByMD5(helper.getMD5Of(path, head)) == Status.CURRENT) {
+					f.discard();
 					continue;
 				}
 				FileOperation fo = null;
