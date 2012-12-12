@@ -35,8 +35,13 @@ public class MD5 {
 	public MD5(String stringMD5) {
 		BigInteger bigInt = new BigInteger(stringMD5, 16);
 		byte[] value = bigInt.toByteArray();
-		int decal = value.length - 16;
-		System.arraycopy(value, decal, md5Sum, 0, md5Sum.length);
+		int decal = 0;
+		int from = 0;
+		if(value.length < md5Sum.length)
+			decal = md5Sum.length - value.length;
+		else
+			from = value.length - md5Sum.length;
+		System.arraycopy(value, from, md5Sum, decal, Math.min(value.length, md5Sum.length));
 	}
 	
 	public MD5(byte[] md5Array) {
@@ -77,10 +82,10 @@ public class MD5 {
 			}
 			System.arraycopy(digest.digest(), 0, md5Sum, 0, md5Sum.length);
 		} catch (NoSuchAlgorithmException e) {
-			FileUtility.close(in);
 			throw new IOException("Could not find the algorithm: " + e.getMessage());
+		} finally {
+			FileUtility.close(in);
 		}
-		FileUtility.close(in);
 		return fileLength;
 	}
 

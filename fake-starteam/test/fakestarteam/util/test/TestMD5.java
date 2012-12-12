@@ -86,13 +86,21 @@ public class TestMD5 {
 	public void testEquals() {
 		MD5 test = new MD5(md5data);
 		assertEquals(test, new MD5(md5data));
-		assertNotSame(new Object(), test);
+		assertFalse(test.equals(new Object()));
+		assertFalse(test.equals(new MD5(md5ipsum)));
 	}
 	
 	@Test
 	public void testNotSet() {
 		MD5 empty = new MD5();
 		assertEquals("00000000000000000000000000000000", empty.toHexString());
+	}
+	
+	@Test
+	public void testSetAnything() {
+		MD5 almostEmpty = new MD5("0000000000000000000000123456789a");
+		assertEquals("0000000000000000000000123456789a", almostEmpty.toHexString());
+		assertEquals("0000000000000000000000123456789a", almostEmpty.toString());
 	}
 
 }
