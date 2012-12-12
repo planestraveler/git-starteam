@@ -66,6 +66,7 @@ public class GitHelper extends RepositoryHelper {
 	private GitFastImportOutputReader gitResponse;
 	private int debugFileCounter = 0;
 	private Map<String, Map<String, DataRef>> trackedFiles;
+	private Map<String, Map<String, MD5>> md5Cache;
 	private MD5 catBlobMD5;
 	private boolean isBare;
 
@@ -75,6 +76,7 @@ public class GitHelper extends RepositoryHelper {
 		}
 		setWorkingDirectory(System.getProperty("user.dir"), createRepo);
 		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
+		md5Cache = new HashMap<String, Map<String, MD5>>();
 
 		loadFileInformation();
 	}
@@ -272,11 +274,13 @@ public class GitHelper extends RepositoryHelper {
 			if(null != ops.getMark()) {
 				if(!trackedFiles.containsKey(headName)) {
 					trackedFiles.put(headName, new HashMap<String, DataRef>());
+					md5Cache.put(headName, new HashMap<String, MD5>());
 				}
 				trackedFiles.get(headName).put(ops.getPath(), ops.getMark());
 			} else if(ops instanceof FileDelete) {
 				trackedFiles.get(headName).remove(ops.getPath());
 			}
+			md5Cache.get(headName).remove(ops.getPath());
 		}
 	}
 	
@@ -370,10 +374,14 @@ public class GitHelper extends RepositoryHelper {
 	public MD5 getMD5Of(String filename, String head) throws IOException {
 		if(!trackedFiles.containsKey(head)) {
 			grabTrackedFiles(head);
+			md5Cache.put(head, new HashMap<String, MD5>());
 		}
 		if(!trackedFiles.containsKey(head))
 			return new MD5();
 		if(trackedFiles.get(head).containsKey(filename)) {
+			if(md5Cache.get(head).containsKey(filename)) {
+				return md5Cache.get(head).get(filename);
+			}
 			catBlobMD5 = new MD5();
 			OutputStream fastImport = getFastImportStream();
 			gitResponse.setCurrentHead(head);
@@ -388,6 +396,7 @@ public class GitHelper extends RepositoryHelper {
 					}
 				}
 			}
+			md5Cache.get(head).put(filename, catBlobMD5);
 			return catBlobMD5;
 		}
 		return new MD5();
