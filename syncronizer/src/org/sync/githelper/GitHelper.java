@@ -428,7 +428,7 @@ public class GitHelper extends RepositoryHelper {
 
 	private File buildStarteamInfoDir() {
 		File objDir = new File(repositoryDir + (isBare?"":File.separator + ".git") + File.separator + STARTEAMFILEINFODIR);
-		if(objDir.exists()) {
+		if(!objDir.exists()) {
 			objDir.mkdir();
 		}
 		File objFile = new File(objDir.getAbsolutePath() + File.separator + STARTEAMFILEINFO);
