@@ -38,7 +38,8 @@ public class FileUtility {
 	public static void close(Closeable... toClose) {
 		for(Closeable c : toClose) {
 			try {
-				c.close();
+				if(null != c)
+					c.close();
 			} catch (IOException e) {
 			}
 		}
