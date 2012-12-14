@@ -209,6 +209,10 @@ public class GitImporter {
 					fo = fm;
 				}
 				if(null != lastCommit && lastInformation.equivalent(current)) {
+					if(lastInformation.getComment().trim().length() == 0 && current.getComment().trim().length() > 0) {
+						lastInformation = current;
+						lastCommit.setComment(current.getComment());
+					}
 					lastCommit.addFileOperation(fo);
 				} else {
 					Commit commit = new Commit(userName, userEmail, current.getComment(), head, new java.util.Date(current.getTime()));

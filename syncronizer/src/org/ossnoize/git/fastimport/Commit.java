@@ -36,8 +36,7 @@ public class Commit implements Markable {
 		}
 		commiterName = name;
 		commiterEmail = email;
-		comment = new Data();
-		comment.writeData(message.getBytes());
+		setComment(message);
 		this.reference = reference;
 		this.commitDate = commitDate;
 		mark = new Mark();
@@ -55,6 +54,11 @@ public class Commit implements Markable {
 		} else {
 			from = null;
 		}
+	}
+	
+	public void setComment(String message) throws IOException {
+		comment = new Data();
+		comment.writeData(message.getBytes());
 	}
 	
 	public void setMergeCommit(Commit previous) {
