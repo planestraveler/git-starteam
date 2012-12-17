@@ -142,7 +142,12 @@ public class GitImporter {
 		if(null == folder) {
 			return;
 		}
-
+		
+		String head = view.getName();
+		if(null != alternateHead) {
+			head = alternateHead;
+		}
+		
 		files.clear();
 		deletedFiles.clear();
 		deletedFiles.addAll(lastFiles);
@@ -152,12 +157,8 @@ public class GitImporter {
 		lastFiles.addAll(files);
 		lastSortedFileList.clear();
 		lastSortedFileList.putAll(sortedFileList);
-		recoverDeleteInformation(deletedFiles, view);
-		
-		String head = view.getName();
-		if(null != alternateHead) {
-			head = alternateHead;
-		}
+		recoverDeleteInformation(deletedFiles, head, view);
+
 		exportStream = helper.getFastImportStream();
 		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
@@ -184,16 +185,18 @@ public class GitImporter {
 				if(f.isDeleted() || current.isFileMove()) {
 					fo = new FileDelete();
 					fo.setPath(current.getPath());
-					helper.unregisterFileId(path);
+					if(!current.isFileMove()) {
+						helper.unregisterFileId(head, path);
+					}
 				} else {
 					aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
 					cm.checkoutTo(f, aFile);
 					
-					Integer fileid = helper.getRegisteredFileId(path);
+					Integer fileid = helper.getRegisteredFileId(head, path);
 					if(null == fileid) {
-						helper.registerFileId(path, f.getItemID(), f.getRevisionNumber());
+						helper.registerFileId(head, path, f.getItemID(), f.getRevisionNumber());
 					} else {
-						helper.updateFileVersion(path, f.getRevisionNumber());
+						helper.updateFileVersion(head, path, f.getRevisionNumber());
 					}
 					Blob fileToStage = new Blob(new Data(aFile));
 					
@@ -303,13 +306,13 @@ public class GitImporter {
 		super.finalize();
 	}
 	
-	private void recoverDeleteInformation(Set<String> listOfFiles, View view) {
+	private void recoverDeleteInformation(Set<String> listOfFiles, String head, View view) {
 		RecycleBin recycleBin = view.getRecycleBin();
 		recycleBin.setIncludeDeletedItems(true);
 		Type fileType = server.typeForName(recycleBin.getTypeNames().FILE);
 		for(Iterator<String> ith = listOfFiles.iterator(); ith.hasNext(); ) {
 			String path = ith.next();
-			Integer fileID = helper.getRegisteredFileId(path);
+			Integer fileID = helper.getRegisteredFileId(head, path);
 			if(null != fileID) {
 				CommitInformation info = null;
 				Item item = recycleBin.findItem(fileType, fileID);

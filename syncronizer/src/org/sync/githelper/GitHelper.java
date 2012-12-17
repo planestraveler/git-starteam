@@ -451,12 +451,14 @@ public class GitHelper extends RepositoryHelper {
 			
 			Object tempObject = objin.readObject();
 			if(tempObject instanceof Map) {
-				fileInformation = (Map<String, StarteamFileInfo>) tempObject;
+				fileInformation = (Map<String, Map<String, StarteamFileInfo>>) tempObject;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			return false;
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+			return false;
 		} finally {
 			FileUtility.close(objin, fin);
 		}

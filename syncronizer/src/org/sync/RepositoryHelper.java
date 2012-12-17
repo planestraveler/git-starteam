@@ -35,7 +35,7 @@ public abstract class RepositoryHelper {
 
 	protected File fastExportOverrideToFile;
 	protected long commitingSince = 0;
-	protected Map<String, StarteamFileInfo> fileInformation;
+	protected Map<String, Map<String, StarteamFileInfo>> fileInformation;
 	protected String repositoryDir;
 
 	/**
@@ -88,20 +88,25 @@ public abstract class RepositoryHelper {
 	/**
 	 * Register in file hidden inside the repository (.git, .bazaar, ...) the list
 	 * of existing repository file and it's id.
-	 * 
+	 * @param head reference name
 	 * @param filename the full path of the file and its name inside the repository
 	 * @param fileId the Starteam file id
 	 * @param fileVersion the Starteam file version
+	 * 
 	 * @return true if the file was correctly registered. False otherwise.
 	 */
-	public boolean registerFileId(String filename, int fileId, int fileVersion) {
+	public boolean registerFileId(String head, String filename, int fileId, int fileVersion) {
 		if(null == fileInformation) {
 			if(!loadFileInformation()) {
-				fileInformation = new HashMap<String, StarteamFileInfo>();
+				fileInformation = new HashMap<String, Map<String, StarteamFileInfo>>();
+				fileInformation.put(head, new HashMap<String, StarteamFileInfo>());
 			}
 		}
-		if(!fileInformation.containsKey(filename)) {
-			fileInformation.put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
+		if(!fileInformation.containsKey(head)) {
+			fileInformation.put(head, new HashMap<String, StarteamFileInfo>());
+		}
+		if(!fileInformation.get(head).containsKey(filename)) {
+			fileInformation.get(head).put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
 			saveFileInformation();
 			return true;
 		}
@@ -111,14 +116,14 @@ public abstract class RepositoryHelper {
 	/**
 	 * Save in file hidden inside the repository (.git, .bazaar, ...) the version of an
 	 * already registered file existing inside the repository.
-	 * 
+	 * @param head the reference name
 	 * @param filename the full path of the file and its name inside the repository
 	 * @param fileVersion the Starteam version of this file.
 	 */
-	public boolean updateFileVersion(String filename, int fileVersion) {
+	public boolean updateFileVersion(String head, String filename, int fileVersion) {
 		if(null != fileInformation) {
-			if(fileInformation.containsKey(filename)) {
-				fileInformation.get(filename).setVersion(fileVersion);
+			if(fileInformation.containsKey(head) && fileInformation.get(head).containsKey(filename)) {
+				fileInformation.get(head).get(filename).setVersion(fileVersion);
 				saveFileInformation();
 				return true;
 			}
@@ -128,46 +133,54 @@ public abstract class RepositoryHelper {
 
 	/**
 	 * Remove the registered file from the repository.
-	 *  
+	 * @param head the reference name
 	 * @param filename the full path of the file and its name inside the repository
 	 */
-	public void unregisterFileId(String filename) {
+	public void unregisterFileId(String head, String filename) {
 		if(null != fileInformation) {
-			fileInformation.remove(filename);
-			saveFileInformation();
+			if(fileInformation.containsKey(head)) {
+				fileInformation.get(head).remove(filename);
+				saveFileInformation();
+			}
 		}
 	}
 
 	/**
 	 * Return the registered file id from the repository tracked file.
-	 * 
+	 * @param head TODO
 	 * @param filename the full path of the file and its name inside the repository
+	 * 
 	 * @return the id of the file or NULL if not found.
 	 */
-	public Integer getRegisteredFileId(String filename) {
+	public Integer getRegisteredFileId(String head, String filename) {
 		if(null != fileInformation) {
-			if(fileInformation.containsKey(filename)) {
-				return fileInformation.get(filename).getId();
+			if(fileInformation.containsKey(head)) {
+				if(fileInformation.get(head).containsKey(filename)) {
+					return fileInformation.get(head).get(filename).getId();
+				}
 			}
 		} else if (loadFileInformation()) {
-			return getRegisteredFileId(filename);
+			return getRegisteredFileId(head, filename);
 		}
 		return null;
 	}
 
 	/**
 	 * Return the registered file version from the repository tracked file.
-	 * 
+	 * @param head TODO
 	 * @param filename the full path of the file and its name inside the repository
+	 * 
 	 * @return the id of the file or NULL if not found.
 	 */
-	public Integer getRegisteredFileVersion(String filename) {
+	public Integer getRegisteredFileVersion(String head, String filename) {
 		if(null != fileInformation) {
-			if(fileInformation.containsKey(filename)) {
-				return fileInformation.get(filename).getVersion();
+			if(fileInformation.containsKey(head)) {
+				if(fileInformation.get(head).containsKey(filename)) {
+					return fileInformation.get(head).get(filename).getVersion();
+				}
 			}
 		} else if (loadFileInformation()) {
-			return getRegisteredFileVersion(filename);
+			return getRegisteredFileVersion(head, filename);
 		}
 		return null;
 	}
