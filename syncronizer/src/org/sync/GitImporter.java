@@ -411,7 +411,7 @@ public class GitImporter {
 		View vc;
 		long hour = 3600000L; // mSec
 		long day = 24 * hour; // 86400000 mSec
-		long firstTime;
+		long firstTime = 0;
 		if(isResume) {
 			String head = view.getName();
 			if(null != alternateHead) {
@@ -424,7 +424,8 @@ public class GitImporter {
 				System.err.println("Cannot resume an import in a non existing branch");
 				return;
 			}
-		} else {
+		}
+		if(firstTime < view.getCreatedTime().getLongValue()) {
 			firstTime = view.getCreatedTime().getLongValue();
 		}
 		System.err.println("View Created Time: " + new java.util.Date(firstTime));
