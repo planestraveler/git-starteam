@@ -294,6 +294,7 @@ public class GitImporter {
 		}
 
 		AddedSortedFileList.clear();
+		cm = null;
 		System.gc();
 	}
 	
@@ -321,6 +322,7 @@ public class GitImporter {
 												 item.getDeletedUserID(),
 												 "",
 												 path);
+					item.discard();
 				} else {
 					item = view.findItem(fileType, fileID);
 					if(null != item) {
@@ -329,7 +331,7 @@ public class GitImporter {
 													 "",
 													 path);
 						info.setFileMove(true);
-						System.err.println(path + " has moved to " + item.getParentFolderHierarchy());
+						item.discard();
 					}
 				}
 				if(info != null) {
@@ -467,6 +469,7 @@ public class GitImporter {
 			System.err.println("View Configuration Time: " + timeIncrement.getTime());
 			generateFastImportStream(vc, baseFolder, domain);
 			vc.discard();
+			vc = null;
 		}
 		helper.gc();
 	}
