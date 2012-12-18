@@ -185,9 +185,7 @@ public class GitImporter {
 				if(f.isDeleted() || current.isFileMove()) {
 					fo = new FileDelete();
 					fo.setPath(current.getPath());
-					if(!current.isFileMove()) {
-						helper.unregisterFileId(head, path);
-					}
+					helper.unregisterFileId(head, path);
 				} else {
 					aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
 					cm.checkoutTo(f, aFile);
