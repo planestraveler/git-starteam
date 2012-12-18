@@ -339,6 +339,8 @@ public class GitImporter {
 					sortedFileList.put(info, (File)item);
 					AddedSortedFileList.put(info, (File)item);
 				}
+			} else {
+				System.err.println("Never seen the file " + path + " in " + head);
 			}
 		}
 	}
