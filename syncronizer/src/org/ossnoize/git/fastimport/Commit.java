@@ -29,6 +29,7 @@ public class Commit implements Markable {
 	private List<FileOperation> listOfOperation;
 	private Date commitDate;
 	private boolean resumeFastImport;
+	private boolean written;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -75,11 +76,13 @@ public class Commit implements Markable {
 
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
+		if(written)
+			return;
 		StringBuilder commitMsg = new StringBuilder();
 		commitMsg.append(COMMIT).append(" ").append(MessageFormat.format(headFormat, reference, "")).append('\n');
 		out.write(commitMsg.toString().getBytes());
 		mark.writeTo(out);
-		commitMsg = new StringBuilder();
+		commitMsg.setLength(0);
 		if(null != authorName  && null != authorEmail) {
 			commitMsg.append(AUTHOR).append(' ').append(authorName).append(' ')
 					 .append('<').append(authorEmail).append('>').append(' ')
@@ -110,6 +113,7 @@ public class Commit implements Markable {
 			ops.writeTo(out);
 		}
 		out.write('\n');
+		written = true;
 	}
 
 	@Override
