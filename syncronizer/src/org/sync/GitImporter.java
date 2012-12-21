@@ -437,6 +437,7 @@ public class GitImporter {
 				// 2000 mSec here is to avoid side effect in StarTeam View Configuration
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(firstTime + 2000)));
 				setLastFilesLastSortedFileList(vc, baseFolder);
+				vc.discard();
 			} 
 			Calendar time = Calendar.getInstance();
 			time.setTimeInMillis(firstTime);
