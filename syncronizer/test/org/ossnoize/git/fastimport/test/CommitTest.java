@@ -21,9 +21,6 @@ import static org.junit.Assert.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,11 +29,7 @@ import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
 import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileModification;
-import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
-import org.ossnoize.git.fastimport.exception.InvalidPathException;
-
-import sun.util.calendar.BaseCalendar.Date;
 
 public class CommitTest {
 
