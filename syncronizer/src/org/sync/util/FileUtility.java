@@ -37,10 +37,11 @@ public class FileUtility {
 	
 	public static void close(Closeable... toClose) {
 		for(Closeable c : toClose) {
-			try {
-				if(null != c)
+			if(null != c) {
+				try {
 					c.close();
-			} catch (IOException e) {
+				} catch (IOException e) {
+				}
 			}
 		}
 	}
