@@ -93,4 +93,10 @@ public class GitHelperTest {
 		assertEquals(true, test.isBareRepository());
 		bareRepo.delete();
 	}
+	
+	@Test
+	public void testAlternateDirectory() throws Exception {
+		GitHelper helper = new GitHelper("/usr/bin", false);
+		helper.dispose();
+	}
 }
