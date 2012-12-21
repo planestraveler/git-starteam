@@ -62,6 +62,7 @@ public class CommitInformationTest {
 	@Test
 	public void testEquivalentObject() {
 		assertTrue(commitA.equivalent(new CommitInformation(78557, 12, "TestA", "/path/to/an/orther/File")));
+		assertFalse(commitD.equivalent(commitH));
 		assertFalse(commitD.equivalent(commitA));
 	}
 
