@@ -25,6 +25,13 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.ossnoize.git.fastimport.Blob;
+import org.ossnoize.git.fastimport.Commit;
+import org.ossnoize.git.fastimport.Data;
+import org.ossnoize.git.fastimport.FileModification;
+import org.ossnoize.git.fastimport.FileOperation;
+import org.ossnoize.git.fastimport.enumeration.GitFileType;
+import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.RepositoryHelper;
 import org.sync.githelper.GitHelper;
 import org.sync.util.FileUtility;
@@ -34,11 +41,15 @@ import com.starbase.util.MD5;
 public class GitHelperTest {
 	private RepositoryHelper test;
 	private File bareRepo;
+	private Blob blob1;
 	
 	@Before
 	public void setUp() throws Exception {
 		test = new GitHelper(null, false);
 		bareRepo = new File(System.getProperty("java.io.tmpdir") + File.separator + "bareRepo");
+		Data content = new Data();
+		content.writeData("This is the content of the file".getBytes());
+		blob1 = new Blob(content);
 	}
 
 	@After
@@ -47,6 +58,7 @@ public class GitHelperTest {
 		test = null;
 		FileUtility.rmDir(bareRepo);
 		bareRepo = null;
+		blob1 = null;
 	}
 
 	@Test(timeout=1000)
@@ -55,6 +67,10 @@ public class GitHelperTest {
 		assertNotNull(listOfFiles);
 		// Check for self in the list of files always start from the working directory. 
 		assertTrue(listOfFiles.contains("syncronizer/test/org/sync/githelper/test/GitHelperTest.java"));
+		
+		Set<String> listOfNoFiles = test.getListOfTrackedFile("Non-existing-branch");
+		assertNotNull(listOfNoFiles);
+		assertEquals(0, listOfNoFiles.size());
 	}
 	
 	@Test
@@ -91,12 +107,55 @@ public class GitHelperTest {
 		bareRepo.mkdir();
 		test.setWorkingDirectory(bareRepo.getAbsolutePath(), true);
 		assertEquals(true, test.isBareRepository());
-		bareRepo.delete();
 	}
 	
 	@Test
 	public void testAlternateDirectory() throws Exception {
 		GitHelper helper = new GitHelper("/usr/bin", false);
 		helper.dispose();
+	}
+	
+	@Test
+	public void testCommitInBareRepository() throws IOException, InvalidPathException {
+		assertFalse(test.isFastImportRunning());
+		bareRepo.mkdir();
+		test.setWorkingDirectory(bareRepo.getAbsolutePath(), true);
+		test.writeBlob(blob1);
+		Commit testCommit = new Commit("Me Tester", "Me.Tester@domain.com", "This is a test commit", "master", new java.util.Date());
+		FileModification fo = new FileModification(blob1);
+		fo.setPath("test/path/of/file.txt");
+		fo.setFileType(GitFileType.Normal);
+		testCommit.addFileOperation(fo);
+		test.writeCommit(testCommit);
+		
+		assertTrue(test.isFastImportRunning());
+		
+		Commit nextCommit = new Commit("Me Tester", "Me.Tester@domain.com", "This is a test commit #2", "master", new java.util.Date());
+		FileModification fo2 = new FileModification(blob1);
+		fo2.setPath("test/path/of/file - Copy.txt");
+		fo2.setFileType(GitFileType.Normal);
+		nextCommit.setFromCommit(testCommit);
+		test.writeCommit(nextCommit);
+	}
+	
+	@Test
+	public void testFileRegistration() {
+		bareRepo.mkdir();
+		test.setWorkingDirectory(bareRepo.getAbsolutePath(), true);
+		
+		test.registerFileId("master", "test/path/of/file.txt", 1234, 0);
+		test.registerFileId("master", "test/path/of/another/file.txt", 1235, 1);
+		assertEquals(new Integer(1234), test.getRegisteredFileId("master", "test/path/of/file.txt"));
+		assertEquals(new Integer(0), test.getRegisteredFileVersion("master", "test/path/of/file.txt"));
+		assertEquals(new Integer(1235), test.getRegisteredFileId("master", "test/path/of/another/file.txt"));
+		assertEquals(new Integer(1), test.getRegisteredFileVersion("master", "test/path/of/another/file.txt"));
+		assertNull(test.getRegisteredFileId("master", "test/path/of/non/existing/file.txt"));
+		assertNull(test.getRegisteredFileVersion("master", "test/path/of/non/existing/file.txt"));
+		
+		test.updateFileVersion("master", "test/path/of/file.txt", 3);
+		assertEquals(new Integer(3), test.getRegisteredFileVersion("master", "test/path/of/file.txt"));
+		
+		test.unregisterFileId("master", "test/path/of/another/file.txt");
+		assertNull(test.getRegisteredFileId("master", "test/path/of/another/file.txt"));
 	}
 }
