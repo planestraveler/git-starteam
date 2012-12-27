@@ -348,7 +348,7 @@ public class GitHelper extends RepositoryHelper {
 	
 	@Override
 	public boolean isFastImportRunning() {
-		if(null == fastExportOverrideToFile) {
+		if(null == fastExportOverrideToFile && null != gitFastImport ) {
 			try {
 				if(0 == gitFastImport.exitValue()) {
 					gitFastImport = null;
