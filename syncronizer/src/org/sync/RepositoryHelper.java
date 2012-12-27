@@ -99,7 +99,6 @@ public abstract class RepositoryHelper {
 		if(null == fileInformation) {
 			if(!loadFileInformation()) {
 				fileInformation = new HashMap<String, Map<String, StarteamFileInfo>>();
-				fileInformation.put(head, new HashMap<String, StarteamFileInfo>());
 			}
 		}
 		if(!fileInformation.containsKey(head)) {
