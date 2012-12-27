@@ -242,15 +242,19 @@ public class GitHelper extends RepositoryHelper {
 
 	@Override
 	public void dispose() {
-		super.dispose();
 		try {
-			int endCode = gitFastImport.waitFor();
-			if(endCode != 0) {
-				System.err.println("Git fast-import has finished anormally with code:" + endCode);
+			if(null != gitFastImport) {
+				gitFastImport.getOutputStream().close();
+				int endCode = gitFastImport.waitFor();
+				if(endCode != 0) {
+					System.err.println("Git fast-import has finished anormally with code:" + endCode);
+				}
+				gitFastImportOutputEater.join();
+				gitFastImportErrorEater.join();
 			}
-			gitFastImportOutputEater.join();
-			gitFastImportErrorEater.join();
 		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
