@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.sync.util.FileUtility;
+
 public class ErrorEater implements Runnable {
 
 	private InputStream errorStream;
@@ -85,18 +87,7 @@ public class ErrorEater implements Runnable {
 		} catch(IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(null != buffer) {
-				try {
-					buffer.close();
-				} catch (IOException e) {
-				}
-			}
-			if(null != reader) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-				}
-			}
+			FileUtility.close(buffer, reader);
 		}
 	}
 
