@@ -136,6 +136,13 @@ public class GitHelperTest {
 		fo2.setFileType(GitFileType.Normal);
 		nextCommit.setFromCommit(testCommit);
 		test.writeCommit(nextCommit);
+		
+		test.dispose();
+		
+		java.util.Date lastCommit = test.getLastCommitOfBranch("master");
+		assertNotNull(lastCommit);
+		System.out.println(lastCommit.getTime() + " " + System.currentTimeMillis());
+		assertTrue((lastCommit.getTime() - System.currentTimeMillis()) < 2500);
 	}
 	
 	@Test
