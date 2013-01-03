@@ -164,5 +164,8 @@ public class GitHelperTest {
 		
 		test.unregisterFileId("master", "test/path/of/another/file.txt");
 		assertNull(test.getRegisteredFileId("master", "test/path/of/another/file.txt"));
+		
+		assertFalse(test.updateFileVersion("master", "unexistingFile.txt", 4));
+		assertFalse(test.registerFileId("master", "test/path/of/file.txt", 12356, 6));
 	}
 }

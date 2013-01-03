@@ -146,7 +146,7 @@ public abstract class RepositoryHelper {
 
 	/**
 	 * Return the registered file id from the repository tracked file.
-	 * @param head TODO
+	 * @param head the name of the branch to check
 	 * @param filename the full path of the file and its name inside the repository
 	 * 
 	 * @return the id of the file or NULL if not found.
@@ -166,7 +166,7 @@ public abstract class RepositoryHelper {
 
 	/**
 	 * Return the registered file version from the repository tracked file.
-	 * @param head TODO
+	 * @param head the name of the branch to check
 	 * @param filename the full path of the file and its name inside the repository
 	 * 
 	 * @return the id of the file or NULL if not found.
@@ -234,4 +234,5 @@ public abstract class RepositoryHelper {
 	public void setWorkingDirectory(String dir, boolean create) {
 		repositoryDir = dir;
 	}
+
 }
