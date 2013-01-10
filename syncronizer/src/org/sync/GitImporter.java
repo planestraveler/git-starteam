@@ -472,6 +472,12 @@ public class GitImporter {
 			vc.discard();
 			vc = null;
 		}
+		if(lastTime < timeIncrement.getTimeInMillis()) {
+			vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(lastTime)));
+			generateFastImportStream(vc, baseFolder, domain);
+			vc.discard();
+			vc = null;
+		}
 		helper.gc();
 	}
 	
