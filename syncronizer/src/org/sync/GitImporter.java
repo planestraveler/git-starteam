@@ -462,18 +462,12 @@ public class GitImporter {
 		Calendar timeIncrement = Calendar.getInstance();
 		timeIncrement.setTimeInMillis(firstTime);
 		for(;timeIncrement.getTimeInMillis() < lastTime; timeIncrement.add(Calendar.DAY_OF_YEAR, 1)) {
-			if(lastTime - firstTime <= day) {
+			if(lastTime - timeIncrement.getTimeInMillis() <= day) {
 				vc = view;
 			} else {
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(timeIncrement.getTimeInMillis())));
 			}
 			System.err.println("View Configuration Time: " + timeIncrement.getTime());
-			generateFastImportStream(vc, baseFolder, domain);
-			vc.discard();
-			vc = null;
-		}
-		if(lastTime < timeIncrement.getTimeInMillis()) {
-			vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(lastTime)));
 			generateFastImportStream(vc, baseFolder, domain);
 			vc.discard();
 			vc = null;
