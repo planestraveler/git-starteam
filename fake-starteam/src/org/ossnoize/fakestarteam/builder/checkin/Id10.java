@@ -25,6 +25,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id10 extends CheckInInstruction {
 
@@ -54,6 +55,8 @@ public class Id10 extends CheckInInstruction {
 		URL viewVersion = new URL("https://raw.github.com/planestraveler/git-starteam/ae3b555c8f5df0e7db03022ae6d32fa51b7a7727/fake-starteam/src/com/starbase/starteam/View.java");
 		File viewClass = new File(starteam);
 		viewClass.addFromStream(viewVersion.openStream(), "View.java", "Class reprensenting the view of starteam", "", 0);
+		
+		view.createViewLabel("Check-in Id 10", "Check Id 10 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 		
 	}
 

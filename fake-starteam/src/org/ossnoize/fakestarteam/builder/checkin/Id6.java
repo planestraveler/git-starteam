@@ -25,6 +25,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id6 extends CheckInInstruction {
 
@@ -102,6 +103,8 @@ public class Id6 extends CheckInInstruction {
 				"string.c",
 				"Copy files from msvcp90",
 				"Copy files from msvcp90", 0);
+
+		view.createViewLabel("Check-in Id 6", "Check Id 6 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

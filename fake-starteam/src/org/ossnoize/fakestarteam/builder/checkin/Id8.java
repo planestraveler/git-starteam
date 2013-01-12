@@ -25,6 +25,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id8 extends CheckInInstruction {
 
@@ -43,6 +44,8 @@ public class Id8 extends CheckInInstruction {
 		URL msvcpVersion = new URL("http://source.winehq.org/git/wine.git/blob_plain/6b5e9e3e3f45fa9f700f6d1904c82a21b3ffd0f8:/dlls/msvcp100/msvcp.h");
 		File msvcpH = findFileIn(msvcp100, "msvcp.h");
 		msvcpH.checkinFromStream(msvcpVersion.openStream(), "Fixed stream-off size definition", 0, false);
+		
+		view.createViewLabel("Check-in Id 8", "Check Id 8 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

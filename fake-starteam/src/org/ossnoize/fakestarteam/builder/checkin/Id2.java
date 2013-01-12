@@ -25,6 +25,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id2 extends CheckInInstruction {
 
@@ -37,6 +38,8 @@ public class Id2 extends CheckInInstruction {
 		File readmeFile = new File(doc);
 		readmeFile.addFromStream(readmeVersion.openStream(),
 				"README", "Readme file for the project", "", 0);
+		
+		view.createViewLabel("Check-in Id 2", "Check Id 2 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

@@ -23,6 +23,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id9 extends CheckInInstruction {
 
@@ -33,6 +34,9 @@ public class Id9 extends CheckInInstruction {
 		Folder scons = findFolderIn(src, "scons");
 		
 		scons.remove();
+		
+
+		view.createViewLabel("Check-in Id 9", "Check Id 9 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

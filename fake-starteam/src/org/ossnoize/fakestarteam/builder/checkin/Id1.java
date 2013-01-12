@@ -25,6 +25,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id1 extends CheckInInstruction {
 
@@ -73,6 +74,8 @@ public class Id1 extends CheckInInstruction {
 				"glsl_lexer.ll",
 				"First version of glsl mesa lexer",
 				"First version of glsl mesa lexer", 0);
+		
+		view.createViewLabel("Check-in Id 1", "Check Id 1 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

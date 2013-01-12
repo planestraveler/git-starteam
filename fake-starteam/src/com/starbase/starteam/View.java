@@ -158,4 +158,11 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	public Server getServer() {
 		return InternalPropertiesProvider.getInstance().getCurrentServer();
 	}
+	
+	public Label createViewLabel(String name, String description, OLEDate time, boolean buildLabel, boolean frozen) {
+		Label ret = new Label(this, name, description, time, buildLabel, frozen);
+		ret.attachToFolder(getRootFolder(), Label.SCOPE_ITEM_AND_CONTENTS);
+		ret.update();
+		return ret;
+	}
 }
