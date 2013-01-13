@@ -492,7 +492,7 @@ public class GitImporter {
 		Calendar timeIncrement = Calendar.getInstance();
 		timeIncrement.setTimeInMillis(firstTime);
 		for(;timeIncrement.getTimeInMillis() < lastTime; timeIncrement.add(Calendar.DAY_OF_YEAR, 1)) {
-			if(lastTime - firstTime <= day) {
+			if(lastTime - timeIncrement.getTimeInMillis() <= day) {
 				vc = view;
 			} else {
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(timeIncrement.getTimeInMillis())));
