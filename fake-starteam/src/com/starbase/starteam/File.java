@@ -175,7 +175,7 @@ public class File extends Item {
 			loadProperties();
 			if(null == checkoutTo) {
 				//TODO: build the default checkout directory location
-				throw new InvalidOperationException("Does not yet support null checkoutTo parameter");
+				throw new NullPointerException("Does not yet support null checkoutTo parameter");
 			}
 			copyFromGz(holdingPlace, checkoutTo);
 			if(!timeStampNow) {
@@ -191,7 +191,7 @@ public class File extends Item {
 		holdingPlace = createHoldingPlace(date);
 		if(holdingPlace.exists()) {
 			if(null == checkoutTo) {
-				throw new InvalidOperationException("Does not yet support null checkoutTo parameter");
+				throw new NullPointerException("Does not yet support null checkoutTo parameter");
 			}
 			copyFromGz(holdingPlace, checkoutTo);
 			if(!timeStampNow) {
