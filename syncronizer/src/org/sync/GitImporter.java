@@ -18,6 +18,7 @@ package org.sync;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -34,10 +35,12 @@ import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.util.CommitInformation;
+import org.sync.util.LabelDateComparator;
 import org.sync.util.TempFileManager;
 
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
+import com.starbase.starteam.Label;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.RecycleBin;
 import com.starbase.starteam.Server;
@@ -408,6 +411,34 @@ public class GitImporter {
 			throw new NullPointerException("Ensure that the helper is correctly started.");
 		}
 	}
+	
+	public void generateByLabelImport(View view, Date date, String baseFolder, String domain) {
+		Label[] viewLabels = view.fetchAllLabels();
+		String head = view.getName();
+		if(null != alternateHead) {
+			head = alternateHead;
+		}
+		Arrays.sort(viewLabels, new LabelDateComparator());
+		int fromLabel = 0;
+		if(isResume) {
+			java.util.Date lastCommit = helper.getLastCommitOfBranch(head);
+			for(int i=0; i < viewLabels.length; ++i) {
+				if(viewLabels[i].getRevisionTime().getLongValue() > lastCommit.getTime()) {
+					System.err.println("Importing from label <" + viewLabels[i].getName() + ">");
+					fromLabel = i;
+					break;
+				}
+			}
+		}
+		setFolder(view, baseFolder);
+		for(int i=fromLabel; i<viewLabels.length; ++i) {
+			View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
+			System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
+			generateFastImportStream(vc, baseFolder, domain);
+			vc.discard();
+		}
+		helper.gc();
+	}
 
 	public void generateDayByDayImport(View view, Date date, String baseFolder, String domain) {
 		View vc;
@@ -449,7 +480,6 @@ public class GitImporter {
 		firstTime = date.getTime();
 		
 		// get the most recent commit 
-		// could we just get the current date ? like (now)
 		setFolder(view, baseFolder);
 		recursiveLastModifiedTime(getFolder());
 		long lastTime = getLastModifiedTime();

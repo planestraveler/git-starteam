@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -86,6 +87,22 @@ public class Label extends CacheRef {
 		loadInformation(viewId, labelId);
 	}
 	
+	protected static Label[] getLabelList(int viewId) {
+		File dir = buildStoragePath(viewId);
+		ArrayList<Label> list = new ArrayList<Label>();
+		for(String labelid : dir.list()) {
+			list.add(new Label(viewId, Integer.parseInt(labelid)));
+		}
+		Label[] LabelList = new Label[list.size()];
+		return list.toArray(LabelList);
+	}
+	
+	protected int getRevisionOfItem(int itemId) {
+		if(!itemList.containsKey(itemId))
+			throw new InvalidOperationException("This item was not labeled in the view");
+		return itemList.get(itemId);
+	}
+	
 	public boolean isNew() {
 		return isNew;
 	}
@@ -96,6 +113,18 @@ public class Label extends CacheRef {
 	
 	public OLEDate getRevisionTime() {
 		return revisionTime;
+	}
+
+	public String getName() {
+		return name;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public int getID() {
+		return id;
 	}
 	
 	public void update() {
@@ -180,7 +209,7 @@ public class Label extends CacheRef {
 		}
 	}
 
-	private java.io.File buildStoragePath(int viewId) {
+	private static java.io.File buildStoragePath(int viewId) {
 		return new java.io.File(InternalPropertiesProvider.getInstance().getStorageLocation() + 
 				java.io.File.separator + "LabelStorage" + java.io.File.separator + viewId);
 	}

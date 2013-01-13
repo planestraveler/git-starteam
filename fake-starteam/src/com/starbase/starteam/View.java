@@ -165,4 +165,8 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 		ret.update();
 		return ret;
 	}
+	
+	public Label[] fetchAllLabels() {
+		return Label.getLabelList(getID());
+	}
 }

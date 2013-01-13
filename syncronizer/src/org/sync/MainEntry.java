@@ -40,6 +40,7 @@ public class MainEntry {
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
 		CmdLineParser.Option selectTimeBasedImport = parser.addBooleanOption('T', "time-based");
+		CmdLineParser.Option selectLabelBasedImport = parser.addBooleanOption('L', "label-based");
 		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
 		CmdLineParser.Option selectFolder = parser.addStringOption('f', "folder");
 		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
@@ -70,6 +71,7 @@ public class MainEntry {
 		String view = (String) parser.getOptionValue(selectView);
 		String time = (String) parser.getOptionValue(selectTime);
 		Boolean timeBased = (Boolean) parser.getOptionValue(selectTimeBasedImport);
+		Boolean labelBased = (Boolean) parser.getOptionValue(selectLabelBasedImport);
 		String folder = (String) parser.getOptionValue(selectFolder);
 		String domain = (String) parser.getOptionValue(selectDomain);
 		Boolean keyword = (Boolean) parser.getOptionValue(isExpandKeywords);
@@ -136,6 +138,8 @@ public class MainEntry {
 						if(v.getName().equalsIgnoreCase(view)) {
 							if(null != timeBased && timeBased) {
 								g.generateDayByDayImport(v, date, folder, domain);
+							} else if (null != labelBased && labelBased) {
+								g.generateByLabelImport(v, date, folder, domain);
 							} else {
 								g.generateFastImportStream(v, folder, domain);
 							}
@@ -161,6 +165,7 @@ public class MainEntry {
 		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
 		System.out.println("[-T]\t\t\tDo a day by day importation of the starteam view");
+		System.out.println("[-L]\t\t\tDo a label by label importation of the starteam view");
 		System.out.println("[-k]\t\t\tSet to enable keyword expansion in text files");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation for branch view");

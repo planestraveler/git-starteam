@@ -84,6 +84,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		} else if (getView().getConfiguration().isTimeBased()) {
 			isFromHistory = true;
 			return findTimeRevision(id);
+		} else if (getView().getConfiguration().isLabelBased()) {
+			isFromHistory = true;
+			Label aLabel = new Label(getView().getID(), getView().getConfiguration().getLabelID());
+			return aLabel.getRevisionOfItem(id);
 		}
 		throw new InvalidOperationException("Cannot find a revision with this view configuration");
 	}

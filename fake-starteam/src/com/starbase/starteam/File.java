@@ -201,6 +201,12 @@ public class File extends Item {
 			throw new InvalidOperationException("The file does not exist in the repository");
 		}
 	}
+
+	public void checkoutByLabelID(java.io.File aFile, int checkoutLabelID, int lockType, boolean timeStampNow, boolean eolConversionEnabled, boolean updateStatus) throws java.io.IOException {
+		Label theLabel = new Label(getView().getID(), checkoutLabelID);
+		int viewVersion = theLabel.getRevisionOfItem(getItemID());
+		checkoutByVersion(aFile, viewVersion, lockType, timeStampNow, eolConversionEnabled, updateStatus);
+	}
 	
 	public void checkoutTo(java.io.File checkoutTo, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
 		if(holdingPlace.exists()) {
