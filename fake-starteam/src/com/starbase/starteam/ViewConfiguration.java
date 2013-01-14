@@ -77,10 +77,14 @@ public class ViewConfiguration {
 	}
 	
 	public OLEDate getTime() {
+		if(!isTimeBased())
+			throw new IllegalStateException("Cannot get time of configuration since it is not time based");
 		return time;
 	}
 	
 	public int getLabelID() {
+		if(!isLabelBased())
+			throw new IllegalStateException("Cannot get Label ID of configuration since it is not label based");
 		return labelID;
 	}
 
