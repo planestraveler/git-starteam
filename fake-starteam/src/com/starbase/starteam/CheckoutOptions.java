@@ -32,10 +32,12 @@ public class CheckoutOptions {
 
 	public CheckoutOptions(View view) {
 		this.view = view;
-		this.time = view.getConfiguration().getTime();
 		this.timeBased = view.getConfiguration().isTimeBased();
-		this.labelId = view.getConfiguration().getLabelID();
+		if(this.timeBased)
+			this.time = view.getConfiguration().getTime();
 		this.labelBased = view.getConfiguration().isLabelBased();
+		if(this.labelBased)
+			this.labelId = view.getConfiguration().getLabelID();
 		this.isTip = view.getConfiguration().isTip();
 		this.updateStatus = false;
 		this.lockType = 0;
