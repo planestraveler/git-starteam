@@ -245,11 +245,17 @@ public class GitImporter {
 		if(deletedFiles.size() > 0) {
 			try {
 				System.err.println("Janitor was needed for cleanup");
+				java.util.Date janitorTime;
+				if(view.getConfiguration().isTimeBased()) {
+					janitorTime = new java.util.Date(view.getConfiguration().getTime().getLongValue());
+				} else {
+					janitorTime = new java.util.Date(lastModifiedTime);
+				}
 				Commit commit = new Commit("File Janitor",
 						"janitor@" + domain,
 						"Cleaning files move along",
 						head,
-						new java.util.Date(view.getConfiguration().getTime().getLongValue()));
+						janitorTime);
 				if(null == lastCommit) {
 					if(isResume) {
 						commit.resumeOnTopOfRef();
