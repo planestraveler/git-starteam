@@ -439,7 +439,7 @@ public class GitImporter {
 			head = alternateHead;
 		}
 		Arrays.sort(viewLabels, new LabelDateComparator());
-		int fromLabel = 0;
+		int fromLabel = -1;
 		if(isResume) {
 			java.util.Date lastCommit = helper.getLastCommitOfBranch(head);
 			if(null != date) {
@@ -451,6 +451,10 @@ public class GitImporter {
 					fromLabel = i;
 					break;
 				}
+			}
+			if(-1 == fromLabel) {
+				System.err.println("No newer label are more recent then last commit made at " + lastCommit);
+				return;
 			}
 		}
 		setFolder(view, baseFolder);
