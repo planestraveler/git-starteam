@@ -61,6 +61,11 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 		return uid == info.uid &&
 				(comment.length() == 0 || info.comment.length() == 0 || info.comment.equalsIgnoreCase(comment));
 	}
+	
+	@Override
+	public String toString() {
+		return "CommitInfo: " + getTime() + " - " + getUid() + " - " + getComment() + " - " + getPath();
+	}
 
 	@Override
 	public boolean equals(Object obj) {
