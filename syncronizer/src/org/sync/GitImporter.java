@@ -113,7 +113,7 @@ public class GitImporter {
 		f.discard();
 	}
 
-	public void setLastFilesLastSortedFileList(View view, String folderPath) {
+	public void setLastFilesLastSortedFileList(View view, String head, String folderPath) {
 		folder = null;
 		setFolder(view, folderPath);
 		if(null == folder) {
@@ -124,7 +124,7 @@ public class GitImporter {
 		deletedFiles.clear();
 		deletedFiles.addAll(lastFiles);
 		sortedFileList.clear();
-		recursiveFilePopulation(folder);
+		recursiveFilePopulation(head, folder);
 		lastFiles.clear();
 		lastFiles.addAll(files);
 		lastSortedFileList.clear();
@@ -155,7 +155,7 @@ public class GitImporter {
 		deletedFiles.clear();
 		deletedFiles.addAll(lastFiles);
 		sortedFileList.clear();
-		recursiveFilePopulation(folder);
+		recursiveFilePopulation(null, folder);
 		lastFiles.clear();
 		lastFiles.addAll(files);
 		lastSortedFileList.clear();
@@ -192,16 +192,15 @@ public class GitImporter {
 				} else {
 					aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
 					cm.checkoutTo(f, aFile);
-					
-					Integer fileid = helper.getRegisteredFileId(head, path);
-					if(null == fileid) {
-						helper.registerFileId(head, path, f.getItemID(), f.getRevisionNumber());
-					} else {
-						helper.updateFileVersion(head, path, f.getRevisionNumber());
-					}
 					Blob fileToStage = new Blob(new Data(aFile));
 					
 					helper.writeBlob(fileToStage);
+					
+					Integer revision = helper.getRegisteredFileVersion(head, path);
+					if(null != revision && revision != f.getRevisionNumber()) { 
+						helper.updateFileVersion(head, path, f.getRevisionNumber());
+						System.err.println("file :" + path + " was updated to version " + f.getRevisionNumber() + " from version " + revision);
+					}
 					
 					FileModification fm = new FileModification(fileToStage);
 					if(aFile.canExecute()) {
@@ -390,7 +389,7 @@ public class GitImporter {
 		f.discard();
 	}
 
-	private void recursiveFilePopulation(Folder f) {
+	private void recursiveFilePopulation(String head, Folder f) {
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
@@ -401,6 +400,12 @@ public class GitImporter {
 				int indexOfFirstPath = path.indexOf('/');
 				path = path.substring(indexOfFirstPath + 1 + folderNameLength);
 
+				if(null != head) {
+					Integer fileid = helper.getRegisteredFileId(head, path);
+					if(null == fileid) {
+						helper.registerFileId(head, path, f.getItemID(), f.getRevisionNumber());
+					}
+				}
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
 				}
@@ -408,14 +413,13 @@ public class GitImporter {
 				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), i.getComment(), path);
 				if(! lastSortedFileList.containsKey(info)) {
 					AddedSortedFileList.put(info, historyFile);
-//					System.err.println("Found file marked as: " + key);
 				}
 				sortedFileList.put(info, historyFile);
 			}
 			i.discard();
 		}
 		for(Folder subfolder : f.getSubFolders()) {
-			recursiveFilePopulation(subfolder);
+			recursiveFilePopulation(head, subfolder);
 		}
 		f.discard();
 	}
@@ -439,8 +443,9 @@ public class GitImporter {
 			head = alternateHead;
 		}
 		Arrays.sort(viewLabels, new LabelDateComparator());
-		int fromLabel = -1;
+		int fromLabel = 0;
 		if(isResume) {
+			fromLabel = -1;
 			java.util.Date lastCommit = helper.getLastCommitOfBranch(head);
 			if(null != date) {
 				lastCommit = date;
@@ -462,7 +467,7 @@ public class GitImporter {
 		for(int i=fromLabel; i<viewLabels.length; ++i) {
 			View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
 			if(i == fromLabel) {
-				setLastFilesLastSortedFileList(vc, baseFolder);
+				setLastFilesLastSortedFileList(vc, head, baseFolder);
 			}
 			System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
 			generateFastImportStream(vc, baseFolder, domain);
@@ -476,11 +481,11 @@ public class GitImporter {
 		long hour = 3600000L; // mSec
 		long day = 24 * hour; // 86400000 mSec
 		long firstTime = 0;
+		String head = view.getName();
+		if(null != alternateHead) {
+			head = alternateHead;
+		}
 		if(isResume) {
-			String head = view.getName();
-			if(null != alternateHead) {
-				head = alternateHead;
-			}
 			java.util.Date lastCommit = helper.getLastCommitOfBranch(head);
 			if(null != lastCommit) {
 				firstTime = lastCommit.getTime();
@@ -498,7 +503,7 @@ public class GitImporter {
 				// -R is for branch view
 				// 2000 mSec here is to avoid side effect in StarTeam View Configuration
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(firstTime + 2000)));
-				setLastFilesLastSortedFileList(vc, baseFolder);
+				setLastFilesLastSortedFileList(vc, head, baseFolder);
 				vc.discard();
 			} 
 			Calendar time = Calendar.getInstance();
