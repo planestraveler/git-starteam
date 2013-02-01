@@ -106,7 +106,6 @@ public abstract class RepositoryHelper {
 		}
 		if(!fileInformation.get(head).containsKey(filename)) {
 			fileInformation.get(head).put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
-			saveFileInformation();
 			return true;
 		}
 		return false;
@@ -123,7 +122,6 @@ public abstract class RepositoryHelper {
 		if(null != fileInformation) {
 			if(fileInformation.containsKey(head) && fileInformation.get(head).containsKey(filename)) {
 				fileInformation.get(head).get(filename).setVersion(fileVersion);
-				saveFileInformation();
 				return true;
 			}
 		}
@@ -139,7 +137,6 @@ public abstract class RepositoryHelper {
 		if(null != fileInformation) {
 			if(fileInformation.containsKey(head)) {
 				fileInformation.get(head).remove(filename);
-				saveFileInformation();
 			}
 		}
 	}
@@ -214,6 +211,7 @@ public abstract class RepositoryHelper {
 			checkpoint.writeTo(fastImportStream);
 			commitingSince = System.currentTimeMillis();
 			System.err.println("Checkpoint done");
+			saveFileInformation();
 		}
 	}
 	
@@ -225,6 +223,7 @@ public abstract class RepositoryHelper {
 	public abstract java.util.Date getLastCommitOfBranch(String branchName);
 
 	public void dispose() {
+		saveFileInformation();
 		try {
 			getFastImportStream().close();
 		} catch (IOException e) {
