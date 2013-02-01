@@ -31,5 +31,13 @@ public enum GitFileType {
 	private GitFileType(String octalRepresentation) {
 		OctalRepresentation = octalRepresentation;
 	}
-	
+
+	public static GitFileType fromOctal(String octalString) {
+		for(GitFileType type : values()) {
+			if(type.getOctalRepresentation().equals(octalString)) {
+				return type;
+			}
+		}
+		throw new UnsupportedOperationException("Cannot find corresponding type from octal representation: <" + octalString + ">");
+	}
 }
