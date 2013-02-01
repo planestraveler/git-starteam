@@ -124,27 +124,27 @@ public class MainEntry {
 					} else {
 						p.setExpandKeywords(true);
 					}
-					GitImporter g = new GitImporter(starteam, p);
+					GitImporter importer = new GitImporter(starteam, p);
 					if(null != head) {
-						g.setHeadName(head);
+						importer.setHeadName(head);
 					}
 					if(null != resume) {
-						g.setResume(resume);
+						importer.setResume(resume);
 					}
 					if(null != dumpTo) {
-						g.setDumpFile(new File(dumpTo));
+						importer.setDumpFile(new File(dumpTo));
 					}
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
 							if(null != timeBased && timeBased) {
-								g.generateDayByDayImport(v, date, folder, domain);
+								importer.generateDayByDayImport(v, date, folder, domain);
 							} else if (null != labelBased && labelBased) {
-								g.generateByLabelImport(v, date, folder, domain);
+								importer.generateByLabelImport(v, date, folder, domain);
 							} else {
-								g.generateFastImportStream(v, folder, domain);
+								importer.generateFastImportStream(v, folder, domain);
 							}
 							// process is finished we can close now.
-							g.dispose();
+							importer.dispose();
 							break;
 						}
 					}
