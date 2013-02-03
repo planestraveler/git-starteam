@@ -463,7 +463,6 @@ public class GitImporter {
 			}
 		}
 		setFolder(view, baseFolder);
-		recursiveLastModifiedTime(getFolder());
 		for(int i=fromLabel; i<viewLabels.length; ++i) {
 			View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
 			if(i == fromLabel) {
