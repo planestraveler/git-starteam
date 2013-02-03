@@ -403,14 +403,19 @@ public class GitImporter {
 				if(null != head) {
 					Integer fileid = helper.getRegisteredFileId(head, path);
 					if(null == fileid) {
-						helper.registerFileId(head, path, f.getItemID(), f.getRevisionNumber());
+						// We register with version -1 to be sure to add it. Since this is a discovered file, when we are 
+						// going to pass trough the files, we will make sure to get it's version 0.
+						helper.registerFileId(head, path, f.getItemID(), -1);
+						fileid = f.getItemID();
 					}
+					
 				}
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
 				}
 				files.add(path);
 				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), i.getComment(), path);
+				//TODO: find a proper solution to file update.
 				if(! lastSortedFileList.containsKey(info)) {
 					AddedSortedFileList.put(info, historyFile);
 				}
