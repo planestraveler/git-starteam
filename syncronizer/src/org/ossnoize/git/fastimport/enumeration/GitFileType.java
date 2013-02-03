@@ -20,7 +20,8 @@ public enum GitFileType {
 
 	Normal("100644"),
 	Executable("100755"),
-	SymbolicLink("120000");
+	SymbolicLink("120000"),
+	NullFile("000000");
 	
 	private String OctalRepresentation;
 
