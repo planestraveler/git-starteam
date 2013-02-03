@@ -199,6 +199,12 @@ public abstract class RepositoryHelper {
 		fastExportOverrideToFile = file;
 	}
 	
+	/**
+	 * Write a commit into the fast-import stream. After 3 hours of continuous 
+	 * commit, a checkpoint is done to preserve the history recorded so far.
+	 * @param commit The commit to record.
+	 * @throws IOException 
+	 */
 	public void writeCommit(Commit commit) throws IOException {
 		OutputStream fastImportStream = getFastImportStream();
 		commit.writeTo(fastImportStream);
@@ -215,6 +221,12 @@ public abstract class RepositoryHelper {
 		}
 	}
 	
+	/**
+	 * Write a blob to the fast-import stream to be used by commit afterward.
+	 * @param fileToStage The blob object representing a file or other markable
+	 *                    data.
+	 * @throws IOException
+	 */
 	public void writeBlob(Blob fileToStage) throws IOException {
 		OutputStream fastImportStream = getFastImportStream();
 		fileToStage.writeTo(fastImportStream);
@@ -230,6 +242,12 @@ public abstract class RepositoryHelper {
 		}
 	}
 	
+	/**
+	 * Set the working directory where the fast-import process and all other
+	 * process will query the repository. 
+	 * @param dir Where to make the fast-import on disk
+	 * @param create Ask to create the repository using an init command.
+	 */
 	public void setWorkingDirectory(String dir, boolean create) {
 		repositoryDir = dir;
 	}
