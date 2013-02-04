@@ -52,6 +52,7 @@ public class MainEntry {
 		CmdLineParser.Option isCreateRepo = parser.addBooleanOption('c', "create-new-repo");
 		CmdLineParser.Option selectPassword = parser.addStringOption("password");
 		CmdLineParser.Option dumpToFile = parser.addStringOption('D', "dump");
+		CmdLineParser.Option selectWorkingFolder = parser.addStringOption('W', "working-folder");
 
 		try {
 			parser.parse(args);
@@ -82,6 +83,7 @@ public class MainEntry {
 		Boolean createNewRepo = (Boolean) parser.getOptionValue(isCreateRepo);
 		String password = (String) parser.getOptionValue(selectPassword);
 		String dumpTo = (String) parser.getOptionValue(dumpToFile);
+		String workingFolder = (String) parser.getOptionValue(selectWorkingFolder);
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -105,6 +107,9 @@ public class MainEntry {
 
 		RepositoryHelperFactory.getFactory().setPreferedPath(pathToProgram);
 		RepositoryHelperFactory.getFactory().setCreateRepo((null != createNewRepo));
+		if(null != workingFolder) {
+			RepositoryHelperFactory.getFactory().setWorkingFolder(workingFolder);
+		}
 
 		Server starteam = new Server(host, port);
 		starteam.connect();
@@ -172,6 +177,7 @@ public class MainEntry {
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
 		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
+		System.out.println("[-W <folder>]\tSelect where the repository is located");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
 	}
