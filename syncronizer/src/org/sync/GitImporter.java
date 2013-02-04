@@ -405,8 +405,8 @@ public class GitImporter {
 					if(null == fileid) {
 						// We register with version -1 to be sure to add it. Since this is a discovered file, when we are 
 						// going to pass trough the files, we will make sure to get it's version 0.
-						helper.registerFileId(head, path, f.getItemID(), -1);
-						fileid = f.getItemID();
+						helper.registerFileId(head, path, historyFile.getItemID(), -1);
+						fileid = historyFile.getItemID();
 					}
 					
 				}
