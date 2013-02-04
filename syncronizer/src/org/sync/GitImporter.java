@@ -155,7 +155,7 @@ public class GitImporter {
 		deletedFiles.clear();
 		deletedFiles.addAll(lastFiles);
 		sortedFileList.clear();
-		recursiveFilePopulation(null, folder);
+		recursiveFilePopulation(head, folder);
 		lastFiles.clear();
 		lastFiles.addAll(files);
 		lastSortedFileList.clear();
