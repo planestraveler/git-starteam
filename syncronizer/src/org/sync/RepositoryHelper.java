@@ -20,12 +20,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Checkpoint;
 import org.ossnoize.git.fastimport.Commit;
+import org.sync.util.LogEntry;
+import org.sync.util.SmallRef;
 import org.sync.util.StarteamFileInfo;
 
 import com.starbase.util.MD5;
@@ -233,7 +236,31 @@ public abstract class RepositoryHelper {
 	}
 	
 	public abstract java.util.Date getLastCommitOfBranch(String branchName);
+	
+	/**
+	 * Return all log entry <code>from</code> the requested commit without 
+	 * including it <code>to</code> the requested commit marking it as the
+	 * last on 
+	 * @param from Commit SmallRef to start logging from
+	 * @param to The last commit SmallRef to mark the end of listing.
+	 * @return The list of commit starting at the <code>from</code> to the 
+	 * 	       last marked as <code>to</code>
+	 */
+	public abstract List<LogEntry> getCommitLog(SmallRef from, SmallRef to);
+	
+	/**
+	 * Return all commit from the first entry of the branch to the last marked
+	 * as <code>to</code>
+	 * @param to The last commit of the log
+	 * @return The list of commit from the first entry to the last marked as
+	 *         <code>to</code>
+	 */
+	public abstract List<LogEntry> getCommitLog(SmallRef to);
 
+	/**
+	 * Close the fast-import stream and do some house keeping for the tracked
+	 * file version. Need to be called for the fast-import process to end.
+	 */
 	public void dispose() {
 		saveFileInformation();
 		try {

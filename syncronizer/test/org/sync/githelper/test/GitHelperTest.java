@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
@@ -30,11 +31,14 @@ import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
 import org.ossnoize.git.fastimport.FileModification;
 import org.ossnoize.git.fastimport.FileOperation;
+import org.ossnoize.git.fastimport.Sha1Ref;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.RepositoryHelper;
 import org.sync.githelper.GitHelper;
 import org.sync.util.FileUtility;
+import org.sync.util.LogEntry;
+import org.sync.util.SmallRef;
 
 import com.starbase.util.MD5;
 
@@ -167,5 +171,23 @@ public class GitHelperTest {
 		
 		assertFalse(test.updateFileVersion("master", "unexistingFile.txt", 4));
 		assertFalse(test.registerFileId("master", "test/path/of/file.txt", 12356, 6));
+	}
+	
+	@Test
+	public void testLogEntry() {
+		List<LogEntry> renamedLog = test.getCommitLog(new SmallRef("e09d507"));
+		assertEquals("Steve Tousignant <s.tousignant@gmail.com>", renamedLog.get(0).getAuthor());
+		assertEquals("MD5Builder is better placed in the util package.", renamedLog.get(0).getComment());
+		assertEquals(new Sha1Ref("e09d5071e480a2f4906dd8fae05afdbdf3492415"), renamedLog.get(0).getCommitRef());
+		assertEquals(2, renamedLog.get(0).getFilesEntry().size());
+		assertEquals(LogEntry.TypeOfModification.Modification, renamedLog.get(0).getFilesEntry().get(0).getTypeOfModification());
+		assertEquals(LogEntry.TypeOfModification.Rename, renamedLog.get(0).getFilesEntry().get(1).getTypeOfModification());
+		assertEquals("syncronizer/src/org/sync/githelper/GitHelper.java", renamedLog.get(0).getFilesEntry().get(0).getPath());
+		assertEquals("syncronizer/src/org/sync/MD5Builder.java", renamedLog.get(0).getFilesEntry().get(1).getPath());
+		assertEquals("syncronizer/src/org/sync/util/MD5Builder.java", renamedLog.get(0).getFilesEntry().get(1).renamedTo());
+		assertFalse(renamedLog.get(0).getFilesEntry().get(1).hasTypeChange());
+		assertEquals(GitFileType.Normal, renamedLog.get(0).getFilesEntry().get(1).getFromType());
+		assertEquals(GitFileType.Normal, renamedLog.get(0).getFilesEntry().get(1).getToType());
+		assertEquals(98, renamedLog.get(0).getFilesEntry().get(1).getDiffRatio());
 	}
 }

@@ -32,9 +32,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -50,7 +52,10 @@ import org.ossnoize.git.fastimport.enumeration.FeatureType;
 import org.sync.ErrorEater;
 import org.sync.RepositoryHelper; 
 import org.sync.util.FileUtility;
+import org.sync.util.LogEntry;
+import org.sync.util.SmallRef;
 import org.sync.util.StarteamFileInfo;
+import org.sync.util.enumeration.FileStatusStyle;
 
 import com.starbase.util.MD5;
 
@@ -408,26 +413,43 @@ public class GitHelper extends RepositoryHelper {
 
 	@Override
 	public Date getLastCommitOfBranch(String branchName) {
+		SmallRef to = new SmallRef(branchName);
+		return getCommitLog(to.back(1), to).get(0).getTimeOfCommit();
+	}
+	
+	@Override
+	public List<LogEntry> getCommitLog(SmallRef from, SmallRef to) {
 		ProcessBuilder process = new ProcessBuilder();
-		process.command(gitExecutable, "log", "-1", "--date=iso8601", branchName);
+		String refs;
+		if(null == from) {
+			refs = to.getRef();
+		} else {
+			refs = from.getRef() + ".." + to.getRef();
+		}
+		process.command(gitExecutable, "log", "--date=iso8601", "--find-renames=75", "--full-index", "--find-copies=75", "--raw", refs);
 		process.directory(new File(repositoryDir));
 		try {
 			Process log = process.start();
-			GitFirstLogInformationReader logReader = new GitFirstLogInformationReader(log.getInputStream());
+			GitLogReader logReader = new GitLogReader(log.getInputStream());
 			Thread logReaderThread = new Thread(logReader);
-			Thread errorEater = new Thread(new ErrorEater(log.getErrorStream(), "log"));
+			Thread errorEater = new Thread(new ErrorEater(log.getErrorStream(), "log:=" + to.getRef()));
 			logReaderThread.start();
 			errorEater.start();
 			log.waitFor();
 			logReaderThread.join();
 			errorEater.join();
-			return logReader.getCommitDate();
+			return logReader.getEntries();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	@Override
+	public List<LogEntry> getCommitLog(SmallRef to) {
+		return getCommitLog(null, to);
 	}
 
 	private File buildStarteamInfoDir() {
@@ -540,59 +562,55 @@ public class GitHelper extends RepositoryHelper {
 		
 	}
 
-	private class GitFirstLogInformationReader implements Runnable {
+	private class GitLogReader implements Runnable {
 		private static final String dateKey = "Date:";
 		private static final String shaKey = "commit";
 		private static final String authorKey = "Author:";
-		private java.util.Date commitDate;
-		private String author;
+		private List<LogEntry> entries;
 		private DataRef commitSHA;
-		private String comment;
 		private InputStream logStream;
 		
-		public GitFirstLogInformationReader(InputStream stream) {
+		public GitLogReader(InputStream stream) {
 			logStream = stream;
-		}
-		
-		public Date getCommitDate() {
-			return commitDate;
+			entries = Collections.synchronizedList(new ArrayList<LogEntry>());
 		}
 
-		public String getAuthor() {
-			return author;
+		public List<LogEntry> getEntries() {
+			return entries;
 		}
 		
-		public DataRef getCommitSHA() {
-			return commitSHA;
-		}
-		
-		public String getComment() {
-			return comment;
-		}
 		@Override
 		public void run() {
-			SimpleDateFormat dateFormatIso =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+			SimpleDateFormat dateFormatIso = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 			InputStreamReader reader = null;
 			BufferedReader buffer = null;
 			try {
 				reader = new InputStreamReader(logStream);
 				buffer = new BufferedReader(reader);
+				LogEntry entry = null;
 				String line;
 				while((line = buffer.readLine()) != null) {
-					if(line.trim().startsWith(dateKey)) {
+					if(line.startsWith(dateKey)) {
 						String isoDate = line.substring(dateKey.length()).trim();
 						try {
-							commitDate = dateFormatIso.parse(isoDate);
+							entry.setTimeOfCommit(dateFormatIso.parse(isoDate));
 						} catch (ParseException e) {
 							throw new Error("The date " + isoDate + " is not a valid (git wise) iso 8601 date");
 						}
-					} else if (line.trim().startsWith(shaKey)) {
+					} else if (line.startsWith(shaKey)) {
+						// Git log entry always start with the commit SHA
 						commitSHA = new Sha1Ref(line.substring(shaKey.length()).trim());
-						comment = ""; // new Commit
-					} else if (line.trim().startsWith(authorKey)) {
-						author = line.substring(authorKey.length()).trim();
+						entry = new LogEntry(commitSHA);
+						synchronized (entries) {
+							entries.notify();
+							entries.add(entry);
+						}
+					} else if (line.startsWith(authorKey)) {
+						entry.setAuthor(line.substring(authorKey.length()).trim());
+					} else if (line.startsWith(":")) {
+						entry.parseStatusLine(FileStatusStyle.GitRaw, line);
 					} else {
-						comment = line.trim() + " ";
+						entry.appendComment(line.trim() + "\n");
 					}
 				}
 			} catch (IOException e) {
