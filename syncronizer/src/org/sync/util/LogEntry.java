@@ -109,8 +109,11 @@ public class LogEntry {
 		
 		@Override
 		public String toString() {
-			return ":" + fromType.getOctalRepresentation() + " " + toType.getOctalRepresentation() + 
-					" " + fromSha.getRef() + "... " + toSha.getRef() + "... "; 
+			String base = ":" + fromType.getOctalRepresentation() + " " + toType.getOctalRepresentation() + 
+					" " + fromSha.getRef() + "... " + toSha.getRef() + "... ";
+			if(getTypeOfModification() == TypeOfModification.Copy || getTypeOfModification() == TypeOfModification.Rename)
+				return base + "\t" + getTypeOfModification() + "\t" + getPath() + "\t" + renamedTo();
+			return base + "\t" + getTypeOfModification() + "\t" + getPath();
 		}
 	}
 	
@@ -179,9 +182,6 @@ public class LogEntry {
 				++tokenId;
 			}
 			if(type == TypeOfModification.Copy || type == TypeOfModification.Rename) {
-				System.out.println(pathA);
-				System.out.println(pathB);
-				System.out.println(ratio);
 				files.add(new FileEntry(pathA, pathB, type, ratio, fromType, toType, fromRef, toRef));
 			} else {
 				files.add(new FileEntry(pathA, type, fromType, toType, fromRef, toRef));
