@@ -53,5 +53,10 @@ public class Sha1Ref implements DataRef {
 		}
 		return false;
 	}
+	
+	@Override
+	public String toString() {
+		return sha1;
+	}
 
 }

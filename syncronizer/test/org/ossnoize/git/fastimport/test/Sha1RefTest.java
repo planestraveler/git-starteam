@@ -46,4 +46,10 @@ public class Sha1RefTest {
 		String sha1ref = new String(output.toByteArray());
 		assertEquals("1234567890987654321abcdefedcba0123456789", sha1ref);
 	}
+	
+	@Test
+	public void testToSTring() {
+		Sha1Ref ref = new Sha1Ref("1234567890abcdefabcd1234567890efabcdefab");
+		assertEquals("1234567890abcdefabcd1234567890efabcdefab", ref.toString());
+	}
 }
