@@ -469,13 +469,15 @@ public class GitImporter {
 		}
 		setFolder(view, baseFolder);
 		for(int i=fromLabel; i<viewLabels.length; ++i) {
-			View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
-			if(i == fromLabel && isResume) {
-				setLastFilesLastSortedFileList(vc, head, baseFolder);
+			if(viewLabels[i].isViewLabel()) {
+				View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
+				if(i == fromLabel && isResume) {
+					setLastFilesLastSortedFileList(vc, head, baseFolder);
+				}
+				System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
+				generateFastImportStream(vc, baseFolder, domain);
+				vc.discard();
 			}
-			System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
-			generateFastImportStream(vc, baseFolder, domain);
-			vc.discard();
 		}
 		helper.gc();
 	}
