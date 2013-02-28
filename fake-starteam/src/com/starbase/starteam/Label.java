@@ -243,4 +243,9 @@ public class Label extends CacheRef {
 			FileUtility.close(fread);
 		}
 	}
+
+	public boolean isViewLabel() {
+		//TODO: create revision label in the fake starteam. We have no goal for simple revision but maybe later.
+		return true;
+	}
 }
