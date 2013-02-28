@@ -282,13 +282,7 @@ public class File extends Item {
 		fin = new FileInputStream(source.getCanonicalPath() + java.io.File.separator + FILE_STORED);
 		gzin = new GZIPInputStream(fin);
 		fout = new FileOutputStream(target);
-		
-		byte[] buffer = new byte[1024 * 64];
-		int read = gzin.read(buffer);
-		while(read >= 0) {
-			fout.write(buffer, 0, read);
-			read = gzin.read(buffer);
-		}
+		FileUtility.copyStream(fout, gzin);
 		FileUtility.close(fout, gzin, fin);
 	}
 	
