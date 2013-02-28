@@ -74,7 +74,14 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	protected void setRevisionNumber(int rev) {
+		if(itemProperties.containsKey(propertyKeys._VIEW_ID)) {
+			int viewId = Integer.parseInt(itemProperties.getProperty(propertyKeys._VIEW_ID));
+			if(viewId != view.getID()) {
+				throw new InvalidOperationException("View branching is not supported yet");
+			}
+		}
 		itemProperties.setProperty(propertyKeys.REVISION_NUMBER, Integer.toString(rev));
+		itemProperties.setProperty(propertyKeys.FILE_CONTENT_REVISION, Integer.toString(rev));
 	}
 	
 	protected int findRightRevision(int id) {

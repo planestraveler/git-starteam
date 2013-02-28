@@ -521,4 +521,14 @@ public class File extends Item {
 	public Type getType() {
 		return new Type(getTypeNames().FILE, view.getServer());
 	}
+
+	public int getContentVersion() {
+		int revision = 1;
+		if(itemProperties.containsKey(propertyKeys.FILE_CONTENT_REVISION)) {
+			revision = Integer.parseInt(itemProperties.getProperty(propertyKeys.FILE_CONTENT_REVISION));
+		} else {
+			revision = getRevisionNumber();
+		}
+		return revision;
+	}
 }

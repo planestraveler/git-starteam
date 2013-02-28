@@ -29,6 +29,7 @@ public class PropertyNames {
 	public final java.lang.String FILE_ENCODING = "File Type";
 	public final java.lang.String FOLDER_PATH = "Folder Path";
 	public final java.lang.String REVISION_NUMBER = "Version";
+	public final java.lang.String FILE_CONTENT_REVISION = "Content Revision";
 	public final java.lang.String MODIFIED_USER_ID = "Modified By";
 	public final java.lang.String CREATED_USER_ID = "Created By";
 	public final java.lang.String DELETED_USER_ID = "Deleted By";
