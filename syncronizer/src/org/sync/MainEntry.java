@@ -86,7 +86,7 @@ public class MainEntry {
 			System.exit(3);
 		}
 
-		if (!folder.endsWith("/")) {
+		if(null != folder && !folder.endsWith("/")) {
 			folder = folder + "/";
 		}
 		
