@@ -85,6 +85,10 @@ public class MainEntry {
 			printHelp();
 			System.exit(3);
 		}
+
+		if (!folder.endsWith("/")) {
+			folder = folder + "/";
+		}
 		
 		Date date = null;
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
