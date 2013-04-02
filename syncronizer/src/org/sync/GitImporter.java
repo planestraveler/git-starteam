@@ -140,6 +140,9 @@ public class GitImporter {
 		folder = null;
 		setFolder(view, folderPath);
 		if(null == folder) {
+			if(folderPath != null) {
+				System.err.println("Folder not found: " + folderPath);
+			}
 			return;
 		}
 		
