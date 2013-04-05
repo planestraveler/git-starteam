@@ -51,6 +51,7 @@ public class MainEntry {
 		CmdLineParser.Option isCreateRepo = parser.addBooleanOption('c', "create-new-repo");
 		CmdLineParser.Option selectPassword = parser.addStringOption("password");
 		CmdLineParser.Option dumpToFile = parser.addStringOption('D', "dump");
+		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
 
 		try {
 			parser.parse(args);
@@ -80,6 +81,7 @@ public class MainEntry {
 		Boolean createNewRepo = (Boolean) parser.getOptionValue(isCreateRepo);
 		String password = (String) parser.getOptionValue(selectPassword);
 		String dumpTo = (String) parser.getOptionValue(dumpToFile);
+		boolean verbose = (Boolean) parser.getOptionValue(isVerbose);
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -138,6 +140,7 @@ public class MainEntry {
 					if(null != dumpTo) {
 						g.setDumpFile(new File(dumpTo));
 					}
+					g.setVerbose(verbose);
 					boolean viewFound = false;
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
@@ -150,12 +153,16 @@ public class MainEntry {
 							// process is finished we can close now.
 							g.dispose();
 							break;
+						} else if(verbose) {
+							System.err.println("Not view: " + v.getName());
 						}
 					}
 					if (!viewFound) {
 						System.err.println("View not found: " + view);
 					}
 					break;
+				} else if(verbose) {
+					System.err.println("Not project: " + p.getName());
 				}
 			}
 			if (!projectFound) {
@@ -181,6 +188,7 @@ public class MainEntry {
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
 		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
+		System.out.println("[--verbose]\t\t\tVerbose output");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
 	}
