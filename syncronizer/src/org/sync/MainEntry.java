@@ -188,6 +188,8 @@ public class MainEntry {
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
 		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
+		System.out.println("[--password]\t\t\tStarTeam password");
+		System.out.println("-D <dump file>\t\t\tDump fast-import data to file");
 		System.out.println("[--verbose]\t\t\tVerbose output");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
