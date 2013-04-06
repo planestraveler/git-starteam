@@ -140,6 +140,9 @@ public class GitImporter {
 		folder = null;
 		setFolder(view, folderPath);
 		if(null == folder) {
+			if(folderPath != null) {
+				System.err.println("Folder not found: " + folderPath);
+			}
 			return;
 		}
 		
@@ -291,7 +294,7 @@ public class GitImporter {
 		} else {
 			if(AddedSortedFileList.size() > 0) {
 				System.err.println("There was no new revision in the starteam view.");
-				System.err.println("All the files in the repository are at theire lastest version");
+				System.err.println("All the files in the repository are at their latest version");
 			} else {
 //				System.err.println("The starteam view specified was empty.");
 			}
