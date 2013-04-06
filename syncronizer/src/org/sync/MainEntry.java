@@ -89,6 +89,10 @@ public class MainEntry {
 			printHelp();
 			System.exit(3);
 		}
+
+		if(null != folder && !folder.endsWith("/")) {
+			folder = folder + "/";
+		}
 		
 		Date date = null;
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -122,8 +126,10 @@ public class MainEntry {
 		}
 		int userid = starteam.logOn(user, password);
 		if(userid > 0) {
+			boolean projectFound = false;
 			for(Project p : starteam.getProjects()) {
 				if(p.getName().equalsIgnoreCase(project)) {
+					projectFound = true;
 					if(null == keyword) {
 						p.setExpandKeywords(false);
 					} else {
@@ -139,8 +145,10 @@ public class MainEntry {
 					if(null != dumpTo) {
 						importer.setDumpFile(new File(dumpTo));
 					}
+					boolean viewFound = false;
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
+							viewFound = true;
 							if(null != timeBased && timeBased) {
 								importer.generateDayByDayImport(v, date, folder, domain);
 							} else if (null != labelBased && labelBased) {
@@ -153,8 +161,14 @@ public class MainEntry {
 							break;
 						}
 					}
+					if (!viewFound) {
+						System.err.println("View not found: " + view);
+					}
 					break;
 				}
+			}
+			if (!projectFound) {
+				System.err.println("Project not found: " + project);
 			}
 		} else {
 			System.err.println("Could not log in user: " + user);
