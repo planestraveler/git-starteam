@@ -137,10 +137,11 @@ public class Folder extends Item {
 							aFile = new com.starbase.starteam.File(id, this.view);
 						}
 						if((this.view instanceof RecycleBin && aFile.isDeleted()) || 
-						   (!(this.view instanceof RecycleBin) && !aFile.isDeleted())) {
+						   !((this.view instanceof RecycleBin) || aFile.isDeleted())) {
 							generatedList.add(aFile);
 						}
 					} catch (NumberFormatException ne) {
+						ne.printStackTrace();
 						throw new InvalidOperationException("Folder child id corrupted.");
 					}
 				}
