@@ -212,12 +212,14 @@ public class Folder extends Item {
 					throw new InvalidOperationException("The object is not registered on this view");
 				}
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(view, id, this);
-				
-				SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
-				if(parent instanceof Folder) {
-					this.parent = (Folder)parent;
-				} else if(getParentObjectID() != 0) {
-					this.parent = new FakeFolder(this.view, getParentObjectID(), null);
+
+				if(null == parent) {
+					SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
+					if(parent instanceof Folder) {
+						this.parent = (Folder)parent;
+					} else if(getParentObjectID() != 0) {
+						this.parent = new FakeFolder(this.view, getParentObjectID(), null);
+					}
 				}
 			} else {
 				// initialize the basic properties of the folder.
