@@ -319,7 +319,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public boolean isDeleted() {
 		return itemProperties.containsKey(propertyKeys._REF_COUNT) && 
-				itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0");
+				itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0") && (view instanceof RecycleBin);
 	}
 
 	public void moveTo(Folder folder) {
@@ -329,7 +329,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public void remove() {
 		decrementRefCount();
-		if(isDeleted()) {
+		if(itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0")) {
 			itemProperties.setProperty(propertyKeys.DELETED_TIME, Long.toString(System.currentTimeMillis()));
 			itemProperties.setProperty(propertyKeys.DELETED_USER_ID, 
 					Integer.toString(InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID()));

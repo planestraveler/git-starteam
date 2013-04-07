@@ -143,7 +143,9 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 		SimpleTypedResource resource = SimpleTypedResourceIDProvider.getProvider().findExisting(this, itemID);
 		if(null != resource) {
 			if(resource.getType().isEqualTo(type)) {
-				return (Item) resource;
+				Item tmp = (Item) resource;
+				tmp.setView(this);
+				return tmp;
 			}
 		}
 		if(type.getName().equals(getTypeNames().FILE)) {
