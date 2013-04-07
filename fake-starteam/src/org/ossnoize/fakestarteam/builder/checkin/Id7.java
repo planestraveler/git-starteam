@@ -36,7 +36,7 @@ public class Id7 extends CheckInInstruction {
 		Folder c = new Folder(src, "c", null);
 		wine.moveTo(c);
 		
-		view.createViewLabel("Check-in Id 7", "Check Id 7 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
+		view.createViewLabel("Check-in Id 7", "Check Id 7 description <Move files around>", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override
