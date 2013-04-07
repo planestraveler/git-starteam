@@ -417,7 +417,14 @@ public class GitImporter {
 					deletedFiles.remove(path);
 				}
 				files.add(path);
-				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), i.getComment(), path);
+				String comment = i.getComment();
+				if(0 == comment.length()) {
+					if(1 == historyFile.getContentVersion())
+						comment = historyFile.getDescription();
+					else
+						comment = "Modification without comments";
+				}
+				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), comment, path);
 				//TODO: find a proper solution to file update.
 				if(! lastSortedFileList.containsKey(info)) {
 					AddedSortedFileList.put(info, historyFile);

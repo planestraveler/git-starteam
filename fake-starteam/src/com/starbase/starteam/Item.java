@@ -81,7 +81,6 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 			}
 		}
 		itemProperties.setProperty(propertyKeys.REVISION_NUMBER, Integer.toString(rev));
-		itemProperties.setProperty(propertyKeys.FILE_CONTENT_REVISION, Integer.toString(rev));
 	}
 	
 	protected int findRightRevision(int id) {

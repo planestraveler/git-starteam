@@ -85,6 +85,7 @@ public class File extends Item {
 			holdingPlace = createHoldingPlace(0);
 			//loadProperties();
 			setRevisionNumber(0);
+			itemProperties.setProperty(propertyKeys.FILE_CONTENT_REVISION, Integer.toString(1));
 			setComment(comment);
 			setDescription(description);
 			setName(fileName);
@@ -135,6 +136,7 @@ public class File extends Item {
 			loadProperties();
 			holdingPlace = createHoldingPlace(newRevision);
 			setRevisionNumber(newRevision);
+			itemProperties.setProperty(propertyKeys.FILE_CONTENT_REVISION, Integer.toString(getContentVersion() + 1));
 			setComment(reason);
 			setModifiedBy();
 			setModifiedTime();
@@ -146,12 +148,12 @@ public class File extends Item {
 	}
 
 	public void checkinFrom(java.io.File file, String reason, int lockStatus, boolean forceCheckin, boolean updateStatus) throws java.io.IOException {
-		if(!isNew() && !isFromHistory()) {
+		if(!isNew()) {
 			int newRevision = getRevisionNumber() + 1;
 			loadProperties();
 			holdingPlace = createHoldingPlace(newRevision);
 			if(holdingPlace.exists()) {
-				if(forceCheckin) {
+				if(forceCheckin && isFromHistory()) {
 					newRevision = findLastRevision(getObjectID()) + 1;
 					holdingPlace = createHoldingPlace(newRevision);
 				} else {
@@ -159,6 +161,8 @@ public class File extends Item {
 				}
 			}
 			setRevisionNumber(newRevision);
+			//TODO: May need some rework since the file from history may still need a new content version.
+			itemProperties.setProperty(propertyKeys.FILE_CONTENT_REVISION, Integer.toString(getContentVersion() + 1));
 			setComment(reason);
 			setModifiedBy();
 			setModifiedTime();
