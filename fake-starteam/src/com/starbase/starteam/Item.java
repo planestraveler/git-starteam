@@ -322,10 +322,12 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 
 	public void moveTo(Folder folder) {
+		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(folder.getObjectID()));
+		parent = folder;
 		decrementRefCount();
 		shareTo(folder);
 	}
-	
+
 	public void remove() {
 		decrementRefCount();
 		if(itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0")) {

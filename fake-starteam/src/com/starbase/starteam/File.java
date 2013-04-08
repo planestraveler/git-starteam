@@ -509,9 +509,6 @@ public class File extends Item {
 			origin.itemProperties.setProperty(propertyKeys._FILES, idList.toString());
 			origin.update();
 		}
-		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(folder.getObjectID()));
-		
-		shareTo(folder);
 		super.moveTo(folder);
 	}
 	

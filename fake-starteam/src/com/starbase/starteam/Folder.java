@@ -255,10 +255,18 @@ public class Folder extends Item {
 	
 	@Override
 	public void moveTo(Folder folder) {
+		Folder origin = getParentFolder();
 		super.moveTo(folder);
-		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID,
-				Integer.toString(folder.getObjectID()));
-		parent = folder;
+		
+		// Fixup the old parent and the child folder path.
+		String thisStringId = Integer.toString(getObjectID());
+		if(origin.itemProperties.containsKey(propertyKeys._CHILD_FOLDER)) {
+			StringBuffer idList = new StringBuffer(origin.itemProperties.getProperty(propertyKeys._CHILD_FOLDER));
+			int start = idList.indexOf(thisStringId);
+			idList.delete(start, start+thisStringId.length());
+			origin.itemProperties.setProperty(propertyKeys._CHILD_FOLDER, idList.toString());
+			origin.update();
+		}
 		buildParentPath();
 		update();
 	}
