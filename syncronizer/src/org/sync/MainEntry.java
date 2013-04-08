@@ -81,7 +81,8 @@ public class MainEntry {
 		Boolean createNewRepo = (Boolean) parser.getOptionValue(isCreateRepo);
 		String password = (String) parser.getOptionValue(selectPassword);
 		String dumpTo = (String) parser.getOptionValue(dumpToFile);
-		boolean verbose = (Boolean) parser.getOptionValue(isVerbose);
+		Boolean verboseFlag = (Boolean) parser.getOptionValue(isVerbose);
+		boolean verbose = verboseFlag != null && verboseFlag;
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
