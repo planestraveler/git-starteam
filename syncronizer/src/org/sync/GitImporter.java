@@ -67,6 +67,7 @@ public class GitImporter {
 	private OutputStream exportStream;
 	private String alternateHead = null;
 	private boolean isResume = false;
+	private boolean verbose = false;
 	private RepositoryHelper helper;
 	// Use these sets to find all the deleted files.
 	private Set<String> files = new HashSet<String>();
@@ -143,6 +144,9 @@ public class GitImporter {
 		folder = null;
 		setFolder(view, folderPath);
 		if(null == folder) {
+			if(folderPath != null) {
+				System.err.println("Folder not found: " + folderPath);
+			}
 			return;
 		}
 		
@@ -151,6 +155,9 @@ public class GitImporter {
 			head = alternateHead;
 		}
 		
+		if(verbose) {
+			System.out.println("Populating files");
+		}
 		files.clear();
 		deletedFiles.clear();
 		deletedFiles.addAll(lastFiles);
@@ -162,6 +169,9 @@ public class GitImporter {
 		lastSortedFileList.putAll(sortedFileList);
 		recoverDeleteInformation(deletedFiles, head, view);
 
+		if(verbose) {
+			System.out.println("Creating commits");
+		}
 		exportStream = helper.getFastImportStream();
 		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
@@ -307,7 +317,7 @@ public class GitImporter {
 		} else {
 			if(AddedSortedFileList.size() > 0) {
 				System.err.println("There was no new revision in the starteam view.");
-				System.err.println("All the files in the repository are at theire lastest version");
+				System.err.println("All the files in the repository are at their latest version");
 			} else {
 //				System.err.println("The starteam view specified was empty.");
 			}
@@ -369,6 +379,10 @@ public class GitImporter {
 		isResume = b;
 	}
 
+	public void setVerbose(boolean b) {
+		verbose = b;
+	}
+
 	private void recursiveFolderPopulation(Folder f, String folderPath) {
 		for(Folder subfolder : f.getSubFolders()) {
 			if(null != folder) {
@@ -384,12 +398,18 @@ public class GitImporter {
 				folder = subfolder;
 				break;
 			}
+			if(verbose) {
+				System.err.println("Not folder: " + path);
+			}
 			recursiveFolderPopulation(subfolder, folderPath);
 		}
 		f.discard();
 	}
 
 	private void recursiveFilePopulation(String head, Folder f) {
+		if(verbose) {
+			System.err.println("Adding [" + head + "] directory " + f);
+		}
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
@@ -414,6 +434,9 @@ public class GitImporter {
 					deletedFiles.remove(path);
 				}
 				files.add(path);
+				if(verbose) {
+					System.err.println("Added file " + path);
+				}
 				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), i.getComment(), path);
 				//TODO: find a proper solution to file update.
 				if(! lastSortedFileList.containsKey(info)) {
