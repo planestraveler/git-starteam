@@ -32,6 +32,7 @@ import org.ossnoize.git.fastimport.Data;
 import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileModification;
 import org.ossnoize.git.fastimport.FileOperation;
+import org.ossnoize.git.fastimport.Reset;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.util.CommitInformation;
@@ -499,6 +500,14 @@ public class GitImporter {
 				}
 				System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
 				generateFastImportStream(vc, baseFolder, domain);
+				if(null != lastCommit) {
+					Reset reset = new Reset("refs/tags/" + viewLabels[i].getName(), lastCommit.getMarkID().toString());
+					try {
+						helper.writeReset(reset);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
 				vc.discard();
 			}
 		}
