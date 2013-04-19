@@ -501,17 +501,43 @@ public class GitImporter {
 				System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
 				generateFastImportStream(vc, baseFolder, domain);
 				if(null != lastCommit) {
-					Reset reset = new Reset("refs/tags/" + viewLabels[i].getName(), lastCommit.getMarkID().toString());
-					try {
-						helper.writeReset(reset);
-					} catch (IOException e1) {
-						e1.printStackTrace();
+					String tag = refName(viewLabels[i].getName());
+					if (tag.length() > 0) {
+						Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID().toString());
+						try {
+							helper.writeReset(reset);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
 					}
 				}
 				vc.discard();
 			}
 		}
 		helper.gc();
+	}
+
+	public static String refName(String name) {
+		// Needs to be acceptable to git-check-ref-format(1).
+		// Unfortunately the rules are defined as a black list instead of
+		// a simple whitelist.
+		return name
+			// replace a sequence of '/' with a single '/', strip leading and trailing '/'
+			.replaceAll("//+", "/").replaceFirst("^/", "").replaceFirst("/$", "")
+			// sanitize @{
+			.replaceAll("@\\{", "__")
+			// sanitize <= \040, \177, space (\040), ~, ^, :, ?, *, [
+			.replaceAll("[\000-\040\177~^:?*\\[]", "_")
+			// Sanitize \ for \. restriction
+			.replace("\\", "_")
+			// Sanitize ..
+			.replaceAll("\\.{2,}", "__")
+			// Sanitize /.*
+			.replace("/.", "/_")
+			// Sanitize .lock extension
+			.replaceFirst("\\.lock$", "_lock")
+			// Sanitize trailing dot
+			.replaceFirst("\\.$", "_");
 	}
 
 	public void generateDayByDayImport(View view, Date date, String baseFolder, String domain) {
