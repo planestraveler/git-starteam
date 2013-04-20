@@ -503,7 +503,7 @@ public class GitImporter {
 				if(null != lastCommit) {
 					String tag = refName(viewLabels[i].getName());
 					if (tag.length() > 0) {
-						Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID().toString());
+						Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
 						try {
 							helper.writeReset(reset);
 						} catch (IOException e1) {

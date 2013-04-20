@@ -22,9 +22,9 @@ import java.io.OutputStream;
 public class Reset implements FastImportObject {
 
     private final String ref;
-    private final String committish;
+    private final DataRef committish;
 
-    public Reset(String ref, String committish) {
+    public Reset(String ref, DataRef committish) {
         this.ref = ref;
         this.committish = committish;
     }
@@ -36,7 +36,7 @@ public class Reset implements FastImportObject {
         out.write('\n');
         if(null != committish) {
             out.write("from ".getBytes());
-            out.write(committish.getBytes());
+            committish.writeTo(out);
             out.write('\n');
         }
 		out.flush();
