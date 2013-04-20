@@ -53,6 +53,7 @@ public class MainEntry {
 		CmdLineParser.Option selectPassword = parser.addStringOption("password");
 		CmdLineParser.Option dumpToFile = parser.addStringOption('D', "dump");
 		CmdLineParser.Option selectWorkingFolder = parser.addStringOption('W', "working-folder");
+		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
 
 		try {
 			parser.parse(args);
@@ -84,6 +85,8 @@ public class MainEntry {
 		String password = (String) parser.getOptionValue(selectPassword);
 		String dumpTo = (String) parser.getOptionValue(dumpToFile);
 		String workingFolder = (String) parser.getOptionValue(selectWorkingFolder);
+		Boolean verboseFlag = (Boolean) parser.getOptionValue(isVerbose);
+		boolean verbose = verboseFlag != null && verboseFlag;
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -145,6 +148,7 @@ public class MainEntry {
 					if(null != dumpTo) {
 						importer.setDumpFile(new File(dumpTo));
 					}
+					importer.setVerbose(verbose);
 					boolean viewFound = false;
 					for(View v : p.getViews()) {
 						if(v.getName().equalsIgnoreCase(view)) {
@@ -159,12 +163,16 @@ public class MainEntry {
 							// process is finished we can close now.
 							importer.dispose();
 							break;
+						} else if(verbose) {
+							System.err.println("Not view: " + v.getName());
 						}
 					}
 					if (!viewFound) {
 						System.err.println("View not found: " + view);
 					}
 					break;
+				} else if(verbose) {
+					System.err.println("Not project: " + p.getName());
 				}
 			}
 			if (!projectFound) {
@@ -192,6 +200,9 @@ public class MainEntry {
 		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
 		System.out.println("[-W <folder>]\tSelect where the repository is located");
+		System.out.println("[--password]\t\t\tStarTeam password");
+		System.out.println("-D <dump file>\t\t\tDump fast-import data to file");
+		System.out.println("[--verbose]\t\t\tVerbose output");
 		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
 		
 	}

@@ -32,6 +32,7 @@ import org.ossnoize.git.fastimport.Data;
 import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileModification;
 import org.ossnoize.git.fastimport.FileOperation;
+import org.ossnoize.git.fastimport.Reset;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.util.CommitInformation;
@@ -67,6 +68,7 @@ public class GitImporter {
 	private OutputStream exportStream;
 	private String alternateHead = null;
 	private boolean isResume = false;
+	private boolean verbose = false;
 	private RepositoryHelper helper;
 	// Use these sets to find all the deleted files.
 	private Set<String> files = new HashSet<String>();
@@ -154,6 +156,9 @@ public class GitImporter {
 			head = alternateHead;
 		}
 		
+		if(verbose) {
+			System.out.println("Populating files");
+		}
 		files.clear();
 		deletedFiles.clear();
 		deletedFiles.addAll(lastFiles);
@@ -165,6 +170,9 @@ public class GitImporter {
 		lastSortedFileList.putAll(sortedFileList);
 		recoverDeleteInformation(deletedFiles, head, view);
 
+		if(verbose) {
+			System.out.println("Creating commits");
+		}
 		exportStream = helper.getFastImportStream();
 		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
@@ -372,6 +380,10 @@ public class GitImporter {
 		isResume = b;
 	}
 
+	public void setVerbose(boolean b) {
+		verbose = b;
+	}
+
 	private void recursiveFolderPopulation(Folder f, String folderPath) {
 		for(Folder subfolder : f.getSubFolders()) {
 			if(null != folder) {
@@ -387,12 +399,18 @@ public class GitImporter {
 				folder = subfolder;
 				break;
 			}
+			if(verbose) {
+				System.err.println("Not folder: " + path);
+			}
 			recursiveFolderPopulation(subfolder, folderPath);
 		}
 		f.discard();
 	}
 
 	private void recursiveFilePopulation(String head, Folder f) {
+		if(verbose) {
+			System.err.println("Adding [" + head + "] directory " + f);
+		}
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
@@ -417,6 +435,9 @@ public class GitImporter {
 					deletedFiles.remove(path);
 				}
 				files.add(path);
+				if(verbose) {
+					System.err.println("Added file " + path);
+				}
 				String comment = i.getComment();
 				if(0 == comment.length()) {
 					if(1 == historyFile.getContentVersion())
@@ -425,6 +446,7 @@ public class GitImporter {
 						comment = "Modification without comments";
 				}
 				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), comment, path);
+
 				//TODO: find a proper solution to file update.
 				if(! lastSortedFileList.containsKey(info)) {
 					AddedSortedFileList.put(info, historyFile);
@@ -486,10 +508,44 @@ public class GitImporter {
 				}
 				System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
 				generateFastImportStream(vc, baseFolder, domain);
+				if(null != lastCommit) {
+					String tag = refName(viewLabels[i].getName());
+					if (tag.length() > 0) {
+						Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
+						try {
+							helper.writeReset(reset);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					}
+				}
 				vc.discard();
 			}
 		}
 		helper.gc();
+	}
+
+	public static String refName(String name) {
+		// Needs to be acceptable to git-check-ref-format(1).
+		// Unfortunately the rules are defined as a black list instead of
+		// a simple whitelist.
+		return name
+			// replace a sequence of '/' with a single '/', strip leading and trailing '/'
+			.replaceAll("//+", "/").replaceFirst("^/", "").replaceFirst("/$", "")
+			// sanitize @{
+			.replaceAll("@\\{", "__")
+			// sanitize <= \040, \177, space (\040), ~, ^, :, ?, *, [
+			.replaceAll("[\000-\040\177~^:?*\\[]", "_")
+			// Sanitize \ for \. restriction
+			.replace("\\", "_")
+			// Sanitize ..
+			.replaceAll("\\.{2,}", "__")
+			// Sanitize /.*
+			.replace("/.", "/_")
+			// Sanitize .lock extension
+			.replaceFirst("\\.lock$", "_lock")
+			// Sanitize trailing dot
+			.replaceFirst("\\.$", "_");
 	}
 
 	public void generateDayByDayImport(View view, Date date, String baseFolder, String domain) {
