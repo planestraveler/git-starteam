@@ -44,8 +44,7 @@
 
       <batchtest fork="yes" todir="syncronizer/testreports">
         <fileset dir="syncronizer/test">
-          <!--include name="**/*Test*.java"/-->
-          <include name="org/sync/test/GitImporterTest.java"/>
+          <include name="**/*Test*.java"/>
         </fileset>
       </batchtest>
     </junit>
