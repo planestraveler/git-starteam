@@ -1,0 +1,54 @@
+<project name="git-starteam" default="jar" basedir=".">
+
+  <!-- no support for building fake-starteam. Use scons if you need that -->
+
+  <target name="init">
+    <property name="jargs.jar" value="jargs.jar"/>
+    <property name="junit.jar" value="junit.jar"/>
+    <property name="starteam.jar" value="starteam110.jar"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="syncronizer/classes"/>
+    <delete dir="syncronizer/testclasses"/>
+    <delete dir="syncronizer/testreports"/>
+    <delete file="bin/syncronizer.jar"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <mkdir dir="syncronizer/classes"/>
+    <javac srcdir="syncronizer/src" destdir="syncronizer/classes"
+           deprecation="on" debug="on"
+           includeAntRuntime="false"
+           classpath="${jargs.jar}:${starteam.jar}"/>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar jarfile="bin/syncronizer.jar" basedir="syncronizer/classes"/>
+  </target>
+
+  <target name="test" depends="compile">
+    <mkdir dir="syncronizer/testclasses"/>
+    <mkdir dir="syncronizer/testreports"/>
+    <javac srcdir="syncronizer/test" destdir="syncronizer/testclasses"
+           deprecation="on" debug="on"
+           includeAntRuntime="false"
+           classpath="syncronizer/classes:${jargs.jar}:${starteam.jar}:${junit.jar}"/>
+    <junit printsummary="yes" haltonfailure="no">
+      <classpath>
+        <pathelement location="syncronizer/testclasses"/>
+        <pathelement path="syncronizer/testclasses:syncronizer/classes:${jargs.jar}:${starteam.jar}"/>
+      </classpath>
+
+      <formatter type="plain"/>
+
+      <batchtest fork="yes" todir="syncronizer/testreports">
+        <fileset dir="syncronizer/test">
+          <!--include name="**/*Test*.java"/-->
+          <include name="org/sync/test/GitImporterTest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+</project>
