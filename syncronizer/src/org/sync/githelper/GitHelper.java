@@ -639,6 +639,7 @@ public class GitHelper extends RepositoryHelper {
 		public void run() {
 			StringBuilder firstResponse = new StringBuilder(50);
 			try {
+				MessageDigest digest = MessageDigest.getInstance("MD5");
 				int character;
 				do {
 					character = stream.read();
@@ -650,10 +651,10 @@ public class GitHelper extends RepositoryHelper {
 						character = stream.read();
 					}
 					if(catBlob.matcher(firstResponse).matches()) {
-						MessageDigest digest = MessageDigest.getInstance("MD5");
 						String length = firstResponse.substring(46);
 						int qtyOfBytes = Integer.parseInt(length);
 						byte[] buffer = new byte[1024];
+						digest.reset();
 						int read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
 						while(qtyOfBytes > 0) {
 							digest.update(buffer, 0, read);
