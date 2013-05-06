@@ -142,36 +142,38 @@ public class MainEntry {
 						p.setExpandKeywords(true);
 					}
 					GitImporter importer = new GitImporter(starteam, p);
-					if(null != head) {
-						importer.setHeadName(head);
-					}
-					if(null != resume) {
-						importer.setResume(resume);
-					}
-					if(null != dumpTo) {
-						importer.setDumpFile(new File(dumpTo));
-					}
-					importer.setVerbose(verbose);
-					boolean viewFound = false;
-					for(View v : p.getViews()) {
-						if(v.getName().equalsIgnoreCase(view)) {
-							viewFound = true;
-							if(null != timeBased && timeBased) {
-								importer.generateDayByDayImport(v, date, folder, domain);
-							} else if (null != labelBased && labelBased) {
-								importer.generateByLabelImport(v, date, folder, domain);
-							} else {
-								importer.generateFastImportStream(v, folder, domain);
-							}
-							// process is finished we can close now.
-							importer.dispose();
-							break;
-						} else if(verbose) {
-							System.err.println("Not view: " + v.getName());
+					try {
+						if(null != head) {
+							importer.setHeadName(head);
 						}
-					}
-					if (!viewFound) {
-						System.err.println("View not found: " + view);
+						if(null != resume) {
+							importer.setResume(resume);
+						}
+						if(null != dumpTo) {
+							importer.setDumpFile(new File(dumpTo));
+						}
+						importer.setVerbose(verbose);
+						boolean viewFound = false;
+						for(View v : p.getViews()) {
+							if(v.getName().equalsIgnoreCase(view)) {
+								viewFound = true;
+								if(null != timeBased && timeBased) {
+									importer.generateDayByDayImport(v, date, folder, domain);
+								} else if (null != labelBased && labelBased) {
+									importer.generateByLabelImport(v, date, folder, domain);
+								} else {
+									importer.generateFastImportStream(v, folder, domain);
+								}
+								break;
+							} else if(verbose) {
+								System.err.println("Not view: " + v.getName());
+							}
+						}
+						if (!viewFound) {
+							System.err.println("View not found: " + view);
+						}
+					} finally {
+						importer.dispose();
 					}
 					break;
 				} else if(verbose) {
