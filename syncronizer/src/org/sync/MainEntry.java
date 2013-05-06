@@ -120,6 +120,9 @@ public class MainEntry {
 
 		Server starteam = new Server(host, port);
 		starteam.connect();
+		starteam.setAutoReconnectEnabled(true);
+		starteam.setAutoReconnectAttempts(100);
+		starteam.setAutoReconnectWait(30);
 		Console con = System.console();
 		if(null == user) {
 			user = con.readLine("Username:");
