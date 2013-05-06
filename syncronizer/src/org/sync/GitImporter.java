@@ -362,6 +362,10 @@ public class GitImporter {
 													 "",
 													 path);
 						info.setFileMove(true);
+						if(verbose) {
+							File f = (File)item;
+							System.err.println("Moved: " + path + ", " + item.getParentFolderHierarchy() + "@" + item.getParentFolder().getRevisionNumber() + ", " + f.getName() + "@" + f.getRevisionNumber());
+						}
 						item.discard();
 					}
 				}
