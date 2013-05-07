@@ -27,6 +27,15 @@
     <jar jarfile="bin/syncronizer.jar" basedir="syncronizer/classes"/>
   </target>
 
+  <target name="fake-starteam" depends="init">
+    <mkdir dir="fake-starteam/classes"/>
+    <javac srcdir="fake-starteam/src" destdir="fake-starteam/classes"
+           deprecation="on" debug="on"
+           includeAntRuntime="false"
+           classpath="${jargs.jar}"/>
+    <jar jarfile="bin/fake-starteam.jar" basedir="fake-starteam/classes"/>
+  </target>
+
   <target name="test" depends="compile">
     <mkdir dir="syncronizer/testclasses"/>
     <mkdir dir="syncronizer/testreports"/>
