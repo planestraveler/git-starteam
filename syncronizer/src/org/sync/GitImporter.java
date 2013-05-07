@@ -337,7 +337,11 @@ public class GitImporter {
 		}
 		super.finalize();
 	}
-	
+
+	// Determines what happened to files which were in the view during the previous
+	// recursiveFilePopulation run but were not found in the current run.
+	//
+	// Deleted files will be found in the view recycle bin. Otherwise the file was renamed.
 	private void recoverDeleteInformation(Set<String> listOfFiles, String head, View view) {
 		RecycleBin recycleBin = view.getRecycleBin();
 		recycleBin.setIncludeDeletedItems(true);
