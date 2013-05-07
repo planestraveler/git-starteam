@@ -193,22 +193,22 @@ public class MainEntry {
 		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
-		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
-		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
+		System.out.println("[-t <time>]\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
+		System.out.println("[-f <folder>]\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("[-T]\t\t\tDo a day by day importation of the starteam view");
 		System.out.println("[-L]\t\t\tDo a label by label importation of the starteam view");
 		System.out.println("[-k]\t\t\tSet to enable keyword expansion in text files");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation for branch view");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
-		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
+		System.out.println("[-X <path to git>]\tSelect the path to the git executable");
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
-		System.out.println("[-W <folder>]\tSelect where the repository is located");
-		System.out.println("[--password]\t\t\tStarTeam password");
-		System.out.println("-D <dump file>\t\t\tDump fast-import data to file");
-		System.out.println("[--verbose]\t\t\tVerbose output");
-		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
+		System.out.println("[-W <folder>]\t\tSelect where the repository is located");
+		System.out.println("[--password]\t\tStarTeam password");
+		System.out.println("[-D <dump file prefix>]\tDump fast-import data to files");
+		System.out.println("[--verbose]\t\tVerbose output");
+		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		
 	}
 }
