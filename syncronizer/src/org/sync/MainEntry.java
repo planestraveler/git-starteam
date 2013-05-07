@@ -120,9 +120,12 @@ public class MainEntry {
 
 		Server starteam = new Server(host, port);
 		starteam.connect();
+
+		// try to reconnect at 15 second intervals for 1 hour
 		starteam.setAutoReconnectEnabled(true);
-		starteam.setAutoReconnectAttempts(100);
-		starteam.setAutoReconnectWait(30);
+		starteam.setAutoReconnectAttempts(60 * 60 / 15);
+		starteam.setAutoReconnectWait(15);
+
 		Console con = System.console();
 		if(null == user) {
 			user = con.readLine("Username:");
