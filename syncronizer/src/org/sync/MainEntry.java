@@ -100,6 +100,11 @@ public class MainEntry {
 		Date date = null;
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		if(null != time) {
+			if(!((null != timeBased && timeBased) ||
+				 (null != labelBased && labelBased))) {
+				System.out.println("-t option can only be used with -T or -L options.");
+				System.exit(3);
+			}
 			try {
 				date = dateFormat.parse(time);
 			} catch (Exception ex) {
