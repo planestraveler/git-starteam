@@ -600,7 +600,7 @@ public class GitImporter {
 		recursiveLastModifiedTime(getFolder());
 		long lastTime = getLastModifiedTime();
 		// in case View life less than 24 hours
-		if(firstTime > lastTime) {
+		if(firstTime > lastTime && lastTime - view.getCreatedTime().getLongValue() < 24*hour) {
 			firstTime = view.getCreatedTime().getLongValue();
 		}
 
