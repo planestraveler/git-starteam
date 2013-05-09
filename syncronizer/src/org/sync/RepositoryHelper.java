@@ -38,7 +38,7 @@ public abstract class RepositoryHelper {
 	protected final static long timeForEachCheckpoint = 1000L*60L*60L*3L; // 3 Hours
 
 	protected File fastExportOverrideToFile;
-	protected long commitingSince = 0;
+	protected long lastCheckpointTime = 0;
 	protected Map<String, Map<String, StarteamFileInfo>> fileInformation;
 	protected String repositoryDir;
 
@@ -212,17 +212,25 @@ public abstract class RepositoryHelper {
 	public void writeCommit(Commit commit) throws IOException {
 		OutputStream fastImportStream = getFastImportStream();
 		commit.writeTo(fastImportStream);
-		if(commitingSince <= 0) {
-			commitingSince = System.currentTimeMillis();
+		if(lastCheckpointTime <= 0) {
+			lastCheckpointTime = System.currentTimeMillis();
 		}
-		if((System.currentTimeMillis() - commitingSince) >= timeForEachCheckpoint) {
+		if((System.currentTimeMillis() - lastCheckpointTime) >= timeForEachCheckpoint) {
 			// if we are doing this process for 3 hours
-			Checkpoint checkpoint = new Checkpoint();
-			checkpoint.writeTo(fastImportStream);
-			commitingSince = System.currentTimeMillis();
-			System.err.println("Checkpoint done");
-			saveFileInformation();
+			writeCheckpoint();
 		}
+	}
+
+	/**
+	 * Write a checkpoint into the fast-import stream.
+	 */
+	public void writeCheckpoint() throws IOException {
+		OutputStream fastImportStream = getFastImportStream();
+		Checkpoint checkpoint = new Checkpoint();
+		checkpoint.writeTo(fastImportStream);
+		lastCheckpointTime = System.currentTimeMillis();
+		System.err.println("Checkpoint done");
+		saveFileInformation();
 	}
 	
 	/**

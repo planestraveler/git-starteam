@@ -54,6 +54,7 @@ public class MainEntry {
 		CmdLineParser.Option dumpToFile = parser.addStringOption('D', "dump");
 		CmdLineParser.Option selectWorkingFolder = parser.addStringOption('W', "working-folder");
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
+		CmdLineParser.Option isCheckpoint = parser.addBooleanOption("checkpoint");
 
 		try {
 			parser.parse(args);
@@ -87,6 +88,8 @@ public class MainEntry {
 		String workingFolder = (String) parser.getOptionValue(selectWorkingFolder);
 		Boolean verboseFlag = (Boolean) parser.getOptionValue(isVerbose);
 		boolean verbose = verboseFlag != null && verboseFlag;
+		Boolean checkpointFlag = (Boolean) parser.getOptionValue(isCheckpoint);
+		boolean createCheckpoints = checkpointFlag != null && checkpointFlag;
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -161,6 +164,7 @@ public class MainEntry {
 							importer.setDumpFile(new File(dumpTo));
 						}
 						importer.setVerbose(verbose);
+						importer.setCreateCheckpoints(createCheckpoints);
 						boolean viewFound = false;
 						for(View v : p.getViews()) {
 							if(v.getName().equalsIgnoreCase(view)) {
@@ -215,6 +219,7 @@ public class MainEntry {
 		System.out.println("[-W <folder>]\t\tSelect where the repository is located");
 		System.out.println("[--password]\t\tStarTeam password");
 		System.out.println("[-D <dump file prefix>]\tDump fast-import data to files");
+		System.out.println("[--checkpoint]\t\tCreate git fast-import checkpoints after each label");
 		System.out.println("[--verbose]\t\tVerbose output");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		

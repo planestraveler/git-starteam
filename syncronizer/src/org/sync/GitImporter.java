@@ -69,6 +69,7 @@ public class GitImporter {
 	private String alternateHead = null;
 	private boolean isResume = false;
 	private boolean verbose = false;
+	private boolean createCheckpoints = false;
 	private RepositoryHelper helper;
 	// Use these sets to find all the deleted files.
 	private Set<String> files = new HashSet<String>();
@@ -390,6 +391,10 @@ public class GitImporter {
 		verbose = b;
 	}
 
+	public void setCreateCheckpoints(boolean b) {
+		createCheckpoints = b;
+	}
+
 	private void recursiveFolderPopulation(Folder f, String folderPath) {
 		for(Folder subfolder : f.getSubFolders()) {
 			if(null != folder) {
@@ -512,14 +517,17 @@ public class GitImporter {
 				System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
 				generateFastImportStream(vc, baseFolder, domain);
 				if(null != lastCommit) {
-					String tag = refName(viewLabels[i].getName());
-					if (tag.length() > 0) {
-						Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
-						try {
+					try {
+						String tag = refName(viewLabels[i].getName());
+						if (tag.length() > 0) {
+							Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
 							helper.writeReset(reset);
-						} catch (IOException e1) {
-							e1.printStackTrace();
 						}
+						if(createCheckpoints) {
+							helper.writeCheckpoint();
+						}
+					} catch (IOException e1) {
+						e1.printStackTrace();
 					}
 				}
 				vc.discard();
