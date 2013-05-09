@@ -452,6 +452,8 @@ public class GitImporter {
 						comment = historyFile.getDescription();
 					else
 						comment = "Modification without comments";
+				} else if(comment.matches("Merge from .*?, Revision .*")) {
+					comment = "Merge from unknown branch";
 				}
 				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), comment, path);
 
