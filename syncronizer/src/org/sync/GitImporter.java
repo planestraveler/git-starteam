@@ -277,7 +277,7 @@ public class GitImporter {
 				} else {
 					janitorTime = new java.util.Date(lastModifiedTime);
 				}
-				Commit commit = new Commit("File Janitor",
+				Commit commit = new Commit("git-starteam File Janitor",
 						"janitor@" + domain,
 						"Cleaning files move along",
 						head,
