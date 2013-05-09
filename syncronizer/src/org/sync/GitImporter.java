@@ -195,13 +195,12 @@ public class GitImporter {
 					continue;
 				}
 				FileOperation fo = null;
-				java.io.File aFile = null;
 				if(f.isDeleted() || current.isFileMove()) {
 					fo = new FileDelete();
 					fo.setPath(current.getPath());
 					helper.unregisterFileId(head, path);
 				} else {
-					aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
+					java.io.File aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
 					cm.checkoutTo(f, aFile);
 					Blob fileToStage = new Blob(new Data(aFile));
 					
