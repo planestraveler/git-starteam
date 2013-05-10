@@ -416,9 +416,6 @@ public class GitImporter {
 	}
 
 	private void recursiveFilePopulation(String head, Folder f) {
-		if(verbose) {
-			System.err.println("Adding [" + head + "] directory " + f);
-		}
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
