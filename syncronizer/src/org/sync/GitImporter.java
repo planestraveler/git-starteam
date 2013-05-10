@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import org.ossnoize.git.fastimport.Blob;
@@ -45,12 +46,14 @@ import com.starbase.starteam.Label;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.RecycleBin;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.StarTeamFinder;
 import com.starbase.starteam.Status;
 import com.starbase.starteam.Type;
 import com.starbase.starteam.View;
 import com.starbase.starteam.File;
 import com.starbase.starteam.CheckoutManager;
 import com.starbase.starteam.ViewConfiguration;
+import com.starbase.util.FileUtils;
 import com.starbase.util.OLEDate;
 
 public class GitImporter {
@@ -59,9 +62,12 @@ public class GitImporter {
 	private Folder folder;
 	private int folderNameLength;
 	private long lastModifiedTime = 0;
-	private Map<CommitInformation, File> sortedFileList = new TreeMap<CommitInformation, File>();
-	private Map<CommitInformation, File> AddedSortedFileList = new TreeMap<CommitInformation, File>();
-	private Map<CommitInformation, File> lastSortedFileList = new TreeMap<CommitInformation, File>();
+	// all files discovered in the current view configuration
+	private NavigableMap<CommitInformation, File> sortedFileList = new TreeMap<CommitInformation, File>();
+	// files found in the current view configuration but not the previous view configuration
+	private NavigableMap<CommitInformation, File> AddedSortedFileList = new TreeMap<CommitInformation, File>();
+	// all files discovered in the previous view configuration
+	private NavigableMap<CommitInformation, File> lastSortedFileList = new TreeMap<CommitInformation, File>();
 	private Commit lastCommit; 
 	// get the really old time as base information;
 	private CommitInformation lastInformation = null;
@@ -75,6 +81,8 @@ public class GitImporter {
 	private Set<String> files = new HashSet<String>();
 	private Set<String> deletedFiles = new HashSet<String>();
 	private Set<String> lastFiles = new HashSet<String>();
+	// Use this to find the renamed files.
+	private long lastViewTime;
 	
 	public GitImporter(Server s, Project p) {
 		server = s;
@@ -175,6 +183,13 @@ public class GitImporter {
 
 		if(verbose) {
 			System.out.println("Creating commits");
+			// this is helpful for debugging out-of-order commits
+			if(!AddedSortedFileList.isEmpty()) {
+				CommitInformation earliest = AddedSortedFileList.firstKey();
+				CommitInformation latest = AddedSortedFileList.lastKey();
+				System.err.println("Earliest file: " + earliest.getPath() + " @ " + new java.util.Date(earliest.getTime()));
+				System.err.println("Latest file: " + latest.getPath() + " @ " + new java.util.Date(latest.getTime()));
+			}
 		}
 		exportStream = helper.getFastImportStream();
 		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
@@ -182,18 +197,18 @@ public class GitImporter {
 			CommitInformation current = e.getKey();
 			String userName = server.getUser(current.getUid()).getName();
 			String userEmail = userName.replaceAll(" ", ".") + "@" + domain;
-			String path = f.getParentFolderHierarchy() + f.getName();
-			path = path.replace('\\', '/');
-			// Strip the view name from the path
-			int indexOfFirstPath = path.indexOf('/');
-			path = path.substring(indexOfFirstPath + 1 + folderNameLength);
-			
+			String path = pathname(f);
+
 			try {
 				FileOperation fo = null;
-				if(f.isDeleted() || current.isFileMove()) {
+				if(current.isFileDelete()) {
 					fo = new FileDelete();
+					// path may be the new file, but current.getPath() is the old deleted path.
 					fo.setPath(current.getPath());
-					helper.unregisterFileId(head, path);
+					helper.unregisterFileId(head, current.getPath());
+					if(verbose) {
+						System.err.println("Unregistered " + current.getPath());
+					}
 				} else {
 					java.io.File aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
 					try {
@@ -349,36 +364,77 @@ public class GitImporter {
 			String path = ith.next();
 			Integer fileID = helper.getRegisteredFileId(head, path);
 			if(null != fileID) {
-				CommitInformation info = null;
-				Item item = recycleBin.findItem(fileType, fileID);
+				File item = (File) recycleBin.findItem(fileType, fileID);
 				if(null != item && item.isDeleted()) {
-					info = new CommitInformation(item.getDeletedTime().getLongValue(), 
-												 item.getDeletedUserID(),
-												 "",
-												 path);
+					CommitInformation info = new CommitInformation(item.getDeletedTime().getLongValue(),
+																   item.getDeletedUserID(),
+																   "",
+																   path);
+					info.setFileDelete(true);
 					item.discard();
-				} else {
-					item = view.findItem(fileType, fileID);
-					if(null != item) {
-						info = new CommitInformation(item.getModifiedTime().getLongValue(),
-													 item.getModifiedBy(),
-													 "",
-													 path);
-						info.setFileMove(true);
-						if(verbose) {
-							File f = (File)item;
-							System.err.println("Moved: " + path + ", " + item.getParentFolderHierarchy() + "@" + item.getParentFolder().getRevisionNumber() + ", " + f.getName() + "@" + f.getRevisionNumber());
-						}
-						item.discard();
-					}
-				}
-				if(info != null) {
 					ith.remove();
-					sortedFileList.put(info, (File)item);
-					AddedSortedFileList.put(info, (File)item);
+					// Deleted files won't have entries, so add one
+					// here to make the delete end up in a commit.
+					sortedFileList.put(info, item);
+					AddedSortedFileList.put(info, item);
+				} else {
+					item = (File) view.findItem(fileType, fileID);
+					if(null != item) {
+						CommitInformation deleteInfo = null;
+						Item renameEventItem = findRenameEventItem(view, path, item, lastViewTime);
+						if(null != renameEventItem) {
+							if(verbose) {
+								System.err.printf("Renamed %s -> %s at %s\n",
+												  path, pathname(item),
+												  renameEventItem.getModifiedTime());
+							}
+							deleteInfo = new CommitInformation(renameEventItem.getModifiedTime().getLongValue(),
+															   renameEventItem.getModifiedBy(),
+															   "",
+															   path);
+							renameEventItem.discard();
+						} else {
+							if(verbose) {
+								System.err.printf("No rename event found: %s -> %s\n", path, pathname(item));
+							}
+							// Not sure how this happens, but fill in with the
+							// only information we have: the last view time
+							// and the last person to modify the item.
+							deleteInfo = new CommitInformation(lastViewTime,
+															   item.getModifiedBy(),
+															   "",
+															   path);
+						}
+						deleteInfo.setFileDelete(true);
+						item.discard();
+						ith.remove();
+						// Cause old file to be deleted.
+						sortedFileList.put(deleteInfo, item);
+						AddedSortedFileList.put(deleteInfo, item);
+						// Replace the existing entries for item if they have an earlier timestamp.
+						CommitInformation info = new CommitInformation(deleteInfo.getTime(),
+																	   deleteInfo.getUid(),
+																	   "",
+																	   pathname(item));
+						replaceEarlierCommitInfo(sortedFileList, info, item);
+						replaceEarlierCommitInfo(AddedSortedFileList, info, item);
+					}
 				}
 			} else {
 				System.err.println("Never seen the file " + path + " in " + head);
+			}
+		}
+	}
+
+	private void replaceEarlierCommitInfo(Map<CommitInformation, File> fileList, CommitInformation info, File file) {
+		String path = pathname(file);
+		// TODO: a better data structure for fileList would make this more efficient.
+		for(Iterator<Map.Entry<CommitInformation, File>> ith = fileList.entrySet().iterator(); ith.hasNext(); ) {
+			CommitInformation info2 = ith.next().getKey();
+			if(path.equals(info2.getPath()) && info2.getTime() < info.getTime()) {
+				ith.remove();
+				fileList.put(info, file);
+				return;
 			}
 		}
 	}
@@ -418,16 +474,20 @@ public class GitImporter {
 		f.discard();
 	}
 
+	private String pathname(File f) {
+		String path = f.getParentFolderHierarchy() + f.getName();
+		path = path.replace('\\', '/');
+		//path = path.substring(1);
+		int indexOfFirstPath = path.indexOf('/');
+		path = path.substring(indexOfFirstPath + 1 + folderNameLength);
+		return path;
+	}
+
 	private void recursiveFilePopulation(String head, Folder f) {
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
-
-				String path = i.getParentFolderHierarchy() + historyFile.getName();
-				path = path.replace('\\', '/');
-				//path = path.substring(1);
-				int indexOfFirstPath = path.indexOf('/');
-				path = path.substring(indexOfFirstPath + 1 + folderNameLength);
+				String path = pathname(historyFile);
 
 				if(null != head) {
 					Integer fileid = helper.getRegisteredFileId(head, path);
@@ -482,7 +542,62 @@ public class GitImporter {
 			throw new NullPointerException("Ensure that the helper is correctly started.");
 		}
 	}
-	
+
+	// Returns the item after startTime when oldPath was renamed to file in view.
+	// Searches file and it's folders for a rename event between those two times.
+	// Returns null if a rename event is not found.
+	private Item findRenameEventItem(View view, String oldPath, File file, long startTime) {
+		String path = pathname(file);
+		String oldFolderName = FileUtils.getParent(oldPath, "/");
+		String folderName = FileUtils.getParent(path, "/");
+		String oldFileName = FileUtils.getName(oldPath, "/");
+
+		//System.err.println(new OLEDate(startTime));
+		//System.err.printf("%s -> %s\n", oldFileName, file.getName());
+
+		// file was probably renamed during the time period
+		if (!oldFileName.equals(file.getName())) {
+			Item[] hist = file.getHistory();
+			for (int i = 0; i < hist.length; i++) {
+				File item = (File) hist[i];
+				long time = item.getModifiedTime().getLongValue();
+				if (time < startTime) {
+					break;
+				}
+				if (i+1 < hist.length &&
+					item.getName().equals(file.getName()) &&
+					((File)hist[i+1]).getName().equals(oldFileName)) {
+					return item;
+				}
+			}
+		}
+
+		//System.err.printf("%s -> %s\n", oldFolderName, folderName);
+
+		// some folder was probably renamed during the time period
+		if (!oldFolderName.equals(folderName)) {
+			Folder folder = file.getParentFolder();
+			while (folder != null) {
+				Item[] hist = folder.getHistory();
+				for (int i = 0; i < hist.length; i++) {
+					Folder item = (Folder) hist[i];
+					long time = item.getModifiedTime().getLongValue();
+					//System.err.printf("[%d] %s\t%s\n", i, item.getModifiedTime(), item.getName());
+					if (time < startTime) {
+						break;
+					}
+					if (i+1 < hist.length &&
+						!item.getName().equals(((Folder)hist[i+1]).getName())) {
+						return item;
+					}
+				}
+				folder = folder.getParentFolder();
+			}
+		}
+
+		return null;
+	}
+
 	public void generateByLabelImport(View view, Date date, String baseFolder, String domain) {
 		Label[] viewLabels = view.fetchAllLabels();
 		String head = view.getName();
@@ -513,6 +628,7 @@ public class GitImporter {
 		for(int i=fromLabel; i<viewLabels.length; ++i) {
 			if(viewLabels[i].isViewLabel()) {
 				View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
+				long viewTime = viewLabels[i].getRevisionTime().getLongValue();
 				if(i == fromLabel && isResume) {
 					setLastFilesLastSortedFileList(vc, head, baseFolder);
 				}
@@ -533,6 +649,7 @@ public class GitImporter {
 					}
 				}
 				vc.discard();
+				lastViewTime = viewTime;
 			}
 		}
 		helper.gc();
@@ -566,6 +683,7 @@ public class GitImporter {
 		long hour = 3600000L; // mSec
 		long day = 24 * hour; // 86400000 mSec
 		long firstTime = 0;
+		long viewTime = 0;
 		String head = view.getName();
 		if(null != alternateHead) {
 			head = alternateHead;
@@ -587,7 +705,8 @@ public class GitImporter {
 			if(isResume) {
 				// -R is for branch view
 				// 2000 mSec here is to avoid side effect in StarTeam View Configuration
-				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(firstTime + 2000)));
+				viewTime = firstTime + 2000;
+				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(viewTime)));
 				setLastFilesLastSortedFileList(vc, head, baseFolder);
 				vc.discard();
 			} 
@@ -617,11 +736,13 @@ public class GitImporter {
 				vc = view;
 			} else {
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(timeIncrement.getTimeInMillis())));
+				viewTime = timeIncrement.getTimeInMillis();
 			}
 			System.err.println("View Configuration Time: " + timeIncrement.getTime());
 			generateFastImportStream(vc, baseFolder, domain);
 			vc.discard();
 			vc = null;
+			lastViewTime = viewTime;
 		}
 		helper.gc();
 	}
