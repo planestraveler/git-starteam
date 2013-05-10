@@ -201,7 +201,12 @@ public class GitImporter {
 					helper.unregisterFileId(head, path);
 				} else {
 					java.io.File aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
-					cm.checkoutTo(f, aFile);
+					try {
+						cm.checkoutTo(f, aFile);
+					} catch (Exception ex) {
+						System.err.printf("Failed to checkout %s: %s\n", path, ex);
+						continue;
+					}
 					Blob fileToStage = new Blob(new Data(aFile));
 					
 					helper.writeBlob(fileToStage);
