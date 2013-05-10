@@ -140,6 +140,8 @@ public class GitImporter {
 		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."
 		CheckoutManager cm = new CheckoutManager(view);
 		cm.getOptions().setEOLConversionEnabled(false);
+		// Disabling status update leads to a large performance increase.
+		cm.getOptions().setUpdateStatus(false);
 		lastInformation = new CommitInformation(Long.MIN_VALUE, Integer.MIN_VALUE, "", "");
 
 		folder = null;
@@ -186,14 +188,6 @@ public class GitImporter {
 			path = path.substring(indexOfFirstPath + 1 + folderNameLength);
 			
 			try {
-				if(f.getStatus() == Status.CURRENT) {
-					f.discard();
-					continue;
-				}
-				if(f.getStatusByMD5(helper.getMD5Of(path, head)) == Status.CURRENT) {
-					f.discard();
-					continue;
-				}
 				FileOperation fo = null;
 				if(f.isDeleted() || current.isFileMove()) {
 					fo = new FileDelete();
