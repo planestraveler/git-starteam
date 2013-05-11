@@ -24,6 +24,7 @@ import java.util.Date;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
+import com.starbase.starteam.vts.comm.NetMonitor;
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
@@ -169,6 +170,7 @@ public class MainEntry {
 						for(View v : p.getViews()) {
 							if(v.getName().equalsIgnoreCase(view)) {
 								viewFound = true;
+								NetMonitor.onFile(new java.io.File("netmon.out"));
 								if(null != timeBased && timeBased) {
 									importer.generateDayByDayImport(v, date, folder, domain);
 								} else if (null != labelBased && labelBased) {
