@@ -178,6 +178,13 @@ as follows:
     cd ~/proj/git-starteam/
     ant -Djargs.jar=/path/to/jargs.jar -Dstarteam.jar=bin/fake-starteam.jar fake-starteam jar
 
+Run Unit Tests
+--------------
+The unit tests currently assume they will be run from the syncronizer subdirectory and in the UTC-0500 timezone.
+
+    cd ~/proj/git-starteam/syncronizer
+    TZ=America/Montreal ant -f ../build.xml -Dstarteam.bin=bin/fake-starteam clean fake-starteam test
+
 TODO
 ----
 * Push to StarTeam
