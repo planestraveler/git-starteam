@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.regex.Pattern;
 
 import org.ossnoize.git.fastimport.CatBlob;
@@ -72,7 +73,7 @@ public class GitHelper extends RepositoryHelper {
 	private int debugFileCounter = 0;
 	private Map<String, Map<String, DataRef>> trackedFiles;
 	private Map<String, Map<String, MD5>> md5Cache;
-	private MD5 catBlobMD5;
+	private ArrayBlockingQueue<MD5> md5Queue;
 	private boolean isBare;
 
 	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
@@ -82,6 +83,7 @@ public class GitHelper extends RepositoryHelper {
 		setWorkingDirectory(System.getProperty("user.dir"), createRepo);
 		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
 		md5Cache = new HashMap<String, Map<String, MD5>>();
+		md5Queue = new ArrayBlockingQueue(1, false);
 
 		loadFileInformation();
 	}
@@ -391,22 +393,17 @@ public class GitHelper extends RepositoryHelper {
 			if(md5Cache.get(head).containsKey(filename)) {
 				return md5Cache.get(head).get(filename);
 			}
-			catBlobMD5 = new MD5();
 			OutputStream fastImport = getFastImportStream();
 			gitResponse.setCurrentHead(head);
 			CatBlob blobRequest = new CatBlob(trackedFiles.get(head).get(filename));
 			blobRequest.writeTo(fastImport);
-			synchronized (catBlobMD5) {
-				if(catBlobMD5.toHexString().equals("00000000000000000000000000000000")) {
-					try {
-						catBlobMD5.wait(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+			try {
+				MD5 catBlobMD5 = md5Queue.take();
+				md5Cache.get(head).put(filename, catBlobMD5);
+				return catBlobMD5;
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			md5Cache.get(head).put(filename, catBlobMD5);
-			return catBlobMD5;
 		}
 		return new MD5();
 	}
@@ -639,6 +636,7 @@ public class GitHelper extends RepositoryHelper {
 		public void run() {
 			StringBuilder firstResponse = new StringBuilder(50);
 			try {
+				MessageDigest digest = MessageDigest.getInstance("MD5");
 				int character;
 				do {
 					character = stream.read();
@@ -650,10 +648,10 @@ public class GitHelper extends RepositoryHelper {
 						character = stream.read();
 					}
 					if(catBlob.matcher(firstResponse).matches()) {
-						MessageDigest digest = MessageDigest.getInstance("MD5");
 						String length = firstResponse.substring(46);
 						int qtyOfBytes = Integer.parseInt(length);
 						byte[] buffer = new byte[1024];
+						digest.reset();
 						int read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
 						while(qtyOfBytes > 0) {
 							digest.update(buffer, 0, read);
@@ -661,9 +659,15 @@ public class GitHelper extends RepositoryHelper {
 							if(qtyOfBytes > 0)
 								read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
 						}
-						synchronized (catBlobMD5) {
-							catBlobMD5.setData(digest.digest());
-							catBlobMD5.notify();
+						MD5 catBlobMD5 = new MD5();
+						catBlobMD5.setData(digest.digest());
+						for (;;) {
+							try {
+								md5Queue.put(catBlobMD5);
+								break;
+							} catch (InterruptedException e) {
+								// retry
+							}
 						}
 					} else if (ls.matcher(firstResponse).matches()) {
 						String type = firstResponse.substring(6, 10);

@@ -18,6 +18,7 @@ package org.ossnoize.git.fastimport.test;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -26,7 +27,6 @@ import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 public class FileOperationTest {
 
@@ -82,19 +82,18 @@ public class FileOperationTest {
 	
 	@Test
 	public void testFileDeleteOperation() throws InvalidPathException, IOException {
-		ByteOutputStream output = new ByteOutputStream();
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		FileOperation fo = new FileDelete();
 		fo.setPath("this/is/a/valid/path.txt");
 		fo.writeTo(output);
-		String result = new String(output.getBytes(),0,output.getCount());
-		assertEquals("D this/is/a/valid/path.txt\n", result);
+		assertEquals("D this/is/a/valid/path.txt\n", output.toString());
 		assertTrue(fo.isInline());
 		assertNull(fo.getMark());
 	}
 	
 	@Test(expected=NullPointerException.class)
 	public void testFileDeleteWithNoPathSet() throws IOException {
-		ByteOutputStream output = new ByteOutputStream();
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		FileOperation fo = new FileDelete();
 		fo.writeTo(output);
 	}
