@@ -3,4 +3,6 @@ bin/
 .metadata
 localhost.*/
 */classes/
+*/testclasses/
+*/testreports/
 .sconsign.dblite

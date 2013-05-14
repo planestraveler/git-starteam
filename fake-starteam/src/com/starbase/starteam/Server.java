@@ -111,4 +111,16 @@ public class Server {
 	public OLEDate getCurrentTime() {
 		return InternalPropertiesProvider.getInstance().getCurrentTime();
 	}
+
+    public void setAutoReconnectEnabled(boolean bEnabled) {
+        // nothing to do
+    }
+
+    public void setAutoReconnectAttempts(int nAttempts) {
+        // nothing to do
+    }
+
+    public void setAutoReconnectWait(int nSeconds) {
+        // nothing to do
+    }
 }

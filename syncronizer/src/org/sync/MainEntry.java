@@ -24,6 +24,7 @@ import java.util.Date;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
+import com.starbase.starteam.vts.comm.NetMonitor;
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
@@ -54,6 +55,7 @@ public class MainEntry {
 		CmdLineParser.Option dumpToFile = parser.addStringOption('D', "dump");
 		CmdLineParser.Option selectWorkingFolder = parser.addStringOption('W', "working-folder");
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
+		CmdLineParser.Option isCheckpoint = parser.addBooleanOption("checkpoint");
 
 		try {
 			parser.parse(args);
@@ -87,6 +89,8 @@ public class MainEntry {
 		String workingFolder = (String) parser.getOptionValue(selectWorkingFolder);
 		Boolean verboseFlag = (Boolean) parser.getOptionValue(isVerbose);
 		boolean verbose = verboseFlag != null && verboseFlag;
+		Boolean checkpointFlag = (Boolean) parser.getOptionValue(isCheckpoint);
+		boolean createCheckpoints = checkpointFlag != null && checkpointFlag;
 		
 		if(host == null || port == null || project == null || view == null) {
 			printHelp();
@@ -100,6 +104,11 @@ public class MainEntry {
 		Date date = null;
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		if(null != time) {
+			if(!((null != timeBased && timeBased) ||
+				 (null != labelBased && labelBased))) {
+				System.out.println("-t option can only be used with -T or -L options.");
+				System.exit(3);
+			}
 			try {
 				date = dateFormat.parse(time);
 			} catch (Exception ex) {
@@ -120,6 +129,12 @@ public class MainEntry {
 
 		Server starteam = new Server(host, port);
 		starteam.connect();
+
+		// try to reconnect at 15 second intervals for 1 hour
+		starteam.setAutoReconnectEnabled(true);
+		starteam.setAutoReconnectAttempts(60 * 60 / 15);
+		starteam.setAutoReconnectWait(15);
+
 		Console con = System.console();
 		if(null == user) {
 			user = con.readLine("Username:");
@@ -139,36 +154,40 @@ public class MainEntry {
 						p.setExpandKeywords(true);
 					}
 					GitImporter importer = new GitImporter(starteam, p);
-					if(null != head) {
-						importer.setHeadName(head);
-					}
-					if(null != resume) {
-						importer.setResume(resume);
-					}
-					if(null != dumpTo) {
-						importer.setDumpFile(new File(dumpTo));
-					}
-					importer.setVerbose(verbose);
-					boolean viewFound = false;
-					for(View v : p.getViews()) {
-						if(v.getName().equalsIgnoreCase(view)) {
-							viewFound = true;
-							if(null != timeBased && timeBased) {
-								importer.generateDayByDayImport(v, date, folder, domain);
-							} else if (null != labelBased && labelBased) {
-								importer.generateByLabelImport(v, date, folder, domain);
-							} else {
-								importer.generateFastImportStream(v, folder, domain);
-							}
-							// process is finished we can close now.
-							importer.dispose();
-							break;
-						} else if(verbose) {
-							System.err.println("Not view: " + v.getName());
+					try {
+						if(null != head) {
+							importer.setHeadName(head);
 						}
-					}
-					if (!viewFound) {
-						System.err.println("View not found: " + view);
+						if(null != resume) {
+							importer.setResume(resume);
+						}
+						if(null != dumpTo) {
+							importer.setDumpFile(new File(dumpTo));
+						}
+						importer.setVerbose(verbose);
+						importer.setCreateCheckpoints(createCheckpoints);
+						boolean viewFound = false;
+						for(View v : p.getViews()) {
+							if(v.getName().equalsIgnoreCase(view)) {
+								viewFound = true;
+								NetMonitor.onFile(new java.io.File("netmon.out"));
+								if(null != timeBased && timeBased) {
+									importer.generateDayByDayImport(v, date, folder, domain);
+								} else if (null != labelBased && labelBased) {
+									importer.generateByLabelImport(v, date, folder, domain);
+								} else {
+									importer.generateFastImportStream(v, folder, domain);
+								}
+								break;
+							} else if(verbose) {
+								System.err.println("Not view: " + v.getName());
+							}
+						}
+						if (!viewFound) {
+							System.err.println("View not found: " + view);
+						}
+					} finally {
+						importer.dispose();
 					}
 					break;
 				} else if(verbose) {
@@ -188,22 +207,23 @@ public class MainEntry {
 		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
-		System.out.println("-t <time>\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
-		System.out.println("-f <folder>\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
+		System.out.println("[-t <time>]\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
+		System.out.println("[-f <folder>]\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
 		System.out.println("[-T]\t\t\tDo a day by day importation of the starteam view");
 		System.out.println("[-L]\t\t\tDo a label by label importation of the starteam view");
 		System.out.println("[-k]\t\t\tSet to enable keyword expansion in text files");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation for branch view");
 		System.out.println("[-H <head>]\t\tSelect the name of the head to use");
-		System.out.println("[-X <path to dvcs>]\tSelect the path where to find the dvcs executable");
+		System.out.println("[-X <path to git>]\tSelect the path to the git executable");
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
-		System.out.println("[-W <folder>]\tSelect where the repository is located");
-		System.out.println("[--password]\t\t\tStarTeam password");
-		System.out.println("-D <dump file>\t\t\tDump fast-import data to file");
-		System.out.println("[--verbose]\t\t\tVerbose output");
-		System.out.println("java -jar Syncronizer.jar -h localhost -P 23456 -p Alpha -v MAIN -U you");
+		System.out.println("[-W <folder>]\t\tSelect where the repository is located");
+		System.out.println("[--password]\t\tStarTeam password");
+		System.out.println("[-D <dump file prefix>]\tDump fast-import data to files");
+		System.out.println("[--checkpoint]\t\tCreate git fast-import checkpoints after each label");
+		System.out.println("[--verbose]\t\tVerbose output");
+		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		
 	}
 }
