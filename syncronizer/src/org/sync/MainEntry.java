@@ -97,10 +97,6 @@ public class MainEntry {
 			System.exit(3);
 		}
 
-		if(null != folder && !folder.endsWith("/")) {
-			folder = folder + "/";
-		}
-		
 		Date date = null;
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		if(null != time) {
@@ -214,7 +210,7 @@ public class MainEntry {
 		System.out.println("-v <view>\t\tSelect the view used for importation");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
 		System.out.println("[-t <time>]\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
-		System.out.println("[-f <folder>]\t\tSelect the folder (format like Src/apps/vlc2android/) to import from");
+		System.out.println("[-f <folder regex>]\t\tSelect the folder (in Java regex format) to import from");
 		System.out.println("[-T]\t\t\tDo a day by day importation of the starteam view");
 		System.out.println("[-L]\t\t\tDo a label by label importation of the starteam view");
 		System.out.println("[-k]\t\t\tSet to enable keyword expansion in text files");

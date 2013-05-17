@@ -19,14 +19,17 @@ package org.sync;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
@@ -95,10 +98,21 @@ public class GitImporter {
 		return lastModifiedTime;
 	}
 
-	public void setFolder(View view, String folderPath) {
-		if(null != folderPath) {
-			recursiveFolderPopulation(view.getRootFolder(), folderPath);
-			folderNameLength = folderPath.length();
+	public void setFolder(View view, String folderPattern) {
+		if(null != folderPattern) {
+			folder = findFirstFolder(view.getRootFolder(), folderPattern);
+			if (folder != null) {
+				String path = this.folder.getFolderHierarchy();
+				path = path.replace('\\', '/');
+				int indexOfFirstPath = path.indexOf('/');
+				path = path.substring(indexOfFirstPath + 1);
+				folderNameLength = path.length();
+				if(verbose) {
+					System.err.println("Folder: " + path);
+				}
+			} else {
+				folderNameLength = 0;
+			}
 		} else {
 			folder = view.getRootFolder();
 			folderNameLength = 0;
@@ -494,24 +508,33 @@ public class GitImporter {
 		createCheckpoints = b;
 	}
 
-	private void recursiveFolderPopulation(Folder f, String folderPath) {
-		for(Folder subfolder : f.getSubFolders()) {
-			if(null != folder) {
-				break;
-			}
-			String path = subfolder.getFolderHierarchy();
+	private Folder findFirstFolder(Folder f, String folderPattern) {
+		//if(verbose) {
+		//	System.err.println("Looking for folder regex: " + folderPattern);
+		//}
+		Pattern pattern = Pattern.compile(folderPattern);
+
+		// Bread-first search queue
+		Deque<Folder> deque = new ArrayDeque<Folder>();
+		deque.addLast(f);
+		while(!deque.isEmpty()) {
+			Folder folder = deque.removeFirst();
+			String path = folder.getFolderHierarchy();
 			path = path.replace('\\', '/');
 			int indexOfFirstPath = path.indexOf('/');
+
 			path = path.substring(indexOfFirstPath + 1);
-			if(folderPath.equalsIgnoreCase(path)) {
-				folder = subfolder;
-				break;
+			if(pattern.matcher(path).find()) {
+				return folder;
 			}
-			if(verbose) {
-				System.err.println("Not folder: " + path);
+			//if(verbose) {
+			//	System.err.println("Not folder: " + path);
+			//}
+			for(Folder subfolder : folder.getSubFolders()) {
+				deque.addLast(subfolder);
 			}
-			recursiveFolderPopulation(subfolder, folderPath);
 		}
+		return null;
 	}
 
 	private String pathname(File f) {
