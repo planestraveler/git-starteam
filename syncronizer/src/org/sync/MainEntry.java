@@ -131,11 +131,16 @@ public class MainEntry {
 		starteam.connect();
 
 		Console con = System.console();
-		if(null == user) {
+		if(null != con && null == user) {
 			user = con.readLine("Username:");
 		}
-		if(null == password) {
-			password = new String(con.readPassword("Password:"));
+		if(null != con && null == password) {
+			char[] passwordChars = con.readPassword("Password:");
+			if(null != passwordChars) {
+				password = new String(passwordChars);
+			} else {
+				password = null;
+			}
 		}
 		int userid = starteam.logOn(user, password);
 		if(userid > 0) {
