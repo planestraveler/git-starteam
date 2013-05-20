@@ -246,8 +246,7 @@ public abstract class RepositoryHelper {
 	
 	/**
 	 * Write a reset to the fast-import stream.
-	 * @param ref Ref to reset
-	 * @param committish Commit to reset ref to
+	 * @param reset Reset data.
 	 * @throws IOException
 	 */
 	public void writeReset(Reset reset) throws IOException {
