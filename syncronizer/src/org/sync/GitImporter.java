@@ -35,11 +35,12 @@ import java.util.regex.Pattern;
 import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
+import org.ossnoize.git.fastimport.DataRef;
 import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileModification;
 import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.RefName;
-import org.ossnoize.git.fastimport.Reset;
+import org.ossnoize.git.fastimport.Tag;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.util.CommitInformation;
@@ -783,18 +784,36 @@ public class GitImporter {
 	}
 
 	private void writeLabelTag(View view, Label label) {
-		if(null == lastCommit) {
-			System.err.println("Not tagging label " + label.getName() + " because lastCommit is null");
+		DataRef ref = null;
+		if(lastCommit != null) {
+			ref = lastCommit.getMarkID();
+		} else if(fromRef != null) {
+			ref = fromRef;
+		}
+
+		if (ref == null) {
+			System.err.println("Not tagging label " + label.getName() + " because lastCommit and fromRef are null");
 			return;
 		}
-		try {
-			String tag = labelRef(view, label);
-			if (tag.length() > 0) {
-				Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
-				helper.writeReset(reset);
+
+		String tagName = labelRef(view, label);
+		if (tagName.length() > 0) {
+			Date tagDate = null;
+			if (label.isViewLabel()) {
+				tagDate = new Date(label.getTime().getLongValue());
+			} else if (label.isRevisionLabel()) {
+				tagDate = new Date(label.getRevisionTime().getLongValue());
+			} else {
+				System.err.println("No date for label, using today: " + label.getName());
+				tagDate = new Date();
 			}
-		} catch (IOException e1) {
-			e1.printStackTrace();
+			try {
+				// TODO(phiggins): make domain an instance variable and replace @cie.com with it
+				Tag tag = new Tag(tagName, ref, "StarTeam", "noreply@cie.com", tagDate, label.getDescription());
+				helper.writeTag(tag);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 

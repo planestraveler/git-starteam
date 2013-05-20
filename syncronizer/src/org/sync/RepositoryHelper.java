@@ -28,6 +28,7 @@ import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Checkpoint;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Reset;
+import org.ossnoize.git.fastimport.Tag;
 import org.sync.util.LogEntry;
 import org.sync.util.SmallRef;
 import org.sync.util.StarteamFileInfo;
@@ -243,6 +244,16 @@ public abstract class RepositoryHelper {
 	public void writeReset(Reset reset) throws IOException {
 		OutputStream fastImportStream = getFastImportStream();
 		reset.writeTo(fastImportStream);
+	}
+
+	/**
+	 * Write a tag to the fast-import stream.
+	 * @param tag Tag to create.
+	 * @throws IOException
+	 */
+	public void writeTag(Tag tag) throws IOException {
+		OutputStream fastImportStream = getFastImportStream();
+		tag.writeTo(fastImportStream);
 	}
 	
 	public abstract java.util.Date getLastCommitOfBranch(String branchName);
