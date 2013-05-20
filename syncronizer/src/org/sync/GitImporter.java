@@ -184,6 +184,7 @@ public class GitImporter {
 			propNames.MODIFIED_TIME,
 			propNames.MODIFIED_USER_ID,
 			propNames.EXCLUSIVE_LOCKER,
+			propNames.NON_EXCLUSIVE_LOCKERS,
 			propNames.FILE_ENCODING,
 			propNames.FILE_EOL_CHARACTER,
 			propNames.FILE_EXECUTABLE,
