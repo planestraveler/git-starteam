@@ -664,8 +664,7 @@ public class GitImporter {
 				generateFastImportStream(vc, baseFolder, domain);
 				writeLabelTag(view, viewLabels[i]);
 				checkpoint();
-				vc.discardFolders();
-				vc.discard();
+				vc.close();
 				lastViewTime = viewTime;
 			}
 		}
@@ -683,9 +682,9 @@ public class GitImporter {
 				generateFastImportStream(vc, baseFolder, domain);
 				writeLabelTag(view, viewLabels[i]);
 				checkpoint();
-				vc.discardFolders();
-				vc.discard();
 				lastViewTime = viewLabels[i].getRevisionTime().getLongValue();
+
+				vc.close();
 			}
 		}
 	}
@@ -749,6 +748,7 @@ public class GitImporter {
 			if(baseRef != null) {
 				View baseView = new View(view.getParentView(), view.getBaseConfiguration());
 				setLastFilesLastSortedFileList(baseView, baseView.getName(), baseFolder);
+				baseView.close();
 			} else {
 				clearAllFiles();
 			}
@@ -756,6 +756,8 @@ public class GitImporter {
 			isResume = false;
 
 			generateAllLabelImport(view, baseFolder, domain);
+
+			view.close();
 		}
 		helper.gc();
 	}
@@ -861,7 +863,7 @@ public class GitImporter {
 				viewTime = firstTime + 2000;
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(viewTime)));
 				setLastFilesLastSortedFileList(vc, head, baseFolder);
-				vc.discard();
+				vc.close();
 			} 
 			Calendar time = Calendar.getInstance();
 			time.setTimeInMillis(firstTime);
@@ -894,9 +896,7 @@ public class GitImporter {
 			}
 			Log.log("View Configuration Time: " + timeIncrement.getTime());
 			generateFastImportStream(vc, baseFolder, domain);
-			vc.discardFolders();
-			vc.discard();
-			vc = null;
+			vc.close();
 			lastViewTime = viewTime;
 		}
 		helper.gc();
