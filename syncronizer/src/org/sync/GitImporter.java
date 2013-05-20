@@ -658,6 +658,7 @@ public class GitImporter {
 				System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
 				generateFastImportStream(vc, baseFolder, domain);
 				writeLabelTag(view, viewLabels[i]);
+				checkpoint();
 				vc.discardFolders();
 				vc.discard();
 				lastViewTime = viewTime;
@@ -676,6 +677,7 @@ public class GitImporter {
 				System.err.printf("View configuration label <%s> (%d/%d)\n", viewLabels[i].getName(), i+1, viewLabels.length);
 				generateFastImportStream(vc, baseFolder, domain);
 				writeLabelTag(view, viewLabels[i]);
+				checkpoint();
 				vc.discardFolders();
 				vc.discard();
 				lastViewTime = viewLabels[i].getRevisionTime().getLongValue();
@@ -781,18 +783,27 @@ public class GitImporter {
 	}
 
 	private void writeLabelTag(View view, Label label) {
-		if(null != lastCommit) {
+		if(null == lastCommit) {
+			System.err.println("Not tagging label " + label.getName() + " because lastCommit is null");
+			return;
+		}
+		try {
+			String tag = labelRef(view, label);
+			if (tag.length() > 0) {
+				Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
+				helper.writeReset(reset);
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	private void checkpoint() {
+		if(createCheckpoints) {
 			try {
-				String tag = labelRef(view, label);
-				if (tag.length() > 0) {
-					Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
-					helper.writeReset(reset);
-				}
-				if(createCheckpoints) {
-					helper.writeCheckpoint();
-				}
-			} catch (IOException e1) {
-				e1.printStackTrace();
+				helper.writeCheckpoint();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
