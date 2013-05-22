@@ -130,11 +130,6 @@ public class MainEntry {
 		Server starteam = new Server(host, port);
 		starteam.connect();
 
-		// try to reconnect at 15 second intervals for 1 hour
-		starteam.setAutoReconnectEnabled(true);
-		starteam.setAutoReconnectAttempts(60 * 60 / 15);
-		starteam.setAutoReconnectWait(15);
-
 		Console con = System.console();
 		if(null == user) {
 			user = con.readLine("Username:");
@@ -144,6 +139,11 @@ public class MainEntry {
 		}
 		int userid = starteam.logOn(user, password);
 		if(userid > 0) {
+			// try to reconnect at 15 second intervals for 1 hour
+			starteam.setAutoReconnectEnabled(true);
+			starteam.setAutoReconnectAttempts(60 * 60 / 15);
+			starteam.setAutoReconnectWait(15);
+
 			boolean projectFound = false;
 			for(Project p : starteam.getProjects()) {
 				if(p.getName().equalsIgnoreCase(project)) {
