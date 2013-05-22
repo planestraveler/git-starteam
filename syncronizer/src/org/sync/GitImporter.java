@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +40,6 @@ import org.ossnoize.git.fastimport.DataRef;
 import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileModification;
 import org.ossnoize.git.fastimport.FileOperation;
-import org.ossnoize.git.fastimport.RefName;
 import org.ossnoize.git.fastimport.Tag;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
@@ -82,7 +82,7 @@ public class GitImporter {
 	private OutputStream exportStream;
 	private String alternateHead = null;
 	private boolean isResume = false;
-	private RefName fromRef = null;
+	private DataRef fromRef = null;
 	private boolean verbose = false;
 	private boolean createCheckpoints = false;
 	private RepositoryHelper helper;
@@ -92,6 +92,8 @@ public class GitImporter {
 	private Set<String> lastFiles = new HashSet<String>();
 	// Use this to find the renamed files.
 	private long lastViewTime;
+	// tracks which ref each tag points at
+	private Map<String, DataRef> tagMarks = new HashMap<String, DataRef>();
 	
 	public GitImporter(Server s, Project p) {
 		server = s;
@@ -726,21 +728,28 @@ public class GitImporter {
 	public void generateAllViewsImport(Project project, String baseFolder, String domain) {
 		List<View> views = getAllViews(project);
 		int count = 0;
+
+		for (View view: views) {
+			String tag = getBaseTag(view);
+			if (tag != null) {
+				// Must have the mark for each tag that is the base of a branch
+				// so that we can create a commit from it.
+				Log.log("Will save mark for tag " + tag);
+				tagMarks.put(tag, null);
+			}
+		}
+
 		for (View view: views) {
 			count++;
-			String baseRef = null;
+			DataRef baseRef = null;
 			try {
-				baseRef = findBaseRef(view);
+				baseRef = getBaseRef(view);
 			} catch (RuntimeException e) {
 				Log.log("Could not get base ref for " + view.getName() + ": " + e);
 				continue;
 			}
 
-			if(baseRef != null) {
-				fromRef = new RefName(baseRef);
-			} else {
-				fromRef = null;
-			}
+			fromRef = baseRef;
 
 			Log.logf("Importing view %s onto %s (%d/%d)", view.getName(), baseRef, count, views.size());
 			setHeadName(refName(view.getName())); // TODO: allow user override (Groovy?)
@@ -804,6 +813,11 @@ public class GitImporter {
 
 		String tagName = labelRef(view, label);
 		if (tagName.length() > 0) {
+			// Only store the tags on which branches are based to save memory.
+			if (tagMarks.containsKey(tagName)) {
+				// Replace the null value with the ref.
+				tagMarks.put(tagName, ref);
+			}
 			Date tagDate = null;
 			if (label.isViewLabel()) {
 				tagDate = new Date(label.getTime().getLongValue());
@@ -902,16 +916,24 @@ public class GitImporter {
 		helper.gc();
 	}
 
-	private String findBaseRef(View v) {
+	private String getBaseTag(View v) {
 		ViewConfiguration vc = v.getBaseConfiguration();
 		if (vc.isLabelBased()) {
 			for (Label label: v.getParentView().getActiveLabels()) {
 				if (label.getID() == vc.getLabelID()) {
-					return "refs/tags/" + labelRef(v.getParentView(), label);
+					return labelRef(v.getParentView(), label);
 				}
 			}
 		}
 		return null;
+	}
+
+	private DataRef getBaseRef(View v) {
+		String tag = getBaseTag(v);
+		if (tag == null) {
+			return null;
+		}
+		return tagMarks.get(tag);
 	}
 	
 	public void dispose() {

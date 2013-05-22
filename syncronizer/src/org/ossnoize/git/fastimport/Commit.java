@@ -26,7 +26,7 @@ public class Commit implements Markable {
 	private Data comment;
 	private MarkID from;
 	private MarkID merge;
-	private RefName fromRef;
+	private DataRef fromRef;
 	private List<FileOperation> listOfOperation;
 	private Date commitDate;
 	private boolean resumeFastImport;
@@ -58,7 +58,7 @@ public class Commit implements Markable {
 		}
 	}
 
-	public void setFromRef(RefName ref) {
+	public void setFromRef(DataRef ref) {
 		fromRef = ref;
 	}
 	
