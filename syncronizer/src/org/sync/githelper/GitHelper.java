@@ -49,6 +49,7 @@ import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.Sha1Ref;
 import org.ossnoize.git.fastimport.enumeration.FeatureType;
 import org.sync.ErrorEater;
+import org.sync.Log;
 import org.sync.RepositoryHelper; 
 import org.sync.util.FileUtility;
 import org.sync.util.LogEntry;
@@ -246,7 +247,7 @@ public class GitHelper extends RepositoryHelper {
 				gitFastImport.getOutputStream().close();
 				int endCode = gitFastImport.waitFor();
 				if(endCode != 0) {
-					System.err.println("Git fast-import has finished anormally with code:" + endCode);
+					Log.log("Git fast-import has finished anormally with code:" + endCode);
 				}
 				gitFastImportOutputEater.join();
 				gitFastImportErrorEater.join();
@@ -480,7 +481,7 @@ public class GitHelper extends RepositoryHelper {
 		super.setWorkingDirectory(dir, create);
 		
 		if (!repositoryExists(create)) {
-			System.err.println("Destination repository not found in '" + repositoryDir + "'");
+			Log.log("Destination repository not found in '" + repositoryDir + "'");
 		}
 		isBare = isBareRepository();
 	}

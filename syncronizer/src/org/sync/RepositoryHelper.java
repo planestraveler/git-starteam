@@ -221,7 +221,7 @@ public abstract class RepositoryHelper {
 		Checkpoint checkpoint = new Checkpoint();
 		checkpoint.writeTo(fastImportStream);
 		lastCheckpointTime = System.currentTimeMillis();
-		System.err.println("Checkpoint done");
+		Log.out("Checkpoint done");
 		saveFileInformation();
 	}
 	
