@@ -558,9 +558,13 @@ public class GitImporter {
 	private String pathname(File f) {
 		String path = f.getParentFolderHierarchy() + f.getName();
 		path = path.replace('\\', '/');
-		//path = path.substring(1);
 		int indexOfFirstPath = path.indexOf('/');
-		path = path.substring(indexOfFirstPath + 1 + folderNameLength);
+		int subindex = indexOfFirstPath + 1 + folderNameLength;
+		try {
+			path = path.substring(subindex);
+		} catch (RuntimeException e) {
+			Log.logf("Invalid subindex: %d + 1 + %d = %d, %s", indexOfFirstPath, folderNameLength, subindex, path);
+		}
 		return path;
 	}
 
