@@ -933,6 +933,34 @@ public class GitImporter {
 					return labelRef(v.getParentView(), label);
 				}
 			}
+		} else if (vc.isTimeBased()) {
+			//Log.log("View " + v.getName() + " is time-based");
+			long baseTime = vc.getTime().getLongValue();
+
+			// Find label nearest to but before baseTime.
+			Label nearest = null;
+			long nearestTime = 0;
+			for (Label label: v.getParentView().getActiveLabels()) {
+				if (label.isViewLabel()) {
+					long labelTime = label.getTime().getLongValue();
+					if (labelTime < baseTime && labelTime > nearestTime) {
+						nearest = label;
+						nearestTime = label.getTime().getLongValue();
+					}
+				}
+			}
+
+			if (nearest != null) {
+				Log.logf("Using %s.%s at %s for view at %s",
+						 v.getParentView().getName(), nearest.getName(), nearest.getTime(), vc.getTime());
+				return labelRef(v.getParentView(), nearest);
+			}
+		} else if (vc.isPromotionStateBased()) {
+			Log.log("View " + v.getName() + " is promotion-state based, not supported!");
+		} else if (vc.isTip()) {
+			//Log.log("View " + v.getName() + " is tip");
+		} else {
+			Log.log("View " + v.getName() + " is ??? based");
 		}
 		return null;
 	}
