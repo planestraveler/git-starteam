@@ -175,14 +175,16 @@ public class MainEntry {
 
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
-						if(allViews) {
-							importer.generateAllViewsImport(p, folder, domain, skipViewsPattern);
+						if(allViews && view == null) {
+							importer.generateAllViewsImport(p, null, folder, domain, skipViewsPattern);
 						} else {
 							boolean viewFound = false;
 							for(View v : p.getViews()) {
 								if(v.getName().equalsIgnoreCase(view)) {
 									viewFound = true;
-									if(null != timeBased && timeBased) {
+									if(allViews) {
+										importer.generateAllViewsImport(p, v, folder, domain, skipViewsPattern);
+									} else if(null != timeBased && timeBased) {
 										importer.generateDayByDayImport(v, date, folder, domain);
 									} else if (null != labelBased && labelBased) {
 										importer.generateByLabelImport(v, date, folder, domain);

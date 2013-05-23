@@ -691,15 +691,18 @@ public class GitImporter {
 		}
 	}
 
-	private List<View> getAllViews(Project project, String skipPatternStr) {
+	private List<View> getAllViews(Project project, View rootView, String skipPatternStr) {
 		Pattern skipPattern = null;
 		if (skipPatternStr != null) {
 			skipPattern = Pattern.compile(skipPatternStr);
 		}
 
-		View v = project.getDefaultView();
-		while (v.getParentView() != null) {
-			v = v.getParentView();
+		View v = rootView;
+		if (v == null) {
+			v = project.getDefaultView();
+			while (v.getParentView() != null) {
+				v = v.getParentView();
+			}
 		}
 
 		List<View> views = new ArrayList<View>();
@@ -720,13 +723,16 @@ public class GitImporter {
 			String viewName = null;
 			ViewConfiguration baseConfig = null;
 			try {
-				viewName = view.getName();
-				baseConfig = view.getBaseConfiguration();
-				if (skipPattern != null && skipPattern.matcher(viewName).find()) {
-					Log.log("Skipping view " + viewName + ", base " + getBaseTag(view));
-				} else {
-					views.add(view);
+				String tag = getBaseTag(view);
+				if (tag == null && view != rootView) {
+					Log.log("Skipping non-rooted view " + view.getName());
+					continue;
 				}
+				if (skipPattern != null && skipPattern.matcher(view.getName()).find()) {
+					Log.log("Skipping view " + view.getName() + ", base " + tag);
+					continue;
+				}
+				views.add(view);
 			} catch (Exception e) {
 				Log.log("Skipping view " + viewName + ": " + e);
 			}
@@ -734,8 +740,8 @@ public class GitImporter {
 		return views;
 	}
 
-	public void generateAllViewsImport(Project project, String baseFolder, String domain, String skipPattern) {
-		List<View> views = getAllViews(project, skipPattern);
+	public void generateAllViewsImport(Project project, View rootView, String baseFolder, String domain, String skipPattern) {
+		List<View> views = getAllViews(project, rootView, skipPattern);
 		int count = 0;
 
 		for (View view: views) {
