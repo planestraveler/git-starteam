@@ -186,15 +186,6 @@ public abstract class RepositoryHelper {
 	}
 
 	/**
-	 * Return the MD5 sum object from the repository tracked file. 
-	 * 
-	 * @param filename The full path of the file and its name inside the repository
-	 * @param head the branch we are referring to.
-	 * @return the MD5 object generated for the file inside the repository.
-	 */
-	public abstract MD5 getMD5Of(String filename, String head) throws IOException;
-	
-	/**
 	 * Request that the stream be dumped into the following file
 	 * 
 	 * @param file The file where is to be written the fast-export

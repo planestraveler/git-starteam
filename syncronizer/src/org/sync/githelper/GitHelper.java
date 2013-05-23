@@ -39,10 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.regex.Pattern;
 
-import org.ossnoize.git.fastimport.CatBlob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.DataRef;
 import org.ossnoize.git.fastimport.Feature;
@@ -58,8 +56,6 @@ import org.sync.util.SmallRef;
 import org.sync.util.StarteamFileInfo;
 import org.sync.util.enumeration.FileStatusStyle;
 
-import com.starbase.util.MD5;
-
 public class GitHelper extends RepositoryHelper {
 	
 	private final static String STARTEAMFILEINFODIR = "starteam";
@@ -72,8 +68,6 @@ public class GitHelper extends RepositoryHelper {
 	private GitFastImportOutputReader gitResponse;
 	private int debugFileCounter = 0;
 	private Map<String, Map<String, DataRef>> trackedFiles;
-	private Map<String, Map<String, MD5>> md5Cache;
-	private ArrayBlockingQueue<MD5> md5Queue;
 	private boolean isBare;
 
 	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
@@ -82,8 +76,6 @@ public class GitHelper extends RepositoryHelper {
 		}
 		setWorkingDirectory(System.getProperty("user.dir"), createRepo);
 		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
-		md5Cache = new HashMap<String, Map<String, MD5>>();
-		md5Queue = new ArrayBlockingQueue(1, false);
 
 		loadFileInformation();
 	}
@@ -285,13 +277,11 @@ public class GitHelper extends RepositoryHelper {
 			if(null != ops.getMark()) {
 				if(!trackedFiles.containsKey(headName)) {
 					trackedFiles.put(headName, new HashMap<String, DataRef>());
-					md5Cache.put(headName, new HashMap<String, MD5>());
 				}
 				trackedFiles.get(headName).put(ops.getPath(), ops.getMark());
 			} else if(ops instanceof FileDelete) {
 				trackedFiles.get(headName).remove(ops.getPath());
 			}
-			md5Cache.get(headName).remove(ops.getPath());
 		}
 	}
 	
@@ -334,9 +324,7 @@ public class GitHelper extends RepositoryHelper {
 					gitFastImportErrorEater.start();
 					OutputStream out = gitFastImport.getOutputStream();
 					// Validate Feature needed;
-					Feature feature = new Feature(FeatureType.CatBlob);
-					feature.writeTo(out);
-					feature = new Feature(FeatureType.DateFormat, "raw");
+					Feature feature = new Feature(FeatureType.DateFormat, "raw");
 					feature.writeTo(out);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -381,33 +369,6 @@ public class GitHelper extends RepositoryHelper {
 		return trackedFiles.get(head).keySet();
 	}
 	
-	@Override
-	public MD5 getMD5Of(String filename, String head) throws IOException {
-		if(!trackedFiles.containsKey(head)) {
-			grabTrackedFiles(head);
-			md5Cache.put(head, new HashMap<String, MD5>());
-		}
-		if(!trackedFiles.containsKey(head))
-			return new MD5();
-		if(trackedFiles.get(head).containsKey(filename)) {
-			if(md5Cache.get(head).containsKey(filename)) {
-				return md5Cache.get(head).get(filename);
-			}
-			OutputStream fastImport = getFastImportStream();
-			gitResponse.setCurrentHead(head);
-			CatBlob blobRequest = new CatBlob(trackedFiles.get(head).get(filename));
-			blobRequest.writeTo(fastImport);
-			try {
-				MD5 catBlobMD5 = md5Queue.take();
-				md5Cache.get(head).put(filename, catBlobMD5);
-				return catBlobMD5;
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		return new MD5();
-	}
-
 	@Override
 	public Date getLastCommitOfBranch(String branchName) {
 		SmallRef to = new SmallRef(branchName);
@@ -622,7 +583,6 @@ public class GitHelper extends RepositoryHelper {
 		
 		private InputStream stream;
 		private String currentHead;
-		private Pattern catBlob = Pattern.compile("^[0-9a-fA-F]{40} blob [0-9]+$");
 		private Pattern ls = Pattern.compile("^[0-9]{6} [a-z]+ [0-9a-fA-F]{40}\t.+$");
 
 		public GitFastImportOutputReader(InputStream stream) {
@@ -647,29 +607,7 @@ public class GitHelper extends RepositoryHelper {
 						firstResponse.append((char)character);
 						character = stream.read();
 					}
-					if(catBlob.matcher(firstResponse).matches()) {
-						String length = firstResponse.substring(46);
-						int qtyOfBytes = Integer.parseInt(length);
-						byte[] buffer = new byte[1024];
-						digest.reset();
-						int read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
-						while(qtyOfBytes > 0) {
-							digest.update(buffer, 0, read);
-							qtyOfBytes -= read;
-							if(qtyOfBytes > 0)
-								read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
-						}
-						MD5 catBlobMD5 = new MD5();
-						catBlobMD5.setData(digest.digest());
-						for (;;) {
-							try {
-								md5Queue.put(catBlobMD5);
-								break;
-							} catch (InterruptedException e) {
-								// retry
-							}
-						}
-					} else if (ls.matcher(firstResponse).matches()) {
+					if (ls.matcher(firstResponse).matches()) {
 						String type = firstResponse.substring(6, 10);
 						if(type.equalsIgnoreCase("blob")) {
 							String sha1 = firstResponse.substring(13,53);
