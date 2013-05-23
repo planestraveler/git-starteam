@@ -280,7 +280,13 @@ public class GitHelper extends RepositoryHelper {
 				}
 				trackedFiles.get(headName).put(ops.getPath(), ops.getMark());
 			} else if(ops instanceof FileDelete) {
-				trackedFiles.get(headName).remove(ops.getPath());
+				// This shouldn't be null, but sometimes is. I think the
+				// file janitor is getting invoked, too. The problems may
+				// have the same cause.
+				Map<String, DataRef> headTracked = trackedFiles.get(headName);
+				if (headTracked != null) {
+					headTracked.remove(ops.getPath());
+				}
 			}
 		}
 	}
