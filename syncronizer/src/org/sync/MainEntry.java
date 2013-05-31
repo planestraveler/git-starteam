@@ -40,6 +40,7 @@ public class MainEntry {
 		CmdLineParser.Option selectPort = parser.addIntegerOption('P', "port");
 		CmdLineParser.Option selectProject = parser.addStringOption('p', "project");
 		CmdLineParser.Option selectView = parser.addStringOption('v', "view");
+		CmdLineParser.Option isAllViews = parser.addBooleanOption('A', "all-views");
 		CmdLineParser.Option selectTimeBasedImport = parser.addBooleanOption('T', "time-based");
 		CmdLineParser.Option selectLabelBasedImport = parser.addBooleanOption('L', "label-based");
 		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
@@ -73,6 +74,8 @@ public class MainEntry {
 		Integer port = (Integer) parser.getOptionValue(selectPort);
 		String project = (String) parser.getOptionValue(selectProject);
 		String view = (String) parser.getOptionValue(selectView);
+		Boolean allViewsFlag = (Boolean) parser.getOptionValue(isAllViews);
+		boolean allViews = allViewsFlag != null && allViewsFlag;
 		String time = (String) parser.getOptionValue(selectTime);
 		Boolean timeBased = (Boolean) parser.getOptionValue(selectTimeBasedImport);
 		Boolean labelBased = (Boolean) parser.getOptionValue(selectLabelBasedImport);
@@ -92,7 +95,7 @@ public class MainEntry {
 		Boolean checkpointFlag = (Boolean) parser.getOptionValue(isCheckpoint);
 		boolean createCheckpoints = checkpointFlag != null && checkpointFlag;
 		
-		if(host == null || port == null || project == null || view == null) {
+		if(host == null || port == null || project == null || (view == null && !allViews)) {
 			printHelp();
 			System.exit(3);
 		}
@@ -167,25 +170,31 @@ public class MainEntry {
 						}
 						importer.setVerbose(verbose);
 						importer.setCreateCheckpoints(createCheckpoints);
-						boolean viewFound = false;
-						for(View v : p.getViews()) {
-							if(v.getName().equalsIgnoreCase(view)) {
-								viewFound = true;
-								NetMonitor.onFile(new java.io.File("netmon.out"));
-								if(null != timeBased && timeBased) {
-									importer.generateDayByDayImport(v, date, folder, domain);
-								} else if (null != labelBased && labelBased) {
-									importer.generateByLabelImport(v, date, folder, domain);
-								} else {
-									importer.generateFastImportStream(v, folder, domain);
+
+						NetMonitor.onFile(new java.io.File("netmon.out"));
+
+						if(allViews) {
+							importer.generateAllViewsImport(p, folder, domain);
+						} else {
+							boolean viewFound = false;
+							for(View v : p.getViews()) {
+								if(v.getName().equalsIgnoreCase(view)) {
+									viewFound = true;
+									if(null != timeBased && timeBased) {
+										importer.generateDayByDayImport(v, date, folder, domain);
+									} else if (null != labelBased && labelBased) {
+										importer.generateByLabelImport(v, date, folder, domain);
+									} else {
+										importer.generateFastImportStream(v, folder, domain);
+									}
+									break;
+								} else if(verbose) {
+									System.err.println("Not view: " + v.getName());
 								}
-								break;
-							} else if(verbose) {
-								System.err.println("Not view: " + v.getName());
 							}
-						}
-						if (!viewFound) {
-							System.err.println("View not found: " + view);
+							if (!viewFound) {
+								System.err.println("View not found: " + view);
+							}
 						}
 					} finally {
 						importer.dispose();
@@ -208,6 +217,7 @@ public class MainEntry {
 		System.out.println("-P <port>\t\tDefine the port used to connect to the starteam server");
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
+		System.out.println("-A\t\tImport all views");
 		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
 		System.out.println("[-t <time>]\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
 		System.out.println("[-f <folder regex>]\t\tSelect the folder (in Java regex format) to import from");

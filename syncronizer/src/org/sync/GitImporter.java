@@ -20,11 +20,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
@@ -36,6 +38,7 @@ import org.ossnoize.git.fastimport.Data;
 import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileModification;
 import org.ossnoize.git.fastimport.FileOperation;
+import org.ossnoize.git.fastimport.RefName;
 import org.ossnoize.git.fastimport.Reset;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
@@ -78,6 +81,7 @@ public class GitImporter {
 	private OutputStream exportStream;
 	private String alternateHead = null;
 	private boolean isResume = false;
+	private RefName fromRef = null;
 	private boolean verbose = false;
 	private boolean createCheckpoints = false;
 	private RepositoryHelper helper;
@@ -135,6 +139,15 @@ public class GitImporter {
 		for(Folder subfolder : f.getSubFolders()) {
 			recursiveLastModifiedTime(subfolder);
 		}
+	}
+
+	public void clearAllFiles() {
+		files.clear();
+		deletedFiles.clear();
+		sortedFileList.clear();
+		lastFiles.clear();
+		lastSortedFileList.clear();
+		AddedSortedFileList.clear();
 	}
 
 	public void setLastFilesLastSortedFileList(View view, String head, String folderPath) {
@@ -278,6 +291,8 @@ public class GitImporter {
 					if(null == lastCommit) {
 						if(isResume) {
 							commit.resumeOnTopOfRef();
+						} else if(null != fromRef) {
+							commit.setFromRef(fromRef);
 						}
 					} else {
 						helper.writeCommit(lastCommit);
@@ -329,6 +344,8 @@ public class GitImporter {
 				if(null == lastCommit) {
 					if(isResume) {
 						commit.resumeOnTopOfRef();
+					} else if(null != fromRef) {
+						commit.setFromRef(fromRef);
 					}
 				} else {
 					helper.writeCommit(lastCommit);
@@ -640,26 +657,104 @@ public class GitImporter {
 				}
 				System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
 				generateFastImportStream(vc, baseFolder, domain);
-				if(null != lastCommit) {
-					try {
-						String tag = refName(viewLabels[i].getName());
-						if (tag.length() > 0) {
-							Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
-							helper.writeReset(reset);
-						}
-						if(createCheckpoints) {
-							helper.writeCheckpoint();
-						}
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-				}
+				writeLabelTag(view, viewLabels[i]);
 				vc.discardFolders();
 				vc.discard();
 				lastViewTime = viewTime;
 			}
 		}
 		helper.gc();
+	}
+
+	public void generateAllLabelImport(View view, String baseFolder, String domain) {
+		Label[] viewLabels = view.fetchAllLabels();
+		Arrays.sort(viewLabels, new LabelDateComparator());
+
+		for(int i=0; i<viewLabels.length; i++) {
+			if(viewLabels[i].isViewLabel()) {
+				View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
+				System.err.printf("View configuration label <%s> (%d/%d)\n", viewLabels[i].getName(), i+1, viewLabels.length);
+				generateFastImportStream(vc, baseFolder, domain);
+				writeLabelTag(view, viewLabels[i]);
+				vc.discardFolders();
+				vc.discard();
+				lastViewTime = viewLabels[i].getRevisionTime().getLongValue();
+			}
+		}
+	}
+
+	private List<View> getAllViews(Project project) {
+		View v = project.getDefaultView();
+		while (v.getParentView() != null) {
+			v = v.getParentView();
+		}
+
+		List<View> views = new ArrayList<View>();
+
+		// add them in bread-first order
+		Deque<View> deque = new ArrayDeque<View>();
+		deque.addLast(v);
+		while(!deque.isEmpty()) {
+			View view = deque.removeFirst();
+			try {
+				for (View derivedView: view.getDerivedViews()) {
+					deque.addLast(derivedView);
+				}
+			} catch (RuntimeException e) {
+				System.err.println("Could not get derived views for " + view.getName() + ": " + e);
+			}
+
+			String viewName = null;
+			ViewConfiguration baseConfig = null;
+			try {
+				viewName = view.getName();
+				baseConfig = view.getBaseConfiguration();
+				views.add(view);
+			} catch (Exception e) {
+				System.err.println("Skipping view " + viewName + ": " + e);
+			}
+		}
+		return views;
+	}
+
+	public void generateAllViewsImport(Project project, String baseFolder, String domain) {
+		List<View> views = getAllViews(project);
+		int count = 0;
+		for (View view: views) {
+			count++;
+			String baseRef = null;
+			try {
+				baseRef = findBaseRef(view);
+			} catch (RuntimeException e) {
+				System.err.println("Could not get base ref for " + view.getName() + ": " + e);
+				continue;
+			}
+
+			if(baseRef != null) {
+				fromRef = new RefName(baseRef);
+			} else {
+				fromRef = null;
+			}
+
+			System.err.printf("Importing view %s onto %s (%d/%d)\n", view.getName(), baseRef, count, views.size());
+			setHeadName(refName(view.getName())); // TODO: allow user override (Groovy?)
+
+			if(baseRef != null) {
+				View baseView = new View(view.getParentView(), view.getBaseConfiguration());
+				setLastFilesLastSortedFileList(baseView, baseView.getName(), baseFolder);
+			} else {
+				clearAllFiles();
+			}
+			lastCommit = null;
+			isResume = false;
+
+			generateAllLabelImport(view, baseFolder, domain);
+		}
+		helper.gc();
+	}
+
+	private static String labelRef(View view, Label label) {
+		return refName(view.getName() + "." + label.getName());
 	}
 
 	public static String refName(String name) {
@@ -683,6 +778,23 @@ public class GitImporter {
 			.replaceFirst("\\.lock$", "_lock")
 			// Sanitize trailing dot
 			.replaceFirst("\\.$", "_");
+	}
+
+	private void writeLabelTag(View view, Label label) {
+		if(null != lastCommit) {
+			try {
+				String tag = labelRef(view, label);
+				if (tag.length() > 0) {
+					Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
+					helper.writeReset(reset);
+				}
+				if(createCheckpoints) {
+					helper.writeCheckpoint();
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
 	}
 
 	public void generateDayByDayImport(View view, Date date, String baseFolder, String domain) {
@@ -754,6 +866,18 @@ public class GitImporter {
 			lastViewTime = viewTime;
 		}
 		helper.gc();
+	}
+
+	private String findBaseRef(View v) {
+		ViewConfiguration vc = v.getBaseConfiguration();
+		if (vc.isLabelBased()) {
+			for (Label label: v.getParentView().getActiveLabels()) {
+				if (label.getID() == vc.getLabelID()) {
+					return "refs/tags/" + labelRef(v.getParentView(), label);
+				}
+			}
+		}
+		return null;
 	}
 	
 	public void dispose() {
