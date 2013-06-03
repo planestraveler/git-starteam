@@ -58,24 +58,28 @@ These options must be set for all runs:
 
 ### Import Modes
 
-There are three primary modes of operation:
+There are four primary modes of operation:
 
 1.  Import latest revisions
 2.  Import label by label
 3.  Import day by day
+4.  Import all labels
 
-All three modes can:
+All four modes can:
 
 * Restrict the import to a specific folder using `-f <folder>` option.
-* Add new commits to an existing repository using `-R` (resume) option.
 * Dump `git fast-import` data to files for debugging using `-D <dump file prefix>` option.
 * Log their operations to stderr with the `--verbose` option.
 * Specify the path to the Git executable with the `-X <path to git>` option.
 * Specify the Git repository location with the `-W <folder>` option.
 * Automatically create the Git repository (as a bare repo) with the `-c` option.
-* Specify the Git branch name with the `-H <head>` option. Uses the view name by default.
 * Expand StarTeam keywords with the `-k` option.
 * Select the StarTeam user and password with the `-U <user>` and `--password` options.
+
+The first three modes can:
+
+* Add new commits to an existing repository using `-R` (resume) option.
+* Specify the Git branch name with the `-H <head>` option. Uses the view name by default.
 
 #### Latest Revisions Mode
 
@@ -138,8 +142,58 @@ of the last commit on the branch specified by the `-H <head>` option.
 
 The `-t` option can be used to specify the starting time directly.
 
+#### All-Views Mode
+
+The `-A` option enables all-views mode.
+
+All-views mode does a label-by-label import of every derived view from the
+root view. The root view may be passed in with the `-v <view>` option or
+will be automatically found by traversing up the view tree from the default
+project view if no `-v <view>` option is given.
+
+The `--skip-views <regex>` option may be given to prevent specific views
+from being imported. All of the views that will be imported and skipped will
+be logged at the beginning of the import run so that you may kill the import
+and make changes if the list is not what you intend.
+
+All-views is intended for one-time import of old project history. After the
+initial all-views import, one of the other modes may be used with the `-R`
+option to keep the git branches in sync with StarTeam.
+
 Examples
 --------
+
+### All-Views Mode Script
+
+        #!/bin/sh
+        
+        # kill existing run, cleanup it's temp files
+        pkill -9 -U $LOGNAME -f org.sync.MainEntry
+        sleep 1
+        rm -f /tmp/Star*.tmp
+        
+        REPO=/pub/gittrees/vlc2android.git
+        
+        rm -rf $REPO
+        git init --bare $REPO
+        
+        (
+            setsid java \
+                -classpath $(echo *.jar | tr ' ' :) \
+                -Xms2000M \
+                -Xmx2000M \
+                org.sync.MainEntry \
+              -h 192.0.1.102 -P 49203 \
+              -p Prime -A --skip-views '^xToDelete' \
+              -d gmail.com \
+              -f Src/apps/vlc2android \
+              -U UserName \
+              -W $REPO \
+              --verbose &
+        ) >vlc2android-all.log 2>&1 </dev/null
+
+### Latest Revisions Mode
+
 1.  Create `bin/.git/` folder from a StarTeam project named `Prime` with `Prime` view:
 
         cd ~/proj/git-starteam/bin/
@@ -168,7 +222,6 @@ Examples
 
         cd ~/proj/git-starteam/bin/
         rm -rf .git/
-
 
 Build with Fake-StarTeam
 ------------------------

@@ -28,6 +28,7 @@ import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Checkpoint;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Reset;
+import org.ossnoize.git.fastimport.Tag;
 import org.sync.util.LogEntry;
 import org.sync.util.SmallRef;
 import org.sync.util.StarteamFileInfo;
@@ -186,15 +187,6 @@ public abstract class RepositoryHelper {
 	}
 
 	/**
-	 * Return the MD5 sum object from the repository tracked file. 
-	 * 
-	 * @param filename The full path of the file and its name inside the repository
-	 * @param head the branch we are referring to.
-	 * @return the MD5 object generated for the file inside the repository.
-	 */
-	public abstract MD5 getMD5Of(String filename, String head) throws IOException;
-	
-	/**
 	 * Request that the stream be dumped into the following file
 	 * 
 	 * @param file The file where is to be written the fast-export
@@ -229,7 +221,7 @@ public abstract class RepositoryHelper {
 		Checkpoint checkpoint = new Checkpoint();
 		checkpoint.writeTo(fastImportStream);
 		lastCheckpointTime = System.currentTimeMillis();
-		System.err.println("Checkpoint done");
+		Log.out("Checkpoint done");
 		saveFileInformation();
 	}
 	
@@ -246,13 +238,22 @@ public abstract class RepositoryHelper {
 	
 	/**
 	 * Write a reset to the fast-import stream.
-	 * @param ref Ref to reset
-	 * @param committish Commit to reset ref to
+	 * @param reset Reset data.
 	 * @throws IOException
 	 */
 	public void writeReset(Reset reset) throws IOException {
 		OutputStream fastImportStream = getFastImportStream();
 		reset.writeTo(fastImportStream);
+	}
+
+	/**
+	 * Write a tag to the fast-import stream.
+	 * @param tag Tag to create.
+	 * @throws IOException
+	 */
+	public void writeTag(Tag tag) throws IOException {
+		OutputStream fastImportStream = getFastImportStream();
+		tag.writeTo(fastImportStream);
 	}
 	
 	public abstract java.util.Date getLastCommitOfBranch(String branchName);
