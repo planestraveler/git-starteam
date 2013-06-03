@@ -172,24 +172,25 @@ public class MainEntry {
 						}
 						importer.setVerbose(verbose);
 						importer.setCreateCheckpoints(createCheckpoints);
+						importer.setDomain(domain);
 
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
 						if(allViews && view == null) {
-							importer.generateAllViewsImport(p, null, folder, domain, skipViewsPattern);
+							importer.generateAllViewsImport(p, null, folder, skipViewsPattern);
 						} else {
 							boolean viewFound = false;
 							for(View v : p.getViews()) {
 								if(v.getName().equalsIgnoreCase(view)) {
 									viewFound = true;
 									if(allViews) {
-										importer.generateAllViewsImport(p, v, folder, domain, skipViewsPattern);
+										importer.generateAllViewsImport(p, v, folder, skipViewsPattern);
 									} else if(null != timeBased && timeBased) {
-										importer.generateDayByDayImport(v, date, folder, domain);
+										importer.generateDayByDayImport(v, date, folder);
 									} else if (null != labelBased && labelBased) {
-										importer.generateByLabelImport(v, date, folder, domain);
+										importer.generateByLabelImport(v, date, folder);
 									} else {
-										importer.generateFastImportStream(v, folder, domain);
+										importer.generateFastImportStream(v, folder);
 									}
 									break;
 								} else if(verbose) {

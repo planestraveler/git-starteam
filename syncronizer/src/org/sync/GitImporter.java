@@ -94,6 +94,8 @@ public class GitImporter {
 	private long lastViewTime;
 	// tracks which ref each tag points at
 	private Map<String, DataRef> tagMarks = new HashMap<String, DataRef>();
+	// email domain to use
+	private String domain;
 	
 	public GitImporter(Server s, Project p) {
 		server = s;
@@ -174,7 +176,11 @@ public class GitImporter {
 		AddedSortedFileList.clear();
 	}
 
-	public void generateFastImportStream(View view, String folderPath, String domain) {
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	public void generateFastImportStream(View view, String folderPath) {
 		// http://techpubs.borland.com/starteam/2009/en/sdk_documentation/api/com/starbase/starteam/CheckoutManager.html
 		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."
 		CheckoutManager cm = new CheckoutManager(view);
@@ -628,7 +634,7 @@ public class GitImporter {
 		}
 	}
 
-	public void generateByLabelImport(View view, Date date, String baseFolder, String domain) {
+	public void generateByLabelImport(View view, Date date, String baseFolder) {
 		Label[] viewLabels = view.fetchAllLabels();
 		String head = view.getName();
 		if(null != alternateHead) {
@@ -663,7 +669,7 @@ public class GitImporter {
 					setLastFilesLastSortedFileList(vc, head, baseFolder);
 				}
 				Log.log("View configuration label <" + viewLabels[i].getName() + ">");
-				generateFastImportStream(vc, baseFolder, domain);
+				generateFastImportStream(vc, baseFolder);
 				writeLabelTag(view, viewLabels[i]);
 				checkpoint();
 				vc.close();
@@ -673,7 +679,7 @@ public class GitImporter {
 		helper.gc();
 	}
 
-	public void generateAllLabelImport(View view, String baseFolder, String domain) {
+	public void generateAllLabelImport(View view, String baseFolder) {
 		Label[] viewLabels = view.fetchAllLabels();
 		Arrays.sort(viewLabels, new LabelDateComparator());
 
@@ -681,7 +687,7 @@ public class GitImporter {
 			if(viewLabels[i].isViewLabel()) {
 				View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
 				Log.logf("View configuration label <%s> (%d/%d)", viewLabels[i].getName(), i+1, viewLabels.length);
-				generateFastImportStream(vc, baseFolder, domain);
+				generateFastImportStream(vc, baseFolder);
 				writeLabelTag(view, viewLabels[i]);
 				checkpoint();
 				lastViewTime = viewLabels[i].getRevisionTime().getLongValue();
@@ -740,7 +746,7 @@ public class GitImporter {
 		return views;
 	}
 
-	public void generateAllViewsImport(Project project, View rootView, String baseFolder, String domain, String skipPattern) {
+	public void generateAllViewsImport(Project project, View rootView, String baseFolder, String skipPattern) {
 		List<View> views = getAllViews(project, rootView, skipPattern);
 		int count = 0;
 
@@ -779,7 +785,7 @@ public class GitImporter {
 			lastCommit = null;
 			isResume = false;
 
-			generateAllLabelImport(view, baseFolder, domain);
+			generateAllLabelImport(view, baseFolder);
 
 			view.close();
 		}
@@ -843,8 +849,7 @@ public class GitImporter {
 				tagDate = new Date();
 			}
 			try {
-				// TODO(phiggins): make domain an instance variable and replace @cie.com with it
-				Tag tag = new Tag(tagName, ref, "StarTeam", "noreply@cie.com", tagDate, label.getDescription());
+				Tag tag = new Tag(tagName, ref, "StarTeam", "noreply@" + domain, tagDate, label.getDescription());
 				helper.writeTag(tag);
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -862,7 +867,7 @@ public class GitImporter {
 		}
 	}
 
-	public void generateDayByDayImport(View view, Date date, String baseFolder, String domain) {
+	public void generateDayByDayImport(View view, Date date, String baseFolder) {
 		View vc;
 		long hour = 3600000L; // mSec
 		long day = 24 * hour; // 86400000 mSec
@@ -924,7 +929,7 @@ public class GitImporter {
 				viewTime = timeIncrement.getTimeInMillis();
 			}
 			Log.log("View Configuration Time: " + timeIncrement.getTime());
-			generateFastImportStream(vc, baseFolder, domain);
+			generateFastImportStream(vc, baseFolder);
 			vc.close();
 			lastViewTime = viewTime;
 		}
