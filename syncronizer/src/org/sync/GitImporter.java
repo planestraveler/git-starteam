@@ -239,7 +239,9 @@ public class GitImporter {
 					Integer revision = helper.getRegisteredFileVersion(head, path);
 					if(null != revision && revision != f.getContentVersion()) { 
 						helper.updateFileVersion(head, path, f.getContentVersion());
-						System.err.println("file was updated " + revision + " => " + f.getContentVersion() + ": " + path);
+						if(verbose) {
+							System.err.println("file was updated " + revision + " => " + f.getContentVersion() + ": " + path);
+						}
 					}
 					
 					FileModification fm = new FileModification(fileToStage);
