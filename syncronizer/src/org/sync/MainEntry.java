@@ -57,6 +57,7 @@ public class MainEntry {
 		CmdLineParser.Option selectWorkingFolder = parser.addStringOption('W', "working-folder");
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
 		CmdLineParser.Option isCheckpoint = parser.addBooleanOption("checkpoint");
+		CmdLineParser.Option selectSkipViewsPattern = parser.addStringOption("skip-views");
 
 		try {
 			parser.parse(args);
@@ -76,6 +77,7 @@ public class MainEntry {
 		String view = (String) parser.getOptionValue(selectView);
 		Boolean allViewsFlag = (Boolean) parser.getOptionValue(isAllViews);
 		boolean allViews = allViewsFlag != null && allViewsFlag;
+		String skipViewsPattern = (String) parser.getOptionValue(selectSkipViewsPattern);
 		String time = (String) parser.getOptionValue(selectTime);
 		Boolean timeBased = (Boolean) parser.getOptionValue(selectTimeBasedImport);
 		Boolean labelBased = (Boolean) parser.getOptionValue(selectLabelBasedImport);
@@ -174,7 +176,7 @@ public class MainEntry {
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
 						if(allViews) {
-							importer.generateAllViewsImport(p, folder, domain);
+							importer.generateAllViewsImport(p, folder, domain, skipViewsPattern);
 						} else {
 							boolean viewFound = false;
 							for(View v : p.getViews()) {
@@ -233,6 +235,7 @@ public class MainEntry {
 		System.out.println("[--password]\t\tStarTeam password");
 		System.out.println("[-D <dump file prefix>]\tDump fast-import data to files");
 		System.out.println("[--checkpoint]\t\tCreate git fast-import checkpoints after each label");
+		System.out.println("[--skip-views <regex>]\t\tSkip views matching regex when using -A");
 		System.out.println("[--verbose]\t\tVerbose output");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		

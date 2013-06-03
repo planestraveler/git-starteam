@@ -691,7 +691,12 @@ public class GitImporter {
 		}
 	}
 
-	private List<View> getAllViews(Project project) {
+	private List<View> getAllViews(Project project, String skipPatternStr) {
+		Pattern skipPattern = null;
+		if (skipPatternStr != null) {
+			skipPattern = Pattern.compile(skipPatternStr);
+		}
+
 		View v = project.getDefaultView();
 		while (v.getParentView() != null) {
 			v = v.getParentView();
@@ -717,7 +722,11 @@ public class GitImporter {
 			try {
 				viewName = view.getName();
 				baseConfig = view.getBaseConfiguration();
-				views.add(view);
+				if (skipPattern != null && skipPattern.matcher(viewName).find()) {
+					Log.log("Skipping view " + viewName + ", base " + getBaseTag(view));
+				} else {
+					views.add(view);
+				}
 			} catch (Exception e) {
 				Log.log("Skipping view " + viewName + ": " + e);
 			}
@@ -725,16 +734,16 @@ public class GitImporter {
 		return views;
 	}
 
-	public void generateAllViewsImport(Project project, String baseFolder, String domain) {
-		List<View> views = getAllViews(project);
+	public void generateAllViewsImport(Project project, String baseFolder, String domain, String skipPattern) {
+		List<View> views = getAllViews(project, skipPattern);
 		int count = 0;
 
 		for (View view: views) {
 			String tag = getBaseTag(view);
+			Log.log("Will import view " + view.getName() + " onto " + tag);
 			if (tag != null) {
 				// Must have the mark for each tag that is the base of a branch
 				// so that we can create a commit from it.
-				Log.log("Will save mark for tag " + tag);
 				tagMarks.put(tag, null);
 			}
 		}
