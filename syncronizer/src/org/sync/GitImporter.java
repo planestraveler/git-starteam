@@ -19,21 +19,28 @@ package org.sync;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
+import org.ossnoize.git.fastimport.DataRef;
 import org.ossnoize.git.fastimport.FileDelete;
 import org.ossnoize.git.fastimport.FileModification;
 import org.ossnoize.git.fastimport.FileOperation;
-import org.ossnoize.git.fastimport.Reset;
+import org.ossnoize.git.fastimport.Tag;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.util.CommitInformation;
@@ -75,6 +82,7 @@ public class GitImporter {
 	private OutputStream exportStream;
 	private String alternateHead = null;
 	private boolean isResume = false;
+	private DataRef fromRef = null;
 	private boolean verbose = false;
 	private boolean createCheckpoints = false;
 	private RepositoryHelper helper;
@@ -84,6 +92,10 @@ public class GitImporter {
 	private Set<String> lastFiles = new HashSet<String>();
 	// Use this to find the renamed files.
 	private long lastViewTime;
+	// tracks which ref each tag points at
+	private Map<String, DataRef> tagMarks = new HashMap<String, DataRef>();
+	// email domain to use
+	private String domain;
 	
 	public GitImporter(Server s, Project p) {
 		server = s;
@@ -95,10 +107,21 @@ public class GitImporter {
 		return lastModifiedTime;
 	}
 
-	public void setFolder(View view, String folderPath) {
-		if(null != folderPath) {
-			recursiveFolderPopulation(view.getRootFolder(), folderPath);
-			folderNameLength = folderPath.length();
+	public void setFolder(View view, String folderPattern) {
+		if(null != folderPattern) {
+			folder = findFirstFolder(view.getRootFolder(), folderPattern);
+			if (folder != null) {
+				String path = this.folder.getFolderHierarchy();
+				path = path.replace('\\', '/');
+				int indexOfFirstPath = path.indexOf('/');
+				path = path.substring(indexOfFirstPath + 1);
+				folderNameLength = path.length();
+				if(verbose) {
+					Log.log("Folder: " + path);
+				}
+			} else {
+				folderNameLength = 0;
+			}
 		} else {
 			folder = view.getRootFolder();
 			folderNameLength = 0;
@@ -123,6 +146,15 @@ public class GitImporter {
 		}
 	}
 
+	public void clearAllFiles() {
+		files.clear();
+		deletedFiles.clear();
+		sortedFileList.clear();
+		lastFiles.clear();
+		lastSortedFileList.clear();
+		AddedSortedFileList.clear();
+	}
+
 	public void setLastFilesLastSortedFileList(View view, String head, String folderPath) {
 		folder = null;
 		setFolder(view, folderPath);
@@ -144,7 +176,11 @@ public class GitImporter {
 		AddedSortedFileList.clear();
 	}
 
-	public void generateFastImportStream(View view, String folderPath, String domain) {
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	public void generateFastImportStream(View view, String folderPath) {
 		// http://techpubs.borland.com/starteam/2009/en/sdk_documentation/api/com/starbase/starteam/CheckoutManager.html
 		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."
 		CheckoutManager cm = new CheckoutManager(view);
@@ -157,7 +193,7 @@ public class GitImporter {
 		setFolder(view, folderPath);
 		if(null == folder) {
 			if(folderPath != null) {
-				System.err.println("Folder not found: " + folderPath);
+				Log.log("Folder not found: " + folderPath);
 			}
 			return;
 		}
@@ -168,7 +204,7 @@ public class GitImporter {
 		}
 		
 		if(verbose) {
-			System.out.println("Populating files");
+			Log.out("Populating files");
 		}
 		files.clear();
 		deletedFiles.clear();
@@ -184,6 +220,7 @@ public class GitImporter {
 			propNames.MODIFIED_TIME,
 			propNames.MODIFIED_USER_ID,
 			propNames.EXCLUSIVE_LOCKER,
+			propNames.NON_EXCLUSIVE_LOCKERS,
 			propNames.FILE_ENCODING,
 			propNames.FILE_EOL_CHARACTER,
 			propNames.FILE_EXECUTABLE,
@@ -197,13 +234,13 @@ public class GitImporter {
 		recoverDeleteInformation(deletedFiles, head, view);
 
 		if(verbose) {
-			System.out.println("Creating commits");
+			Log.out("Creating commits");
 			// this is helpful for debugging out-of-order commits
 			if(!AddedSortedFileList.isEmpty()) {
 				CommitInformation earliest = AddedSortedFileList.firstKey();
 				CommitInformation latest = AddedSortedFileList.lastKey();
-				System.err.println("Earliest file: " + earliest.getPath() + " @ " + new java.util.Date(earliest.getTime()));
-				System.err.println("Latest file: " + latest.getPath() + " @ " + new java.util.Date(latest.getTime()));
+				Log.log("Earliest file: " + earliest.getPath() + " @ " + new java.util.Date(earliest.getTime()));
+				Log.log("Latest file: " + latest.getPath() + " @ " + new java.util.Date(latest.getTime()));
 			}
 		}
 		exportStream = helper.getFastImportStream();
@@ -222,14 +259,14 @@ public class GitImporter {
 					fo.setPath(current.getPath());
 					helper.unregisterFileId(head, current.getPath());
 					if(verbose) {
-						System.err.println("Unregistered " + current.getPath());
+						Log.log("Unregistered " + current.getPath());
 					}
 				} else {
 					java.io.File aFile = TempFileManager.getInstance().createTempFile("StarteamFile", ".tmp");
 					try {
 						cm.checkoutTo(f, aFile);
 					} catch (Exception ex) {
-						System.err.printf("Failed to checkout %s: %s\n", path, ex);
+						Log.logf("Failed to checkout %s: %s", path, ex);
 						continue;
 					}
 					Blob fileToStage = new Blob(new Data(aFile));
@@ -240,7 +277,7 @@ public class GitImporter {
 					if(null != revision && revision != f.getContentVersion()) { 
 						helper.updateFileVersion(head, path, f.getContentVersion());
 						if(verbose) {
-							System.err.println("file was updated " + revision + " => " + f.getContentVersion() + ": " + path);
+						    Log.log("file was updated " + revision + " => " + f.getContentVersion() + ": " + path);
 						}
 					}
 					
@@ -265,6 +302,8 @@ public class GitImporter {
 					if(null == lastCommit) {
 						if(isResume) {
 							commit.resumeOnTopOfRef();
+						} else if(null != fromRef) {
+							commit.setFromRef(fromRef);
 						}
 					} else {
 						helper.writeCommit(lastCommit);
@@ -277,7 +316,7 @@ public class GitImporter {
 				}
 			} catch (IOException io) {
 				io.printStackTrace();
-				System.err.println("Git outputstream just crash unexpectedly. Stopping process");
+				Log.log("Git outputstream just crash unexpectedly. Stopping process");
 				System.exit(-1);
 			} catch (InvalidPathException e1) {
 				e1.printStackTrace();
@@ -287,7 +326,7 @@ public class GitImporter {
 		// TODO: delete event. (as known from now)
 		if(deletedFiles.size() > 0) {
 			try {
-				System.err.println("Janitor was needed for cleanup");
+				Log.log("Janitor was needed for cleanup");
 				java.util.Date janitorTime;
 				if(view.getConfiguration().isTimeBased()) {
 					janitorTime = new java.util.Date(view.getConfiguration().getTime().getLongValue());
@@ -302,7 +341,7 @@ public class GitImporter {
 					if(labelTime != Long.MIN_VALUE) {
 						janitorTime = new java.util.Date(labelTime);
 					} else {
-						System.err.println("Could not figure out what is the time of the label id " + view.getConfiguration().getLabelID());
+						Log.log("Could not figure out what is the time of the label id " + view.getConfiguration().getLabelID());
 						janitorTime = new java.util.Date();
 					}
 				} else {
@@ -316,6 +355,8 @@ public class GitImporter {
 				if(null == lastCommit) {
 					if(isResume) {
 						commit.resumeOnTopOfRef();
+					} else if(null != fromRef) {
+						commit.setFromRef(fromRef);
 					}
 				} else {
 					helper.writeCommit(lastCommit);
@@ -347,10 +388,10 @@ public class GitImporter {
 			}
 		} else {
 			if(AddedSortedFileList.size() > 0) {
-				System.err.println("There was no new revision in the starteam view.");
-				System.err.println("All the files in the repository are at their latest version");
+				Log.log("There was no new revision in the starteam view.");
+				Log.log("All the files in the repository are at their latest version");
 			} else {
-//				System.err.println("The starteam view specified was empty.");
+//				Log.log("The starteam view specified was empty.");
 			}
 		}
 
@@ -403,7 +444,7 @@ public class GitImporter {
 						Item renameEventItem = renameFinder.findEventItem(view, path, pathname(item), item, lastViewTime);
 						if(null != renameEventItem) {
 							if(verbose) {
-								System.err.printf("Renamed %s -> %s at %s\n",
+								Log.logf("Renamed %s -> %s at %s",
 												  path, pathname(item),
 												  renameEventItem.getModifiedTime());
 							}
@@ -413,7 +454,7 @@ public class GitImporter {
 															   path);
 						} else {
 							if(verbose) {
-								System.err.printf("No rename event found: %s -> %s\n", path, pathname(item));
+								Log.logf("No rename event found: %s -> %s", path, pathname(item));
 							}
 							// Not sure how this happens, but fill in with the
 							// only information we have: the last view time
@@ -438,7 +479,7 @@ public class GitImporter {
 					}
 				}
 			} else {
-				System.err.println("Never seen the file " + path + " in " + head);
+				Log.log("Never seen the file " + path + " in " + head);
 			}
 		}
 
@@ -495,32 +536,45 @@ public class GitImporter {
 		createCheckpoints = b;
 	}
 
-	private void recursiveFolderPopulation(Folder f, String folderPath) {
-		for(Folder subfolder : f.getSubFolders()) {
-			if(null != folder) {
-				break;
-			}
-			String path = subfolder.getFolderHierarchy();
+	private Folder findFirstFolder(Folder f, String folderPattern) {
+		//if(verbose) {
+		//	Log.log("Looking for folder regex: " + folderPattern);
+		//}
+		Pattern pattern = Pattern.compile(folderPattern);
+
+		// Bread-first search queue
+		Deque<Folder> deque = new ArrayDeque<Folder>();
+		deque.addLast(f);
+		while(!deque.isEmpty()) {
+			Folder folder = deque.removeFirst();
+			String path = folder.getFolderHierarchy();
 			path = path.replace('\\', '/');
 			int indexOfFirstPath = path.indexOf('/');
+
 			path = path.substring(indexOfFirstPath + 1);
-			if(folderPath.equalsIgnoreCase(path)) {
-				folder = subfolder;
-				break;
+			if(pattern.matcher(path).find()) {
+				return folder;
 			}
-			if(verbose) {
-				System.err.println("Not folder: " + path);
+			//if(verbose) {
+			//	Log.log("Not folder: " + path);
+			//}
+			for(Folder subfolder : folder.getSubFolders()) {
+				deque.addLast(subfolder);
 			}
-			recursiveFolderPopulation(subfolder, folderPath);
 		}
+		return null;
 	}
 
 	private String pathname(File f) {
 		String path = f.getParentFolderHierarchy() + f.getName();
 		path = path.replace('\\', '/');
-		//path = path.substring(1);
 		int indexOfFirstPath = path.indexOf('/');
-		path = path.substring(indexOfFirstPath + 1 + folderNameLength);
+		int subindex = indexOfFirstPath + 1 + folderNameLength;
+		try {
+			path = path.substring(subindex);
+		} catch (RuntimeException e) {
+			Log.logf("Invalid subindex: %d + 1 + %d = %d, %s", indexOfFirstPath, folderNameLength, subindex, path);
+		}
 		return path;
 	}
 
@@ -545,7 +599,7 @@ public class GitImporter {
 				}
 				files.add(path);
 				//if(verbose) {
-				//	System.err.println("Added file " + path);
+				//	Log.log("Added file " + path);
 				//}
 				String comment = i.getComment();
 				if(0 == comment.length()) {
@@ -582,7 +636,7 @@ public class GitImporter {
 		}
 	}
 
-	public void generateByLabelImport(View view, Date date, String baseFolder, String domain) {
+	public void generateByLabelImport(View view, Date date, String baseFolder) {
 		Label[] viewLabels = view.fetchAllLabels();
 		String head = view.getName();
 		if(null != alternateHead) {
@@ -598,13 +652,13 @@ public class GitImporter {
 			}
 			for(int i=0; i < viewLabels.length; ++i) {
 				if(viewLabels[i].getRevisionTime().getLongValue() > lastCommit.getTime()) {
-					System.err.println("Importing from label <" + viewLabels[i].getName() + ">");
+					Log.log("Importing from label <" + viewLabels[i].getName() + ">");
 					fromLabel = i;
 					break;
 				}
 			}
 			if(-1 == fromLabel) {
-				System.err.println("No newer label are more recent then last commit made at " + lastCommit);
+				Log.log("No newer label are more recent then last commit made at " + lastCommit);
 				return;
 			}
 		}
@@ -616,28 +670,132 @@ public class GitImporter {
 				if(i == fromLabel && isResume) {
 					setLastFilesLastSortedFileList(vc, head, baseFolder);
 				}
-				System.err.println("View configuration label <" + viewLabels[i].getName() + ">");
-				generateFastImportStream(vc, baseFolder, domain);
-				if(null != lastCommit) {
-					try {
-						String tag = refName(viewLabels[i].getName());
-						if (tag.length() > 0) {
-							Reset reset = new Reset("refs/tags/" + tag, lastCommit.getMarkID());
-							helper.writeReset(reset);
-						}
-						if(createCheckpoints) {
-							helper.writeCheckpoint();
-						}
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-				}
-				vc.discardFolders();
-				vc.discard();
+				Log.log("View configuration label <" + viewLabels[i].getName() + ">");
+				generateFastImportStream(vc, baseFolder);
+				writeLabelTag(view, viewLabels[i]);
+				checkpoint();
+				vc.close();
 				lastViewTime = viewTime;
 			}
 		}
 		helper.gc();
+	}
+
+	public void generateAllLabelImport(View view, String baseFolder) {
+		Label[] viewLabels = view.fetchAllLabels();
+		Arrays.sort(viewLabels, new LabelDateComparator());
+
+		for(int i=0; i<viewLabels.length; i++) {
+			if(viewLabels[i].isViewLabel()) {
+				View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
+				Log.logf("View configuration label <%s> (%d/%d)", viewLabels[i].getName(), i+1, viewLabels.length);
+				generateFastImportStream(vc, baseFolder);
+				writeLabelTag(view, viewLabels[i]);
+				checkpoint();
+				lastViewTime = viewLabels[i].getRevisionTime().getLongValue();
+
+				vc.close();
+			}
+		}
+	}
+
+	private List<View> getAllViews(Project project, View rootView, String skipPatternStr) {
+		Pattern skipPattern = null;
+		if (skipPatternStr != null) {
+			skipPattern = Pattern.compile(skipPatternStr);
+		}
+
+		View v = rootView;
+		if (v == null) {
+			v = project.getDefaultView();
+			while (v.getParentView() != null) {
+				v = v.getParentView();
+			}
+		}
+
+		List<View> views = new ArrayList<View>();
+
+		// add them in bread-first order
+		Deque<View> deque = new ArrayDeque<View>();
+		deque.addLast(v);
+		while(!deque.isEmpty()) {
+			View view = deque.removeFirst();
+			try {
+				for (View derivedView: view.getDerivedViews()) {
+					deque.addLast(derivedView);
+				}
+			} catch (RuntimeException e) {
+				Log.log("Could not get derived views for " + view.getName() + ": " + e);
+			}
+
+			String viewName = null;
+			ViewConfiguration baseConfig = null;
+			try {
+				String tag = getBaseTag(view);
+				if (tag == null && view != rootView) {
+					Log.log("Skipping non-rooted view " + view.getName());
+					continue;
+				}
+				if (skipPattern != null && skipPattern.matcher(view.getName()).find()) {
+					Log.log("Skipping view " + view.getName() + ", base " + tag);
+					continue;
+				}
+				views.add(view);
+			} catch (Exception e) {
+				Log.log("Skipping view " + viewName + ": " + e);
+			}
+		}
+		return views;
+	}
+
+	public void generateAllViewsImport(Project project, View rootView, String baseFolder, String skipPattern) {
+		List<View> views = getAllViews(project, rootView, skipPattern);
+		int count = 0;
+
+		for (View view: views) {
+			String tag = getBaseTag(view);
+			Log.log("Will import view " + view.getName() + " onto " + tag);
+			if (tag != null) {
+				// Must have the mark for each tag that is the base of a branch
+				// so that we can create a commit from it.
+				tagMarks.put(tag, null);
+			}
+		}
+
+		for (View view: views) {
+			count++;
+			DataRef baseRef = null;
+			try {
+				baseRef = getBaseRef(view);
+			} catch (RuntimeException e) {
+				Log.log("Could not get base ref for " + view.getName() + ": " + e);
+				continue;
+			}
+
+			fromRef = baseRef;
+
+			Log.logf("Importing view %s onto %s (%d/%d)", view.getName(), baseRef, count, views.size());
+			setHeadName(refName(view.getName())); // TODO: allow user override (Groovy?)
+
+			if(baseRef != null) {
+				View baseView = new View(view.getParentView(), view.getBaseConfiguration());
+				setLastFilesLastSortedFileList(baseView, baseView.getName(), baseFolder);
+				baseView.close();
+			} else {
+				clearAllFiles();
+			}
+			lastCommit = null;
+			isResume = false;
+
+			generateAllLabelImport(view, baseFolder);
+
+			view.close();
+		}
+		helper.gc();
+	}
+
+	private static String labelRef(View view, Label label) {
+		return refName(view.getName() + "." + label.getName());
 	}
 
 	public static String refName(String name) {
@@ -663,7 +821,55 @@ public class GitImporter {
 			.replaceFirst("\\.$", "_");
 	}
 
-	public void generateDayByDayImport(View view, Date date, String baseFolder, String domain) {
+	private void writeLabelTag(View view, Label label) {
+		DataRef ref = null;
+		if(lastCommit != null) {
+			ref = lastCommit.getMarkID();
+		} else if(fromRef != null) {
+			ref = fromRef;
+		}
+
+		if (ref == null) {
+			Log.log("Not tagging label " + label.getName() + " because lastCommit and fromRef are null");
+			return;
+		}
+
+		String tagName = labelRef(view, label);
+		if (tagName.length() > 0) {
+			// Only store the tags on which branches are based to save memory.
+			if (tagMarks.containsKey(tagName)) {
+				// Replace the null value with the ref.
+				tagMarks.put(tagName, ref);
+			}
+			Date tagDate = null;
+			if (label.isViewLabel()) {
+				tagDate = new Date(label.getTime().getLongValue());
+			} else if (label.isRevisionLabel()) {
+				tagDate = new Date(label.getRevisionTime().getLongValue());
+			} else {
+				Log.log("No date for label, using today: " + label.getName());
+				tagDate = new Date();
+			}
+			try {
+				Tag tag = new Tag(tagName, ref, "StarTeam", "noreply@" + domain, tagDate, label.getDescription());
+				helper.writeTag(tag);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+
+	private void checkpoint() {
+		if(createCheckpoints) {
+			try {
+				helper.writeCheckpoint();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void generateDayByDayImport(View view, Date date, String baseFolder) {
 		View vc;
 		long hour = 3600000L; // mSec
 		long day = 24 * hour; // 86400000 mSec
@@ -678,14 +884,14 @@ public class GitImporter {
 			if(null != lastCommit) {
 				firstTime = lastCommit.getTime();
 			} else {
-				System.err.println("Cannot resume an import in a non existing branch");
+				Log.log("Cannot resume an import in a non existing branch");
 				return;
 			}
 		}
 		if(firstTime < view.getCreatedTime().getLongValue()) {
 			firstTime = view.getCreatedTime().getLongValue();
 		}
-		System.err.println("View Created Time: " + new java.util.Date(firstTime));
+		Log.log("View Created Time: " + new java.util.Date(firstTime));
 		if (null == date){
 			if(isResume) {
 				// -R is for branch view
@@ -693,7 +899,7 @@ public class GitImporter {
 				viewTime = firstTime + 2000;
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(viewTime)));
 				setLastFilesLastSortedFileList(vc, head, baseFolder);
-				vc.discard();
+				vc.close();
 			} 
 			Calendar time = Calendar.getInstance();
 			time.setTimeInMillis(firstTime);
@@ -714,7 +920,7 @@ public class GitImporter {
 			firstTime = view.getCreatedTime().getLongValue();
 		}
 
-		System.err.println("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
+		Log.log("Commit from " + new java.util.Date(firstTime) + " to " + new java.util.Date(lastTime));
 		Calendar timeIncrement = Calendar.getInstance();
 		timeIncrement.setTimeInMillis(firstTime);
 		for(;timeIncrement.getTimeInMillis() < lastTime; timeIncrement.add(Calendar.DAY_OF_YEAR, 1)) {
@@ -724,14 +930,60 @@ public class GitImporter {
 				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(timeIncrement.getTimeInMillis())));
 				viewTime = timeIncrement.getTimeInMillis();
 			}
-			System.err.println("View Configuration Time: " + timeIncrement.getTime());
-			generateFastImportStream(vc, baseFolder, domain);
-			vc.discardFolders();
-			vc.discard();
-			vc = null;
+			Log.log("View Configuration Time: " + timeIncrement.getTime());
+			generateFastImportStream(vc, baseFolder);
+			vc.close();
 			lastViewTime = viewTime;
 		}
 		helper.gc();
+	}
+
+	private String getBaseTag(View v) {
+		ViewConfiguration vc = v.getBaseConfiguration();
+		if (vc.isLabelBased()) {
+			for (Label label: v.getParentView().getActiveLabels()) {
+				if (label.getID() == vc.getLabelID()) {
+					return labelRef(v.getParentView(), label);
+				}
+			}
+		} else if (vc.isTimeBased()) {
+			//Log.log("View " + v.getName() + " is time-based");
+			long baseTime = vc.getTime().getLongValue();
+
+			// Find label nearest to but before baseTime.
+			Label nearest = null;
+			long nearestTime = 0;
+			for (Label label: v.getParentView().getActiveLabels()) {
+				if (label.isViewLabel()) {
+					long labelTime = label.getTime().getLongValue();
+					if (labelTime < baseTime && labelTime > nearestTime) {
+						nearest = label;
+						nearestTime = label.getTime().getLongValue();
+					}
+				}
+			}
+
+			if (nearest != null) {
+				Log.logf("Using %s.%s at %s for view at %s",
+						 v.getParentView().getName(), nearest.getName(), nearest.getTime(), vc.getTime());
+				return labelRef(v.getParentView(), nearest);
+			}
+		} else if (vc.isPromotionStateBased()) {
+			Log.log("View " + v.getName() + " is promotion-state based, not supported!");
+		} else if (vc.isTip()) {
+			//Log.log("View " + v.getName() + " is tip");
+		} else {
+			Log.log("View " + v.getName() + " is ??? based");
+		}
+		return null;
+	}
+
+	private DataRef getBaseRef(View v) {
+		String tag = getBaseTag(v);
+		if (tag == null) {
+			return null;
+		}
+		return tagMarks.get(tag);
 	}
 	
 	public void dispose() {

@@ -26,6 +26,7 @@ public class Commit implements Markable {
 	private Data comment;
 	private MarkID from;
 	private MarkID merge;
+	private DataRef fromRef;
 	private List<FileOperation> listOfOperation;
 	private Date commitDate;
 	private boolean resumeFastImport;
@@ -55,6 +56,10 @@ public class Commit implements Markable {
 		} else {
 			from = null;
 		}
+	}
+
+	public void setFromRef(DataRef ref) {
+		fromRef = ref;
 	}
 	
 	public void setComment(String message) throws IOException {
@@ -95,7 +100,11 @@ public class Commit implements Markable {
 				 .append('\n');
 		out.write(commitMsg.toString().getBytes());
 		comment.writeTo(out);
-		if(null != from) {
+		if(null != fromRef) {
+			out.write(FROM_SP.getBytes());
+			fromRef.writeTo(out);
+			out.write('\n');
+		} else if(null != from) {
 			out.write(FROM_SP.getBytes());
 			from.writeTo(out);
 			out.write('\n');
