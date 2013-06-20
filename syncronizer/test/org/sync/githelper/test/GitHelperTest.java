@@ -86,17 +86,6 @@ public class GitHelperTest {
 		assertFalse(test.isSpecialFile("aFile.txt"));
 		assertFalse(test.isSpecialFile("some/random/directory/file.gitignore"));
 	}
-	
-	@Test(timeout=1000)
-	public void testGetMD5Of() throws IOException {
-		assertEquals(new MD5("a7e10f59183aa3c456e9059fb7036c9b"), test.getMD5Of("testfiles/ipsum1.txt", "master"));
-		assertEquals(new MD5("de7dbcbebe6373006d292240cee4297e"), test.getMD5Of("testfiles/ipsum2.txt", "master"));
-		assertEquals(new MD5("da26078a58263879cb5c55331ae52385"), test.getMD5Of("testfiles/ipsum3.txt", "master"));
-		assertEquals(new MD5("a7e10f59183aa3c456e9059fb7036c9b"), test.getMD5Of("testfiles/ipsum1.txt", "master"));
-		assertEquals(new MD5("de7dbcbebe6373006d292240cee4297e"), test.getMD5Of("testfiles/ipsum2.txt", "master"));
-		assertEquals(new MD5("da26078a58263879cb5c55331ae52385"), test.getMD5Of("testfiles/ipsum3.txt", "master"));
-		assertEquals(new MD5("00000000000000000000000000000000"), test.getMD5Of("random/file/that/does/not/exists.txt", "master"));
-	}
 
 	@Test
 	public void testGC() {
