@@ -55,7 +55,6 @@ import com.starbase.starteam.Project;
 import com.starbase.starteam.PropertyNames;
 import com.starbase.starteam.RecycleBin;
 import com.starbase.starteam.Server;
-import com.starbase.starteam.StarTeamFinder;
 import com.starbase.starteam.Status;
 import com.starbase.starteam.Type;
 import com.starbase.starteam.View;
