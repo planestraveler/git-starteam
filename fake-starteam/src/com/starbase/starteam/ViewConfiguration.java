@@ -26,7 +26,7 @@ public class ViewConfiguration {
 	private int labelID;
 	private boolean labelBased;
 
-	private ViewConfiguration() {
+	protected ViewConfiguration() {
 		tip = false;
 		timeBased = false;
 		labelBased = false;
@@ -50,17 +50,17 @@ public class ViewConfiguration {
 		return ret;
 	}
 
-	private void setLabelId(int id) {
+	protected void setLabelId(int id) {
 		labelID = id;
 		labelBased = true;
 	}
 
-	private void setTime(OLEDate oleDate) {
+	protected void setTime(OLEDate oleDate) {
 		time = oleDate;
 		timeBased = true;
 	}
 
-	private void setTip(boolean b) {
+	protected void setTip(boolean b) {
 		tip = b;
 	}
 	
@@ -86,6 +86,11 @@ public class ViewConfiguration {
 		if(!isLabelBased())
 			throw new IllegalStateException("Cannot get Label ID of configuration since it is not label based");
 		return labelID;
+	}
+
+	public boolean isPromotionStateBased() {
+		// TODO Implement other kind of view once promotion has been figured out.
+		return false;
 	}
 
 }
