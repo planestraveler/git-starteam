@@ -22,11 +22,15 @@ public class PropertyNames {
 	public final java.lang.String OBJECT_ID = "Object ID";
 	public final java.lang.String PARENT_OBJECT_ID = "Parent ID";
 	public final java.lang.String ROOT_OBJECT_ID = "Root Object ID";
+	public final java.lang.String EXCLUSIVE_LOCKER = "Locked By";
+	public final java.lang.String NON_EXCLUSIVE_LOCKERS = "Non-Exclusive Lockers";
 	public final java.lang.String FILE_DESCRIPTION = "Description";
 	public final java.lang.String FILE_NAME = "Name";
 	public final java.lang.String FILE_MD5_CHECKSUM = "MD5 Checksum";
 	public final java.lang.String FILE_SIZE = "Size";
 	public final java.lang.String FILE_ENCODING = "File Type";
+	public final java.lang.String FILE_EOL_CHARACTER = "EOL Character";
+	public final java.lang.String FILE_EXECUTABLE = "Executable";
 	public final java.lang.String FOLDER_PATH = "Folder Path";
 	public final java.lang.String REVISION_NUMBER = "Version";
 	public final java.lang.String FILE_CONTENT_REVISION = "Content Revision";

@@ -31,6 +31,7 @@ public class Server {
 	private User loggedUser;
 	private PropertyNames propertyNames = new PropertyNames();
 	private PropertyEnums propertyEnums = new PropertyEnums();
+	private TypeNames typeNames = new TypeNames();
 
 	public Server(String address, int port) {
 		Address = address;
@@ -123,4 +124,8 @@ public class Server {
     public void setAutoReconnectWait(int nSeconds) {
         // nothing to do
     }
+
+	public TypeNames getTypeNames() {
+		return typeNames;
+	}
 }

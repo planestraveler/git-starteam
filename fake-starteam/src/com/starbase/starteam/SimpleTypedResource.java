@@ -23,6 +23,11 @@ public class SimpleTypedResource extends TypedResource implements Cloneable {
 		return super.getTypeNames();
 	}
 	
+	@Override
+	public PropertyNames getPropertyNames() {
+		return super.getPropertyNames();
+	}
+	
 	public int getID() {
 		return 0;
 	}

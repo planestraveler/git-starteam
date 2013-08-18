@@ -362,4 +362,9 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	protected void loadProperties() {
 	}
+	
+	@Override
+	public PropertyNames getPropertyNames() {
+		return propertyKeys;
+	}
 }
