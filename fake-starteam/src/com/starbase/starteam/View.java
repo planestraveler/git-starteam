@@ -132,6 +132,12 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 		return new RecycleBin(this);
 	}
 	
+	public View[] getDerivedViews() {
+		if(null != otherView)
+			 return otherView.getDerivedViews();
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
 	public ViewConfiguration getConfiguration() {
 		return configuration;
 	}
@@ -170,5 +176,8 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	
 	public Label[] fetchAllLabels() {
 		return Label.getLabelList(getID());
+	}
+
+	public void close() {
 	}
 }

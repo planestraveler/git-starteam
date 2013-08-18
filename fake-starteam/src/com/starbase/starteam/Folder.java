@@ -306,4 +306,12 @@ public class Folder extends Item {
 	public Type getType() {
 		return new Type(getTypeNames().FOLDER, view.getServer());
 	}
+
+	public void populateNow(String file, String[] populateProps, int i) {
+		// Nothing to do specially as in fake-starteam, most of the stuff are not on a remote server far away.
+	}
+
+	public void discardItems(String file, int i) {
+		// Nothing special to do unless we have some memory retension issue.
+	}
 }

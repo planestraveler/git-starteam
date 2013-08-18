@@ -132,6 +132,11 @@ public class SerializableView extends View implements Serializable {
 	public int getCreatedBy() {
 		return createdBy;
 	}
+	
+	@Override
+	public View[] getDerivedViews() {
+		return new View[0];
+	}
 
 	@Override
 	public Folder getRootFolder() {

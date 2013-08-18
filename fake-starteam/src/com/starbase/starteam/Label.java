@@ -248,4 +248,9 @@ public class Label extends CacheRef {
 		//TODO: create revision label in the fake starteam. We have no goal for simple revision but maybe later.
 		return true;
 	}
+
+	public boolean isRevisionLabel() {
+		// We do not support Revision label in the fake-starteam. See comment about isViewLabel();
+		return false;
+	}
 }
