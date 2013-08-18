@@ -141,6 +141,10 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	public ViewConfiguration getConfiguration() {
 		return configuration;
 	}
+
+	public ViewConfiguration getBaseConfiguration() {
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
 	
 	public void discard() {
 	}
@@ -175,9 +179,14 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	}
 	
 	public Label[] fetchAllLabels() {
-		return Label.getLabelList(getID());
+		return Label.getLabelList(getID(), false);
+	}
+	
+	public Label[] getActiveLabels() {
+		return Label.getLabelList(getID(), true);
 	}
 
 	public void close() {
 	}
+
 }

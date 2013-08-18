@@ -47,6 +47,7 @@ public class Label extends CacheRef {
 	private final String PROJECT_ID = "project id";
 	private final String BUILD_LABEL = "build label";
 	private final String FROZEN = "frozen";
+	private final String DELETED = "deleted";
 	
 	private int id;
 	private Map<Integer, Integer> itemList = new HashMap<Integer,Integer>();
@@ -59,6 +60,7 @@ public class Label extends CacheRef {
 	private boolean isNew;
 	private boolean buildLabel;
 	private boolean frozen;
+	private boolean deleted;
 
 	protected Label(View view, String name, String description, OLEDate time, boolean buildLabel, boolean frozen) {
 		isNew = true;
@@ -80,6 +82,7 @@ public class Label extends CacheRef {
 		this.projectID = view.getProject().getID();
 		this.buildLabel = buildLabel;
 		this.frozen = frozen;
+		this.deleted = false;
 	}
 	
 	protected Label(int viewId, int labelId) {
@@ -87,11 +90,14 @@ public class Label extends CacheRef {
 		loadInformation(viewId, labelId);
 	}
 	
-	protected static Label[] getLabelList(int viewId) {
+	protected static Label[] getLabelList(int viewId, boolean onlyActive) {
 		File dir = buildStoragePath(viewId);
 		ArrayList<Label> list = new ArrayList<Label>();
 		for(String labelid : dir.list()) {
-			list.add(new Label(viewId, Integer.parseInt(labelid)));
+			Label l = new Label(viewId, Integer.parseInt(labelid));
+			if(onlyActive && l.deleted)
+				continue;
+			list.add(l);
 		}
 		Label[] LabelList = new Label[list.size()];
 		return list.toArray(LabelList);
@@ -158,6 +164,7 @@ public class Label extends CacheRef {
 		toSave.setProperty(PROJECT_ID, Integer.toString(projectID));
 		toSave.setProperty(BUILD_LABEL, Boolean.toString(buildLabel));
 		toSave.setProperty(FROZEN, Boolean.toString(frozen));
+		toSave.setProperty(DELETED, Boolean.toString(deleted));
 		FileWriter fout = null;
 		try {
 			java.io.File labelInformation = new java.io.File(storageLocation.getAbsolutePath() + File.separator + id);
@@ -234,6 +241,7 @@ public class Label extends CacheRef {
 			projectID = Integer.parseInt(labelProps.getProperty(PROJECT_ID));
 			buildLabel = labelProps.getProperty(BUILD_LABEL).equalsIgnoreCase("true");
 			frozen = labelProps.getProperty(FROZEN).equalsIgnoreCase("true");
+			deleted = labelProps.getProperty(DELETED).equalsIgnoreCase("true");
 			if(viewID != viewId) {
 				throw new InvalidOperationException("The view id (" + viewID +") does not match with the requested view id(" + viewId + ")");
 			}
@@ -252,5 +260,10 @@ public class Label extends CacheRef {
 	public boolean isRevisionLabel() {
 		// We do not support Revision label in the fake-starteam. See comment about isViewLabel();
 		return false;
+	}
+	
+	public void remove() {
+		deleted = true;
+		update();
 	}
 }
