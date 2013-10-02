@@ -152,7 +152,7 @@ public class MainEntry {
 
 			// set keep alive to attempt to prevent disconnects
 			starteam.setKeepAlive(true);
-			starteam.setKeepAliveInterval(0);
+			starteam.setKeepAliveInterval(1);
 
 			boolean projectFound = false;
 			for(Project p : starteam.getProjects()) {
