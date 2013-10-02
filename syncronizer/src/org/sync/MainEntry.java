@@ -150,6 +150,10 @@ public class MainEntry {
 			starteam.setAutoReconnectAttempts(60 * 60 / 15);
 			starteam.setAutoReconnectWait(15);
 
+			// set keep alive to attempt to prevent disconnects
+			starteam.setKeepAlive(true);
+			starteam.setKeepAliveInterval(0);
+
 			boolean projectFound = false;
 			for(Project p : starteam.getProjects()) {
 				if(p.getName().equalsIgnoreCase(project)) {
