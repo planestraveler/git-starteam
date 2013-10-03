@@ -705,11 +705,10 @@ public class GitImporter {
 			skipPattern = Pattern.compile(skipPatternStr);
 		}
 
-		View v = rootView;
-		if (v == null) {
-			v = project.getDefaultView();
-			while (v.getParentView() != null) {
-				v = v.getParentView();
+		if (rootView == null) {
+			rootView = project.getDefaultView();
+			while (rootView.getParentView() != null) {
+				rootView = rootView.getParentView();
 			}
 		}
 
@@ -717,7 +716,7 @@ public class GitImporter {
 
 		// add them in bread-first order
 		Deque<View> deque = new ArrayDeque<View>();
-		deque.addLast(v);
+		deque.addLast(rootView);
 		while(!deque.isEmpty()) {
 			View view = deque.removeFirst();
 			try {
