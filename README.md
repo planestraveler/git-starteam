@@ -12,6 +12,7 @@ Supported Features
 Limitations
 -----------
 * Merge history is not imported
+ - Use [git-starteam-merges](https://github.com/patrick-higgins/git-starteam-merges) to reconstruct history after import
 * Some file revisions may not be imported
  - Granularity is one revision per-day per-file or one revision per-file per-label
 * Assumes StarTeam user ID prepended to a fixed domain name is a valid email address for Git commit messages
