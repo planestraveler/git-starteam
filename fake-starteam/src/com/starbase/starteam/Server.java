@@ -128,4 +128,12 @@ public class Server {
 	public TypeNames getTypeNames() {
 		return typeNames;
 	}
+
+	public void setKeepAlive(boolean b) {
+		// Nothing to do
+	}
+
+	public void setKeepAliveInterval(int i) {
+		// Nothing to do
+	}
 }
