@@ -18,8 +18,6 @@ package org.sync.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.InvalidParameterException;
-
 import org.ossnoize.git.fastimport.DataRef;
 
 public class SmallRef {

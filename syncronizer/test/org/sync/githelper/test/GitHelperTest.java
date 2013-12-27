@@ -30,7 +30,6 @@ import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.Data;
 import org.ossnoize.git.fastimport.FileModification;
-import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.Sha1Ref;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
@@ -39,8 +38,6 @@ import org.sync.githelper.GitHelper;
 import org.sync.util.FileUtility;
 import org.sync.util.LogEntry;
 import org.sync.util.SmallRef;
-
-import com.starbase.util.MD5;
 
 public class GitHelperTest {
 	private RepositoryHelper test;

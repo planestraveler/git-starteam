@@ -18,18 +18,11 @@ package org.sync.test;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.sync.GitImporter;
-
-import com.starbase.util.MD5;
 
 public class GitImporterTest {
 	@Rule
