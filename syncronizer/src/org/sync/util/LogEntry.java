@@ -222,4 +222,8 @@ public class LogEntry {
 	public List<FileEntry> getFilesEntry() {
 		return files;
 	}
+	
+	public String toString() {
+		return getComment() + "@" + getTimeOfCommit();
+	}
 }
