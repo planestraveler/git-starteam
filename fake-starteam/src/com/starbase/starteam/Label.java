@@ -105,7 +105,7 @@ public class Label extends CacheRef {
 	
 	protected int getRevisionOfItem(int itemId) {
 		if(!itemList.containsKey(itemId))
-			throw new InvalidOperationException("This item id " + itemId + " was not labeled in the view");
+			throw new InvalidOperationException("This item id " + itemId + " was not labeled in the view for label " + getDescription());
 		return itemList.get(itemId);
 	}
 	
