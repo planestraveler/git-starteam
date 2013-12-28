@@ -62,6 +62,7 @@ public class GitImporterTest {
 			{"a\\.b", "a_.b"},
 			// real label test
 			{"119_ BootesOchre.114.00", "119__BootesOchre.114.00"},
+			{"\"This is a quoted String\"", "_This_is_a_quoted_String_"},
 		};
 		for (int i = 0; i < tests.length; i++) {
 			String test = tests[i][0];

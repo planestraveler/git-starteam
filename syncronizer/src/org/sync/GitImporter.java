@@ -827,7 +827,9 @@ public class GitImporter {
 			// Sanitize .lock extension
 			.replaceFirst("\\.lock$", "_lock")
 			// Sanitize trailing dot
-			.replaceFirst("\\.$", "_");
+			.replaceFirst("\\.$", "_")
+			// Sanitize "
+			.replaceAll("\"", "_");
 	}
 
 	private void writeLabelTag(View view, Label label) {
