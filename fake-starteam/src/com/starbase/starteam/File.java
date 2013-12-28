@@ -402,10 +402,9 @@ public class File extends Item {
 
 	@Override
 	protected List<Item> loadHistory() {
-		int lastRevision = findLastRevision(getObjectID());
-		List<Item> ret = new ArrayList<Item>(lastRevision);
-		for(int i=0; i<=lastRevision; i++) {
-			ret.add(new File(getObjectID(), i, this.view));
+		List<Item> ret = new ArrayList<Item>(getRevisionNumber());
+		for(int i=0; i < getRevisionNumber(); i++) {
+			ret.add(new File(getObjectID(), i, getView()));
 		}
 		return ret;
 	}

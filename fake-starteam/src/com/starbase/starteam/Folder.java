@@ -199,9 +199,18 @@ public class Folder extends Item {
 	
 	@Override
 	protected void loadProperties() {
+		loadProperties(-1);
+	}
+	
+	protected void loadProperties(int revision) {
 		FileInputStream fin = null;
 		try {
-			int lastRevision = findRightRevision(Integer.parseInt(holdingPlace.getName()));
+			int lastRevision;
+			if(revision < 0) {
+				lastRevision = findRightRevision(Integer.parseInt(holdingPlace.getName()));
+			} else {
+				lastRevision = revision;
+			}
 			File folderProperty = new File(holdingPlace.getCanonicalPath() + File.separator + lastRevision + File.separator + FOLDER_PROPERTIES);
 			if(folderProperty.exists()) {
 				fin = new FileInputStream(folderProperty);
