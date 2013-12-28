@@ -273,10 +273,16 @@ public class GitImporter {
 					helper.writeBlob(fileToStage);
 					
 					Integer revision = helper.getRegisteredFileVersion(head, path);
-					if(null != revision && revision != f.getContentVersion()) { 
-						helper.updateFileVersion(head, path, f.getContentVersion());
-						if(verbose) {
-						    Log.log("file was updated " + revision + " => " + f.getContentVersion() + ": " + path);
+					if(null != revision) {
+						if(revision != f.getContentVersion()) { 
+							helper.updateFileVersion(head, path, f.getContentVersion());
+							if(verbose) {
+							    Log.log("file was updated " + revision + " => " + f.getContentVersion() + ": " + path);
+							}
+						}
+					} else {
+						if(verbose)	{
+							Log.log("Not file revision was found for : " + path);
 						}
 					}
 					
@@ -591,31 +597,37 @@ public class GitImporter {
 						helper.registerFileId(head, path, historyFile.getItemID(), -1);
 						fileid = historyFile.getItemID();
 					}
-					
 				}
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
 				}
 				files.add(path);
-				//if(verbose) {
-				//	Log.log("Added file " + path);
-				//}
 				String comment = i.getComment();
 				if(0 == comment.length()) {
-					if(1 == historyFile.getContentVersion())
+					if(1 == historyFile.getContentVersion()) {
 						comment = historyFile.getDescription();
-					else
+					} else {
 						comment = "Modification without comments";
+					}
 				} else if(comment.matches("Merge from .*?, Revision .*")) {
 					comment = "Merge from unknown branch";
 				}
 				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), comment, path);
 
 				//TODO: find a proper solution to file update.
-				if(! lastSortedFileList.containsKey(info)) {
+				if(!lastSortedFileList.containsKey(info)) {
 					AddedSortedFileList.put(info, historyFile);
+					if(verbose) Log.out("Added new file <" + info + ">");
+				} else {
+					Integer rev = helper.getRegisteredFileVersion(head, path);
+					if(rev != null && rev < historyFile.getRevisionNumber()) {
+						AddedSortedFileList.put(info, historyFile);
+						if(verbose) Log.out("updated new file <" + info + ">");
+					}
 				}
 				sortedFileList.put(info, historyFile);
+			} else {
+				Log.log("Item " + f + "/" + i + " is not a file");
 			}
 		}
 		for(Folder subfolder : f.getSubFolders()) {
@@ -727,7 +739,6 @@ public class GitImporter {
 			}
 
 			String viewName = null;
-			ViewConfiguration baseConfig = null;
 			try {
 				String tag = getBaseTag(view);
 				if (tag == null && view != rootView) {
