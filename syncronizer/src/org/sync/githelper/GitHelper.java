@@ -71,11 +71,14 @@ public class GitHelper extends RepositoryHelper {
 	private Map<String, Map<String, DataRef>> trackedFiles;
 	private boolean isBare;
 
-	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
+	public GitHelper(String preferedPath, boolean createRepo, String workingDir) throws Exception {
 		if (!findExecutable(preferedPath)) {
 			throw new Exception("Git executable not found.");
 		}
-		setWorkingDirectory(System.getProperty("user.dir"), createRepo);
+		if(workingDir == null) {
+			workingDir = System.getProperty("user.dir");
+		}
+		setWorkingDirectory(workingDir, createRepo);
 		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
 
 		loadFileInformation();

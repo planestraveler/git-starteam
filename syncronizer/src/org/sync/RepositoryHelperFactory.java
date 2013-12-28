@@ -25,9 +25,9 @@ public class RepositoryHelperFactory {
 	 * properly initialized. The process could also only block when all the process have finished properly.
 	 */
 	private RepositoryHelper helper;
-	private String preferredPath;
-	private boolean createRepo;
-	private String workingFolder;
+	private String preferredPath = null;
+	private boolean createRepo = false;
+	private String workingFolder = null;
 	
 	private RepositoryHelperFactory() {
 	}
@@ -49,7 +49,7 @@ public class RepositoryHelperFactory {
 		if (null == helper) {
 			try {
 				// TODO: Add more validation to support more repository type. (Bazaar, Mercurial, ...)
-				helper = new org.sync.githelper.GitHelper(preferredPath, (null!=workingFolder?false:createRepo));
+				helper = new org.sync.githelper.GitHelper(preferredPath, (null!=workingFolder?false:createRepo), workingFolder);
 				if(null != workingFolder) {
 					helper.setWorkingDirectory(workingFolder, createRepo);
 				}
@@ -58,7 +58,6 @@ public class RepositoryHelperFactory {
 				clearCachedHelper();
 			}
 		}
-		
 		return helper;
 	}
 	

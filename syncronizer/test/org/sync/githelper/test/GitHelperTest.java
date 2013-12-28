@@ -46,7 +46,7 @@ public class GitHelperTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		test = new GitHelper(null, false);
+		test = new GitHelper(null, false, null);
 		bareRepo = new File(System.getProperty("java.io.tmpdir") + File.separator + "bareRepo");
 		Data content = new Data();
 		content.writeData("This is the content of the file".getBytes());
@@ -101,7 +101,7 @@ public class GitHelperTest {
 	
 	@Test
 	public void testAlternateDirectory() throws Exception {
-		GitHelper helper = new GitHelper("/usr/bin", false);
+		GitHelper helper = new GitHelper("/usr/bin", false, null);
 		helper.dispose();
 	}
 	
