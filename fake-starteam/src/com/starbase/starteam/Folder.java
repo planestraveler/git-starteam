@@ -98,8 +98,8 @@ public class Folder extends Item {
 				if(null != folderId && 0 < folderId.length()) {
 					try {
 						int id = Integer.parseInt(folderId);
-						SimpleTypedResource ressource =
-								SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
+						SimpleTypedResource ressource = null;
+								//SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
 						if(null != ressource && ressource instanceof Folder) {
 							generatedList.add((Folder)ressource);
 						} else {
@@ -127,8 +127,8 @@ public class Folder extends Item {
 				if(null != fileID && 0 < fileID.length()) {
 					try {
 						int id = Integer.parseInt(fileID);
-						SimpleTypedResource ressource =
-								SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
+						SimpleTypedResource ressource = null;
+								//SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
 
 						com.starbase.starteam.File aFile = null;
 						if(null != ressource && ressource instanceof com.starbase.starteam.File) {
