@@ -54,6 +54,17 @@ public class CheckoutManager {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		} else if(options.isByLabel()) {
+			try {
+				f.checkoutByLabelID(aFile,
+						options.getCheckoutLabelID(),
+						options.getLockType(),
+						false,
+						options.getEOLConversionEnabled(),
+						options.getUpdateStatus());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		} else {
 			throw new UnsupportedOperationException("Cannot checkout as requested " + options);
 		}

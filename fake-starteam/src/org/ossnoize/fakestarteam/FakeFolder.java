@@ -18,16 +18,23 @@ package org.ossnoize.fakestarteam;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.ossnoize.fakestarteam.exception.ObjectIdNotFoundError;
 
 import com.starbase.starteam.Folder;
+import com.starbase.starteam.Item;
 import com.starbase.starteam.View;
 
 public class FakeFolder extends Folder {
 	
 	public FakeFolder(View view, int objectID, Folder parent) {
+		this(view, objectID, parent, -1);
+	}
+	
+	public FakeFolder(View view, int objectID, Folder parent, int revision) {
 		this.itemProperties = new Properties();
 		this.parent = parent;
 		this.view = view;
@@ -56,10 +63,18 @@ public class FakeFolder extends Folder {
 				if(!holdingPlace.exists())
 					throw new ObjectIdNotFoundError(objectID);
 				validateHoldingPlace();
-				loadProperties();
+				loadProperties(revision);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	protected List<Item> loadHistory() {
+		List<Item> ret = new ArrayList<Item>();
+		for(int i=1; i<getRevisionNumber(); i++) {
+			ret.add(new FakeFolder(getView(), getObjectID(), getParentFolder(), i));
+		}
+		return ret;
 	}
 }

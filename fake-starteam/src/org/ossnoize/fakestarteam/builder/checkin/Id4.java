@@ -25,6 +25,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id4 extends CheckInInstruction {
 
@@ -45,6 +46,8 @@ public class Id4 extends CheckInInstruction {
 		File glslParser = new File(glsl);
 		glslParser.addFromStream(parserVersion.openStream(),
 				"glsl_parser.yy", "GLSL Parser", "Parser should always be with lexer", 0);
+
+		view.createViewLabel("Check-in Id 4", "Check Id 4 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

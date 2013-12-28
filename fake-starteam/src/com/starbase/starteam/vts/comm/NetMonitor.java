@@ -14,36 +14,15 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *****************************************************************************/
-package org.ossnoize.fakestarteam.builder.checkin;
 
-import java.io.IOException;
-import java.util.Calendar;
+package com.starbase.starteam.vts.comm;
 
-import org.ossnoize.fakestarteam.builder.CheckInInstruction;
+import java.io.File;
 
-import com.starbase.starteam.Folder;
-import com.starbase.starteam.View;
-import com.starbase.util.OLEDate;
+public class NetMonitor {
 
-public class Id9 extends CheckInInstruction {
-
-	@Override
-	public void checkin(View view) throws IOException {
-		Folder root = view.getRootFolder();
-		Folder src = findFolderIn(root, "src");
-		Folder scons = findFolderIn(src, "scons");
-		
-		scons.remove();
-		
-
-		view.createViewLabel("Check-in Id 9", "Check Id 9 description <remove a folder scons>", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
-	}
-
-	@Override
-	public long getTimeOfCheckIn() {
-		Calendar time = Calendar.getInstance();
-		time.set(2010, 6, 19, 15, 15);
-		return time.getTimeInMillis();
+	public static void onFile(File file) {
+		//TODO: this is a stub
 	}
 
 }

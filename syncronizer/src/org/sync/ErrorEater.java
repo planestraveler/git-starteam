@@ -82,7 +82,7 @@ public class ErrorEater implements Runnable {
 			String line = null;
 			while(null != (line = buffer.readLine())) {
 				if(!dontWrite)
-					System.err.println(process + ":" + line);
+					Log.log(process + ":" + line);
 			}
 		} catch(IOException e) {
 			e.printStackTrace();

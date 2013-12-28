@@ -31,6 +31,7 @@ public class Server {
 	private User loggedUser;
 	private PropertyNames propertyNames = new PropertyNames();
 	private PropertyEnums propertyEnums = new PropertyEnums();
+	private TypeNames typeNames = new TypeNames();
 
 	public Server(String address, int port) {
 		Address = address;
@@ -110,5 +111,29 @@ public class Server {
 	
 	public OLEDate getCurrentTime() {
 		return InternalPropertiesProvider.getInstance().getCurrentTime();
+	}
+
+    public void setAutoReconnectEnabled(boolean bEnabled) {
+        // nothing to do
+    }
+
+    public void setAutoReconnectAttempts(int nAttempts) {
+        // nothing to do
+    }
+
+    public void setAutoReconnectWait(int nSeconds) {
+        // nothing to do
+    }
+
+	public TypeNames getTypeNames() {
+		return typeNames;
+	}
+
+	public void setKeepAlive(boolean b) {
+		// Nothing to do
+	}
+
+	public void setKeepAliveInterval(int i) {
+		// Nothing to do
 	}
 }

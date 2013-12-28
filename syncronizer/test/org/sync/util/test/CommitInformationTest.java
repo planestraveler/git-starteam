@@ -60,6 +60,11 @@ public class CommitInformationTest {
 	}
 	
 	@Test
+	public void testToString() {
+		assertEquals("CommitInfo: 12345 - 12 - TestA - /path/to/file/testA", commitA.toString());
+	}
+	
+	@Test
 	public void testEquivalentObject() {
 		assertTrue(commitA.equivalent(new CommitInformation(78557, 12, "TestA", "/path/to/an/orther/File")));
 		assertFalse(commitD.equivalent(commitH));

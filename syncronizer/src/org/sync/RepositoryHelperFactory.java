@@ -27,6 +27,7 @@ public class RepositoryHelperFactory {
 	private RepositoryHelper helper;
 	private String preferredPath;
 	private boolean createRepo;
+	private String workingFolder;
 	
 	private RepositoryHelperFactory() {
 	}
@@ -48,7 +49,10 @@ public class RepositoryHelperFactory {
 		if (null == helper) {
 			try {
 				// TODO: Add more validation to support more repository type. (Bazaar, Mercurial, ...)
-				helper = new org.sync.githelper.GitHelper(preferredPath, createRepo);
+				helper = new org.sync.githelper.GitHelper(preferredPath, (null!=workingFolder?false:createRepo));
+				if(null != workingFolder) {
+					helper.setWorkingDirectory(workingFolder, createRepo);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				clearCachedHelper();
@@ -71,5 +75,9 @@ public class RepositoryHelperFactory {
 
 	public void setCreateRepo(boolean create) {
 		createRepo = create;
+	}
+
+	public void setWorkingFolder(String workingFolder) {
+		this.workingFolder = workingFolder;
 	}
 }

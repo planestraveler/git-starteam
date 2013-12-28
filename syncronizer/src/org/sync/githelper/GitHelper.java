@@ -32,14 +32,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.ossnoize.git.fastimport.CatBlob;
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.DataRef;
 import org.ossnoize.git.fastimport.Feature;
@@ -48,11 +49,13 @@ import org.ossnoize.git.fastimport.FileOperation;
 import org.ossnoize.git.fastimport.Sha1Ref;
 import org.ossnoize.git.fastimport.enumeration.FeatureType;
 import org.sync.ErrorEater;
+import org.sync.Log;
 import org.sync.RepositoryHelper; 
 import org.sync.util.FileUtility;
+import org.sync.util.LogEntry;
+import org.sync.util.SmallRef;
 import org.sync.util.StarteamFileInfo;
-
-import com.starbase.util.MD5;
+import org.sync.util.enumeration.FileStatusStyle;
 
 public class GitHelper extends RepositoryHelper {
 	
@@ -66,8 +69,6 @@ public class GitHelper extends RepositoryHelper {
 	private GitFastImportOutputReader gitResponse;
 	private int debugFileCounter = 0;
 	private Map<String, Map<String, DataRef>> trackedFiles;
-	private Map<String, Map<String, MD5>> md5Cache;
-	private MD5 catBlobMD5;
 	private boolean isBare;
 
 	public GitHelper(String preferedPath, boolean createRepo) throws Exception {
@@ -76,7 +77,6 @@ public class GitHelper extends RepositoryHelper {
 		}
 		setWorkingDirectory(System.getProperty("user.dir"), createRepo);
 		trackedFiles = Collections.synchronizedMap(new HashMap<String, Map<String, DataRef>>());
-		md5Cache = new HashMap<String, Map<String, MD5>>();
 
 		loadFileInformation();
 	}
@@ -247,7 +247,7 @@ public class GitHelper extends RepositoryHelper {
 				gitFastImport.getOutputStream().close();
 				int endCode = gitFastImport.waitFor();
 				if(endCode != 0) {
-					System.err.println("Git fast-import has finished anormally with code:" + endCode);
+					Log.log("Git fast-import has finished anormally with code:" + endCode);
 				}
 				gitFastImportOutputEater.join();
 				gitFastImportErrorEater.join();
@@ -278,13 +278,17 @@ public class GitHelper extends RepositoryHelper {
 			if(null != ops.getMark()) {
 				if(!trackedFiles.containsKey(headName)) {
 					trackedFiles.put(headName, new HashMap<String, DataRef>());
-					md5Cache.put(headName, new HashMap<String, MD5>());
 				}
 				trackedFiles.get(headName).put(ops.getPath(), ops.getMark());
 			} else if(ops instanceof FileDelete) {
-				trackedFiles.get(headName).remove(ops.getPath());
+				// This shouldn't be null, but sometimes is. I think the
+				// file janitor is getting invoked, too. The problems may
+				// have the same cause.
+				Map<String, DataRef> headTracked = trackedFiles.get(headName);
+				if (headTracked != null) {
+					headTracked.remove(ops.getPath());
+				}
 			}
-			md5Cache.get(headName).remove(ops.getPath());
 		}
 	}
 	
@@ -327,9 +331,7 @@ public class GitHelper extends RepositoryHelper {
 					gitFastImportErrorEater.start();
 					OutputStream out = gitFastImport.getOutputStream();
 					// Validate Feature needed;
-					Feature feature = new Feature(FeatureType.CatBlob);
-					feature.writeTo(out);
-					feature = new Feature(FeatureType.DateFormat, "raw");
+					Feature feature = new Feature(FeatureType.DateFormat, "raw");
 					feature.writeTo(out);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -375,59 +377,44 @@ public class GitHelper extends RepositoryHelper {
 	}
 	
 	@Override
-	public MD5 getMD5Of(String filename, String head) throws IOException {
-		if(!trackedFiles.containsKey(head)) {
-			grabTrackedFiles(head);
-			md5Cache.put(head, new HashMap<String, MD5>());
-		}
-		if(!trackedFiles.containsKey(head))
-			return new MD5();
-		if(trackedFiles.get(head).containsKey(filename)) {
-			if(md5Cache.get(head).containsKey(filename)) {
-				return md5Cache.get(head).get(filename);
-			}
-			catBlobMD5 = new MD5();
-			OutputStream fastImport = getFastImportStream();
-			gitResponse.setCurrentHead(head);
-			CatBlob blobRequest = new CatBlob(trackedFiles.get(head).get(filename));
-			blobRequest.writeTo(fastImport);
-			synchronized (catBlobMD5) {
-				if(catBlobMD5.toHexString().equals("00000000000000000000000000000000")) {
-					try {
-						catBlobMD5.wait(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			md5Cache.get(head).put(filename, catBlobMD5);
-			return catBlobMD5;
-		}
-		return new MD5();
-	}
-
-	@Override
 	public Date getLastCommitOfBranch(String branchName) {
+		SmallRef to = new SmallRef(branchName);
+		return getCommitLog(to.back(1), to).get(0).getTimeOfCommit();
+	}
+	
+	@Override
+	public List<LogEntry> getCommitLog(SmallRef from, SmallRef to) {
 		ProcessBuilder process = new ProcessBuilder();
-		process.command(gitExecutable, "log", "-1", "--date=iso8601", branchName);
+		String refs;
+		if(null == from) {
+			refs = to.getRef();
+		} else {
+			refs = from.getRef() + ".." + to.getRef();
+		}
+		process.command(gitExecutable, "log", "--date=iso8601", "--find-renames=75", "--full-index", "--find-copies=75", "--raw", refs);
 		process.directory(new File(repositoryDir));
 		try {
 			Process log = process.start();
-			GitFirstLogInformationReader logReader = new GitFirstLogInformationReader(log.getInputStream());
+			GitLogReader logReader = new GitLogReader(log.getInputStream());
 			Thread logReaderThread = new Thread(logReader);
-			Thread errorEater = new Thread(new ErrorEater(log.getErrorStream(), "log"));
+			Thread errorEater = new Thread(new ErrorEater(log.getErrorStream(), "log:=" + to.getRef()));
 			logReaderThread.start();
 			errorEater.start();
 			log.waitFor();
 			logReaderThread.join();
 			errorEater.join();
-			return logReader.getCommitDate();
+			return logReader.getEntries();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	@Override
+	public List<LogEntry> getCommitLog(SmallRef to) {
+		return getCommitLog(null, to);
 	}
 
 	private File buildStarteamInfoDir() {
@@ -494,7 +481,7 @@ public class GitHelper extends RepositoryHelper {
 		super.setWorkingDirectory(dir, create);
 		
 		if (!repositoryExists(create)) {
-			System.err.println("Destination repository not found in '" + repositoryDir + "'");
+			Log.log("Destination repository not found in '" + repositoryDir + "'");
 		}
 		isBare = isBareRepository();
 	}
@@ -540,59 +527,55 @@ public class GitHelper extends RepositoryHelper {
 		
 	}
 
-	private class GitFirstLogInformationReader implements Runnable {
+	private class GitLogReader implements Runnable {
 		private static final String dateKey = "Date:";
 		private static final String shaKey = "commit";
 		private static final String authorKey = "Author:";
-		private java.util.Date commitDate;
-		private String author;
+		private List<LogEntry> entries;
 		private DataRef commitSHA;
-		private String comment;
 		private InputStream logStream;
 		
-		public GitFirstLogInformationReader(InputStream stream) {
+		public GitLogReader(InputStream stream) {
 			logStream = stream;
-		}
-		
-		public Date getCommitDate() {
-			return commitDate;
+			entries = Collections.synchronizedList(new ArrayList<LogEntry>());
 		}
 
-		public String getAuthor() {
-			return author;
+		public List<LogEntry> getEntries() {
+			return entries;
 		}
 		
-		public DataRef getCommitSHA() {
-			return commitSHA;
-		}
-		
-		public String getComment() {
-			return comment;
-		}
 		@Override
 		public void run() {
-			SimpleDateFormat dateFormatIso =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+			SimpleDateFormat dateFormatIso = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 			InputStreamReader reader = null;
 			BufferedReader buffer = null;
 			try {
 				reader = new InputStreamReader(logStream);
 				buffer = new BufferedReader(reader);
+				LogEntry entry = null;
 				String line;
 				while((line = buffer.readLine()) != null) {
-					if(line.trim().startsWith(dateKey)) {
+					if(line.startsWith(dateKey)) {
 						String isoDate = line.substring(dateKey.length()).trim();
 						try {
-							commitDate = dateFormatIso.parse(isoDate);
+							entry.setTimeOfCommit(dateFormatIso.parse(isoDate));
 						} catch (ParseException e) {
 							throw new Error("The date " + isoDate + " is not a valid (git wise) iso 8601 date");
 						}
-					} else if (line.trim().startsWith(shaKey)) {
+					} else if (line.startsWith(shaKey)) {
+						// Git log entry always start with the commit SHA
 						commitSHA = new Sha1Ref(line.substring(shaKey.length()).trim());
-						comment = ""; // new Commit
-					} else if (line.trim().startsWith(authorKey)) {
-						author = line.substring(authorKey.length()).trim();
+						entry = new LogEntry(commitSHA);
+						synchronized (entries) {
+							entries.notify();
+							entries.add(entry);
+						}
+					} else if (line.startsWith(authorKey)) {
+						entry.setAuthor(line.substring(authorKey.length()).trim());
+					} else if (line.startsWith(":")) {
+						entry.parseStatusLine(FileStatusStyle.GitRaw, line);
 					} else {
-						comment = line.trim() + " ";
+						entry.appendComment(line.trim() + "\n");
 					}
 				}
 			} catch (IOException e) {
@@ -607,7 +590,6 @@ public class GitHelper extends RepositoryHelper {
 		
 		private InputStream stream;
 		private String currentHead;
-		private Pattern catBlob = Pattern.compile("^[0-9a-fA-F]{40} blob [0-9]+$");
 		private Pattern ls = Pattern.compile("^[0-9]{6} [a-z]+ [0-9a-fA-F]{40}\t.+$");
 
 		public GitFastImportOutputReader(InputStream stream) {
@@ -621,6 +603,7 @@ public class GitHelper extends RepositoryHelper {
 		public void run() {
 			StringBuilder firstResponse = new StringBuilder(50);
 			try {
+				MessageDigest digest = MessageDigest.getInstance("MD5");
 				int character;
 				do {
 					character = stream.read();
@@ -631,23 +614,7 @@ public class GitHelper extends RepositoryHelper {
 						firstResponse.append((char)character);
 						character = stream.read();
 					}
-					if(catBlob.matcher(firstResponse).matches()) {
-						MessageDigest digest = MessageDigest.getInstance("MD5");
-						String length = firstResponse.substring(46);
-						int qtyOfBytes = Integer.parseInt(length);
-						byte[] buffer = new byte[1024];
-						int read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
-						while(qtyOfBytes > 0) {
-							digest.update(buffer, 0, read);
-							qtyOfBytes -= read;
-							if(qtyOfBytes > 0)
-								read = stream.read(buffer, 0, Math.min(qtyOfBytes, buffer.length));
-						}
-						synchronized (catBlobMD5) {
-							catBlobMD5.setData(digest.digest());
-							catBlobMD5.notify();
-						}
-					} else if (ls.matcher(firstResponse).matches()) {
+					if (ls.matcher(firstResponse).matches()) {
 						String type = firstResponse.substring(6, 10);
 						if(type.equalsIgnoreCase("blob")) {
 							String sha1 = firstResponse.substring(13,53);

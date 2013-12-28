@@ -23,6 +23,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id7 extends CheckInInstruction {
 
@@ -34,6 +35,8 @@ public class Id7 extends CheckInInstruction {
 		Folder wine = findFolderIn(cpp, "wine");
 		Folder c = new Folder(src, "c", null);
 		wine.moveTo(c);
+		
+		view.createViewLabel("Check-in Id 7", "Check Id 7 description <Move files around>", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

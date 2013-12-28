@@ -35,6 +35,7 @@ public class InternalPropertiesProvider {
 	private File StorageLocation;
 	private Server server;
 	private OLEDate currentTime;
+	private String baseFolder;
 	
 	private InternalPropertiesProvider() {
 		currentTime = new OLEDate(System.currentTimeMillis());
@@ -66,11 +67,15 @@ public class InternalPropertiesProvider {
 	public File getStorageLocation() {
 		return StorageLocation;
 	}
+	
+	public void setBaseStorageLocation(String baseFolder) {
+		this.baseFolder = baseFolder;
+	}
 
 	public void setCurrentServer(Server server) {
 		this.server = server;
-		Archive = new File(server.getAddress() + "." + server.getPort());
-		StorageLocation = new File(server.getAddress() + "." + server.getPort() + 
+		Archive = new File(baseFolder + File.separator + server.getAddress() + "." + server.getPort());
+		StorageLocation = new File(baseFolder + File.separator + server.getAddress() + "." + server.getPort() + 
 				File.separator + "ObjectStorage");
 		validateArchive();
 	}

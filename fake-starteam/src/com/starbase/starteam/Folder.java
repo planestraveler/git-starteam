@@ -98,8 +98,8 @@ public class Folder extends Item {
 				if(null != folderId && 0 < folderId.length()) {
 					try {
 						int id = Integer.parseInt(folderId);
-						SimpleTypedResource ressource =
-								SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
+						SimpleTypedResource ressource = null;
+								//SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
 						if(null != ressource && ressource instanceof Folder) {
 							generatedList.add((Folder)ressource);
 						} else {
@@ -127,8 +127,8 @@ public class Folder extends Item {
 				if(null != fileID && 0 < fileID.length()) {
 					try {
 						int id = Integer.parseInt(fileID);
-						SimpleTypedResource ressource =
-								SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
+						SimpleTypedResource ressource = null;
+								//SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
 
 						com.starbase.starteam.File aFile = null;
 						if(null != ressource && ressource instanceof com.starbase.starteam.File) {
@@ -136,11 +136,12 @@ public class Folder extends Item {
 						} else {
 							aFile = new com.starbase.starteam.File(id, this.view);
 						}
-						if((this.view instanceof RecycleBin && aFile.isDeleted()) || 
-						   (!(this.view instanceof RecycleBin) && !aFile.isDeleted())) {
+						if((this.view instanceof RecycleBin && aFile.isDeleted()) || isFromHistory() ||
+						   !((this.view instanceof RecycleBin) || aFile.isDeleted())) {
 							generatedList.add(aFile);
 						}
 					} catch (NumberFormatException ne) {
+						ne.printStackTrace();
 						throw new InvalidOperationException("Folder child id corrupted.");
 					}
 				}
@@ -198,9 +199,18 @@ public class Folder extends Item {
 	
 	@Override
 	protected void loadProperties() {
+		loadProperties(-1);
+	}
+	
+	protected void loadProperties(int revision) {
 		FileInputStream fin = null;
 		try {
-			int lastRevision = findRightRevision(Integer.parseInt(holdingPlace.getName()));
+			int lastRevision;
+			if(revision < 0) {
+				lastRevision = findRightRevision(Integer.parseInt(holdingPlace.getName()));
+			} else {
+				lastRevision = revision;
+			}
 			File folderProperty = new File(holdingPlace.getCanonicalPath() + File.separator + lastRevision + File.separator + FOLDER_PROPERTIES);
 			if(folderProperty.exists()) {
 				fin = new FileInputStream(folderProperty);
@@ -211,12 +221,14 @@ public class Folder extends Item {
 					throw new InvalidOperationException("The object is not registered on this view");
 				}
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(view, id, this);
-				
-				SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
-				if(parent instanceof Folder) {
-					this.parent = (Folder)parent;
-				} else if(getParentObjectID() != 0) {
-					this.parent = new FakeFolder(this.view, getParentObjectID(), null);
+
+				if(null == parent) {
+					SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
+					if(parent instanceof Folder) {
+						this.parent = (Folder)parent;
+					} else if(getParentObjectID() != 0) {
+						this.parent = new FakeFolder(this.view, getParentObjectID(), null);
+					}
 				}
 			} else {
 				// initialize the basic properties of the folder.
@@ -252,10 +264,18 @@ public class Folder extends Item {
 	
 	@Override
 	public void moveTo(Folder folder) {
+		Folder origin = getParentFolder();
 		super.moveTo(folder);
-		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID,
-				Integer.toString(folder.getObjectID()));
-		parent = folder;
+		
+		// Fixup the old parent and the child folder path.
+		String thisStringId = Integer.toString(getObjectID());
+		if(origin.itemProperties.containsKey(propertyKeys._CHILD_FOLDER)) {
+			StringBuffer idList = new StringBuffer(origin.itemProperties.getProperty(propertyKeys._CHILD_FOLDER));
+			int start = idList.indexOf(thisStringId);
+			idList.delete(start, start+thisStringId.length());
+			origin.itemProperties.setProperty(propertyKeys._CHILD_FOLDER, idList.toString());
+			origin.update();
+		}
 		buildParentPath();
 		update();
 	}
@@ -294,5 +314,13 @@ public class Folder extends Item {
 	@Override
 	public Type getType() {
 		return new Type(getTypeNames().FOLDER, view.getServer());
+	}
+
+	public void populateNow(String file, String[] populateProps, int i) {
+		// Nothing to do specially as in fake-starteam, most of the stuff are not on a remote server far away.
+	}
+
+	public void discardItems(String file, int i) {
+		// Nothing special to do unless we have some memory retension issue.
 	}
 }

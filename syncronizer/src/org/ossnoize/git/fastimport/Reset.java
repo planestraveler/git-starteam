@@ -14,31 +14,32 @@
     You should have received a copy of the GNU General Public License
     along with Git-Starteam.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-package org.ossnoize.git.fastimport.enumeration;
+package org.ossnoize.git.fastimport;
 
-public enum GitFileType {
+import java.io.IOException;
+import java.io.OutputStream;
 
-	Normal("100644"),
-	Executable("100755"),
-	SymbolicLink("120000"),
-	NullFile("000000");
-	
-	private String OctalRepresentation;
+public class Reset implements FastImportObject {
 
-	public String getOctalRepresentation() {
-		return OctalRepresentation;
+    private final String ref;
+    private final DataRef committish;
+
+    public Reset(String ref, DataRef committish) {
+        this.ref = ref;
+        this.committish = committish;
+    }
+
+	@Override
+	public void writeTo(OutputStream out) throws IOException {
+		out.write("reset ".getBytes());
+        out.write(ref.getBytes());
+        out.write('\n');
+        if(null != committish) {
+            out.write("from ".getBytes());
+            committish.writeTo(out);
+            out.write('\n');
+        }
+		out.flush();
 	}
 
-	private GitFileType(String octalRepresentation) {
-		OctalRepresentation = octalRepresentation;
-	}
-
-	public static GitFileType fromOctal(String octalString) {
-		for(GitFileType type : values()) {
-			if(type.getOctalRepresentation().equals(octalString)) {
-				return type;
-			}
-		}
-		throw new UnsupportedOperationException("Cannot find corresponding type from octal representation: <" + octalString + ">");
-	}
 }

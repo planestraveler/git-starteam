@@ -25,6 +25,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id1 extends CheckInInstruction {
 
@@ -64,8 +65,8 @@ public class Id1 extends CheckInInstruction {
 		URL sconsVersion = new URL("http://cgit.freedesktop.org/mesa/mesa/plain/SConstruct?id=c61bf363937f40624a5632745630d4f2b9907082");
 		mesaSconscript.addFromStream(sconsVersion.openStream(),
 				"SConstruct",
-				"The initial version of the scconstruct file of mesa",
-				"The initial version of the scconstruct file of mesa", 0);
+				"The initial version of the sconstruct file of mesa",
+				"The initial version of the sconstruct file of mesa", 0);
 		
 		File glslLexer = new File(glsl);
 		URL lexerVersion = new URL("http://cgit.freedesktop.org/mesa/mesa/plain/src/glsl/glsl_lexer.ll?id=80ec97af79530dc053770d218cd55ac7dbd74736");
@@ -73,6 +74,8 @@ public class Id1 extends CheckInInstruction {
 				"glsl_lexer.ll",
 				"First version of glsl mesa lexer",
 				"First version of glsl mesa lexer", 0);
+		
+		view.createViewLabel("Check-in Id 1", "Check Id 1 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

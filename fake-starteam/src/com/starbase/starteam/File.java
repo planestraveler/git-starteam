@@ -85,6 +85,7 @@ public class File extends Item {
 			holdingPlace = createHoldingPlace(0);
 			//loadProperties();
 			setRevisionNumber(0);
+			itemProperties.setProperty(propertyKeys.FILE_CONTENT_REVISION, Integer.toString(1));
 			setComment(comment);
 			setDescription(description);
 			setName(fileName);
@@ -135,6 +136,7 @@ public class File extends Item {
 			loadProperties();
 			holdingPlace = createHoldingPlace(newRevision);
 			setRevisionNumber(newRevision);
+			itemProperties.setProperty(propertyKeys.FILE_CONTENT_REVISION, Integer.toString(getContentVersion() + 1));
 			setComment(reason);
 			setModifiedBy();
 			setModifiedTime();
@@ -146,12 +148,12 @@ public class File extends Item {
 	}
 
 	public void checkinFrom(java.io.File file, String reason, int lockStatus, boolean forceCheckin, boolean updateStatus) throws java.io.IOException {
-		if(!isNew() && !isFromHistory()) {
+		if(!isNew()) {
 			int newRevision = getRevisionNumber() + 1;
 			loadProperties();
 			holdingPlace = createHoldingPlace(newRevision);
 			if(holdingPlace.exists()) {
-				if(forceCheckin) {
+				if(forceCheckin && isFromHistory()) {
 					newRevision = findLastRevision(getObjectID()) + 1;
 					holdingPlace = createHoldingPlace(newRevision);
 				} else {
@@ -159,6 +161,8 @@ public class File extends Item {
 				}
 			}
 			setRevisionNumber(newRevision);
+			//TODO: May need some rework since the file from history may still need a new content version.
+			itemProperties.setProperty(propertyKeys.FILE_CONTENT_REVISION, Integer.toString(getContentVersion() + 1));
 			setComment(reason);
 			setModifiedBy();
 			setModifiedTime();
@@ -175,7 +179,7 @@ public class File extends Item {
 			loadProperties();
 			if(null == checkoutTo) {
 				//TODO: build the default checkout directory location
-				throw new InvalidOperationException("Does not yet support null checkoutTo parameter");
+				throw new NullPointerException("Does not yet support null checkoutTo parameter");
 			}
 			copyFromGz(holdingPlace, checkoutTo);
 			if(!timeStampNow) {
@@ -191,7 +195,7 @@ public class File extends Item {
 		holdingPlace = createHoldingPlace(date);
 		if(holdingPlace.exists()) {
 			if(null == checkoutTo) {
-				throw new InvalidOperationException("Does not yet support null checkoutTo parameter");
+				throw new NullPointerException("Does not yet support null checkoutTo parameter");
 			}
 			copyFromGz(holdingPlace, checkoutTo);
 			if(!timeStampNow) {
@@ -200,6 +204,12 @@ public class File extends Item {
 		} else {
 			throw new InvalidOperationException("The file does not exist in the repository");
 		}
+	}
+
+	public void checkoutByLabelID(java.io.File aFile, int checkoutLabelID, int lockType, boolean timeStampNow, boolean eolConversionEnabled, boolean updateStatus) throws java.io.IOException {
+		Label theLabel = new Label(getView().getID(), checkoutLabelID);
+		int viewVersion = theLabel.getRevisionOfItem(getItemID());
+		checkoutByVersion(aFile, viewVersion, lockType, timeStampNow, eolConversionEnabled, updateStatus);
 	}
 	
 	public void checkoutTo(java.io.File checkoutTo, int lockStatus, boolean timeStampNow, boolean eol, boolean updateStatus) throws java.io.IOException {
@@ -276,13 +286,7 @@ public class File extends Item {
 		fin = new FileInputStream(source.getCanonicalPath() + java.io.File.separator + FILE_STORED);
 		gzin = new GZIPInputStream(fin);
 		fout = new FileOutputStream(target);
-		
-		byte[] buffer = new byte[1024 * 64];
-		int read = gzin.read(buffer);
-		while(read >= 0) {
-			fout.write(buffer, 0, read);
-			read = gzin.read(buffer);
-		}
+		FileUtility.copyStream(fout, gzin);
 		FileUtility.close(fout, gzin, fin);
 	}
 	
@@ -398,10 +402,9 @@ public class File extends Item {
 
 	@Override
 	protected List<Item> loadHistory() {
-		int lastRevision = findLastRevision(getObjectID());
-		List<Item> ret = new ArrayList<Item>(lastRevision);
-		for(int i=0; i<=lastRevision; i++) {
-			ret.add(new File(getObjectID(), i, this.view));
+		List<Item> ret = new ArrayList<Item>(getRevisionNumber());
+		for(int i=0; i < getRevisionNumber(); i++) {
+			ret.add(new File(getObjectID(), i, getView()));
 		}
 		return ret;
 	}
@@ -505,14 +508,21 @@ public class File extends Item {
 			origin.itemProperties.setProperty(propertyKeys._FILES, idList.toString());
 			origin.update();
 		}
-		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(folder.getObjectID()));
-		
-		shareTo(folder);
 		super.moveTo(folder);
 	}
 	
 	@Override
 	public Type getType() {
 		return new Type(getTypeNames().FILE, view.getServer());
+	}
+
+	public int getContentVersion() {
+		int revision = 1;
+		if(itemProperties.containsKey(propertyKeys.FILE_CONTENT_REVISION)) {
+			revision = Integer.parseInt(itemProperties.getProperty(propertyKeys.FILE_CONTENT_REVISION));
+		} else {
+			revision = getRevisionNumber();
+		}
+		return revision;
 	}
 }

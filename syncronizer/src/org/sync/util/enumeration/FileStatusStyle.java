@@ -14,31 +14,8 @@
     You should have received a copy of the GNU General Public License
     along with Git-Starteam.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-package org.ossnoize.git.fastimport.enumeration;
+package org.sync.util.enumeration;
 
-public enum GitFileType {
-
-	Normal("100644"),
-	Executable("100755"),
-	SymbolicLink("120000"),
-	NullFile("000000");
-	
-	private String OctalRepresentation;
-
-	public String getOctalRepresentation() {
-		return OctalRepresentation;
-	}
-
-	private GitFileType(String octalRepresentation) {
-		OctalRepresentation = octalRepresentation;
-	}
-
-	public static GitFileType fromOctal(String octalString) {
-		for(GitFileType type : values()) {
-			if(type.getOctalRepresentation().equals(octalString)) {
-				return type;
-			}
-		}
-		throw new UnsupportedOperationException("Cannot find corresponding type from octal representation: <" + octalString + ">");
-	}
+public enum FileStatusStyle {
+	GitRaw,
 }

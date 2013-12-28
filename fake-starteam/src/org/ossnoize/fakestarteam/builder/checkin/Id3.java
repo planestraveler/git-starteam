@@ -25,6 +25,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.View;
+import com.starbase.util.OLEDate;
 
 public class Id3 extends CheckInInstruction {
 
@@ -53,6 +54,8 @@ public class Id3 extends CheckInInstruction {
 		
 		URL folderVersion2 = new URL("https://raw.github.com/planestraveler/git-starteam/182e12e0f5dcb189241ed09cf8ec23a05188baa3/fake-starteam/src/com/starbase/starteam/Folder.java");
 		folderClass.checkinFromStream(folderVersion2.openStream(), "Upgrade the version", 0, false);
+		
+		view.createViewLabel("Check-in Id 3", "Check Id 3 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
 	}
 
 	@Override

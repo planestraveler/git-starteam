@@ -74,6 +74,12 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	protected void setRevisionNumber(int rev) {
+		if(itemProperties.containsKey(propertyKeys._VIEW_ID)) {
+			int viewId = Integer.parseInt(itemProperties.getProperty(propertyKeys._VIEW_ID));
+			if(viewId != view.getID()) {
+				throw new InvalidOperationException("View branching is not supported yet");
+			}
+		}
 		itemProperties.setProperty(propertyKeys.REVISION_NUMBER, Integer.toString(rev));
 	}
 	
@@ -84,6 +90,10 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		} else if (getView().getConfiguration().isTimeBased()) {
 			isFromHistory = true;
 			return findTimeRevision(id);
+		} else if (getView().getConfiguration().isLabelBased()) {
+			isFromHistory = true;
+			Label aLabel = new Label(getView().getID(), getView().getConfiguration().getLabelID());
+			return aLabel.getRevisionOfItem(id);
 		}
 		throw new InvalidOperationException("Cannot find a revision with this view configuration");
 	}
@@ -308,17 +318,19 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public boolean isDeleted() {
 		return itemProperties.containsKey(propertyKeys._REF_COUNT) && 
-				itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0");
+				itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0") && (view instanceof RecycleBin);
 	}
 
 	public void moveTo(Folder folder) {
+		itemProperties.setProperty(propertyKeys.PARENT_OBJECT_ID, Integer.toString(folder.getObjectID()));
+		parent = folder;
 		decrementRefCount();
 		shareTo(folder);
 	}
-	
+
 	public void remove() {
 		decrementRefCount();
-		if(isDeleted()) {
+		if(itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0")) {
 			itemProperties.setProperty(propertyKeys.DELETED_TIME, Long.toString(System.currentTimeMillis()));
 			itemProperties.setProperty(propertyKeys.DELETED_USER_ID, 
 					Integer.toString(InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID()));
@@ -345,10 +357,14 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	}
 	
 	public void discard() {
-		loadProperties();
 		SimpleTypedResourceIDProvider.getProvider().clearExisting(getView(), getObjectID());
 	}
 	
 	protected void loadProperties() {
+	}
+	
+	@Override
+	public PropertyNames getPropertyNames() {
+		return propertyKeys;
 	}
 }

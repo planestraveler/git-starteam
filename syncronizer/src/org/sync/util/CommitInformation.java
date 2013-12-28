@@ -27,14 +27,14 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 	private int uid;
 	private String comment;
 	private String path;
-	private boolean fileMove;
+	private boolean fileDelete;
 
 	public CommitInformation(long time, int uid, String comment, String path) {
 		this.time = time;
 		this.uid = uid;
 		this.comment = comment;
 		this.path = path;
-		this.fileMove = false;
+		this.fileDelete = false;
 	}
 	
 	public long getTime() {
@@ -60,6 +60,11 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 	public boolean equivalent(CommitInformation info) {
 		return uid == info.uid &&
 				(comment.length() == 0 || info.comment.length() == 0 || info.comment.equalsIgnoreCase(comment));
+	}
+	
+	@Override
+	public String toString() {
+		return "CommitInfo: " + getTime() + " - " + getUid() + " - " + getComment() + " - " + getPath();
 	}
 
 	@Override
@@ -93,11 +98,11 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 		return -1;
 	}
 
-	public void setFileMove(boolean b) {
-		fileMove = b;
+	public void setFileDelete(boolean b) {
+		fileDelete = b;
 	}
 
-	public boolean isFileMove() {
-		return fileMove;
+	public boolean isFileDelete() {
+		return fileDelete;
 	}
 }

@@ -23,6 +23,7 @@ import com.starbase.starteam.Folder;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.RecycleBin;
 import com.starbase.starteam.View;
+import com.starbase.starteam.ViewConfiguration;
 import com.starbase.util.OLEDate;
 
 public class SerializableView extends View implements Serializable {
@@ -40,6 +41,7 @@ public class SerializableView extends View implements Serializable {
 	private int rootFolderId;
 	private Date createdDate;
 	private int createdBy;
+	private SerializableViewConfiguration baseConfiguration;
 	private transient Project project;
 	private transient Folder rootFolder;
 	
@@ -55,6 +57,7 @@ public class SerializableView extends View implements Serializable {
 		this.id = SimpleTypedResourceIDProvider.getProvider().registerNew(this, this);
 		this.createdDate = new Date(InternalPropertiesProvider.getInstance().getCurrentTime().getLongValue());
 		this.createdBy = InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID();
+		this.baseConfiguration = new SerializableViewConfiguration(ViewConfiguration.createTip());
 		if(null != parent) {
 			project = parent.getProject();
 			if(project instanceof SerializableProject) {
@@ -132,6 +135,11 @@ public class SerializableView extends View implements Serializable {
 	public int getCreatedBy() {
 		return createdBy;
 	}
+	
+	@Override
+	public View[] getDerivedViews() {
+		return new View[0];
+	}
 
 	@Override
 	public Folder getRootFolder() {
@@ -139,6 +147,11 @@ public class SerializableView extends View implements Serializable {
 			rootFolder = createRootFolder(this);
 		}
 		return rootFolder;
+	}
+	
+	@Override
+	public ViewConfiguration getBaseConfiguration() {
+		return baseConfiguration;
 	}
 	
 	@Override

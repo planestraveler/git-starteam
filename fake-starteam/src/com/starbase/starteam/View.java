@@ -132,8 +132,18 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 		return new RecycleBin(this);
 	}
 	
+	public View[] getDerivedViews() {
+		if(null != otherView)
+			 return otherView.getDerivedViews();
+		throw new UnsupportedOperationException("Not implemented at this level");
+	}
+	
 	public ViewConfiguration getConfiguration() {
 		return configuration;
+	}
+
+	public ViewConfiguration getBaseConfiguration() {
+		throw new UnsupportedOperationException("Not implemented at this level");
 	}
 	
 	public void discard() {
@@ -143,7 +153,9 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 		SimpleTypedResource resource = SimpleTypedResourceIDProvider.getProvider().findExisting(this, itemID);
 		if(null != resource) {
 			if(resource.getType().isEqualTo(type)) {
-				return (Item) resource;
+				Item tmp = (Item) resource;
+				tmp.setView(this);
+				return tmp;
 			}
 		}
 		if(type.getName().equals(getTypeNames().FILE)) {
@@ -158,4 +170,23 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	public Server getServer() {
 		return InternalPropertiesProvider.getInstance().getCurrentServer();
 	}
+	
+	public Label createViewLabel(String name, String description, OLEDate time, boolean buildLabel, boolean frozen) {
+		Label ret = new Label(this, name, description, time, buildLabel, frozen);
+		ret.attachToFolder(getRootFolder(), Label.SCOPE_ITEM_AND_CONTENTS);
+		ret.update();
+		return ret;
+	}
+	
+	public Label[] fetchAllLabels() {
+		return Label.getLabelList(getID(), false);
+	}
+	
+	public Label[] getActiveLabels() {
+		return Label.getLabelList(getID(), true);
+	}
+
+	public void close() {
+	}
+
 }

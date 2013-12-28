@@ -14,36 +14,41 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *****************************************************************************/
-package org.ossnoize.fakestarteam.builder.checkin;
+package com.starbase.starteam;
 
-import java.io.IOException;
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
-import org.ossnoize.fakestarteam.builder.CheckInInstruction;
+public class ItemList implements Runnable, Items {
 
-import com.starbase.starteam.Folder;
-import com.starbase.starteam.View;
-import com.starbase.util.OLEDate;
-
-public class Id9 extends CheckInInstruction {
-
+	private List<Item> items;
+	
+	public ItemList() {
+		items = new ArrayList<Item>();
+	}
+	
 	@Override
-	public void checkin(View view) throws IOException {
-		Folder root = view.getRootFolder();
-		Folder src = findFolderIn(root, "src");
-		Folder scons = findFolderIn(src, "scons");
-		
-		scons.remove();
-		
-
-		view.createViewLabel("Check-in Id 9", "Check Id 9 description <remove a folder scons>", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
+	public Item getAt(int pos) {
+		return items.get(pos);
 	}
 
 	@Override
-	public long getTimeOfCheckIn() {
-		Calendar time = Calendar.getInstance();
-		time.set(2010, 6, 19, 15, 15);
-		return time.getTimeInMillis();
+	public int size() {
+		return items.size();
+	}
+	
+	public void addItem(Item item) {
+		items.add(item);
+	}
+	
+	public void populateNow(String[] properties) {
+		// TODO: nothing as we are not network based.
+	}
+
+	@Override
+	@Deprecated()
+	public void run() {
 	}
 
 }

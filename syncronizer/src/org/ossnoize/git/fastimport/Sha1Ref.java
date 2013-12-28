@@ -44,5 +44,19 @@ public class Sha1Ref implements DataRef {
 	public String getId() {
 		return sha1;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof DataRef) {
+			DataRef other = (DataRef) obj;
+			return getId().equals(other.getId());
+		}
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return sha1;
+	}
 
 }
