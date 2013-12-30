@@ -22,7 +22,8 @@
   </target>
 
   <target name="jar" depends="compile">
-    <jar jarfile="bin/syncronizer.jar" basedir="syncronizer/classes"/>
+    <jar jarfile="bin/syncronizer.jar" basedir="syncronizer/classes" 
+         manifest="syncronizer.mf" />
   </target>
 
   <target name="fake-starteam" depends="init">
@@ -31,7 +32,8 @@
            deprecation="on" debug="on" extdirs="/usr/share/java"
            includeAntRuntime="false"
            classpath="${jargs.jar}"/>
-    <jar jarfile="bin/fake-starteam.jar" basedir="fake-starteam/classes"/>
+    <jar jarfile="bin/fake-starteam.jar" basedir="fake-starteam/classes"
+         manifest="fakestarteam.mf" />
   </target>
 
   <target name="test" depends="compile">
