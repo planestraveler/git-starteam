@@ -1,7 +1,5 @@
 <project name="git-starteam" default="jar" basedir=".">
 
-  <!-- no support for building fake-starteam. Use scons if you need that -->
-
   <target name="init">
     <property name="jargs.jar" value="jargs.jar"/>
     <property name="junit.jar" value="junit.jar"/>
@@ -15,12 +13,12 @@
     <delete file="bin/syncronizer.jar"/>
   </target>
 
-  <target name="compile" depends="init">
+  <target name="compile" depends="init,fake-starteam">
     <mkdir dir="syncronizer/classes"/>
     <javac srcdir="syncronizer/src" destdir="syncronizer/classes"
-           deprecation="on" debug="on"
+           deprecation="on" debug="on" extdirs="/usr/share/java"
            includeAntRuntime="false"
-           classpath="${jargs.jar}:${starteam.jar}"/>
+           classpath="${jargs.jar}:${starteam.jar}:fake-starteam/classes"/>
   </target>
 
   <target name="jar" depends="compile">
@@ -30,7 +28,7 @@
   <target name="fake-starteam" depends="init">
     <mkdir dir="fake-starteam/classes"/>
     <javac srcdir="fake-starteam/src" destdir="fake-starteam/classes"
-           deprecation="on" debug="on"
+           deprecation="on" debug="on" extdirs="/usr/share/java"
            includeAntRuntime="false"
            classpath="${jargs.jar}"/>
     <jar jarfile="bin/fake-starteam.jar" basedir="fake-starteam/classes"/>
@@ -40,9 +38,9 @@
     <mkdir dir="syncronizer/testclasses"/>
     <mkdir dir="syncronizer/testreports"/>
     <javac srcdir="syncronizer/test" destdir="syncronizer/testclasses"
-           deprecation="on" debug="on"
+           deprecation="on" debug="on" extdirs="/usr/share/java"
            includeAntRuntime="false"
-           classpath="syncronizer/classes:${jargs.jar}:${starteam.jar}:${junit.jar}"/>
+           classpath="syncronizer/classes:${jargs.jar}:${starteam.jar}:${junit.jar}:fake-starteam/classes"/>
     <junit printsummary="yes" haltonfailure="no">
       <classpath>
         <pathelement location="syncronizer/testclasses"/>
