@@ -496,8 +496,8 @@ public class GitImporter {
 			PropertyNames propNames = view.getPropertyNames();
 			String[] populateProps = new String[] {
 				propNames.FILE_NAME,
-				propNames.ITEM_DELETED_TIME,
-				propNames.ITEM_DELETED_USER_ID,
+				PropertyNames.ITEM_DELETED_TIME,
+				PropertyNames.ITEM_DELETED_USER_ID,
 			};
 			items.populateNow(populateProps);
 

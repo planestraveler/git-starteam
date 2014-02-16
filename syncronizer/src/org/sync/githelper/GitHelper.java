@@ -606,7 +606,6 @@ public class GitHelper extends RepositoryHelper {
 		public void run() {
 			StringBuilder firstResponse = new StringBuilder(50);
 			try {
-				MessageDigest digest = MessageDigest.getInstance("MD5");
 				int character;
 				do {
 					character = stream.read();
@@ -628,8 +627,6 @@ public class GitHelper extends RepositoryHelper {
 					firstResponse.setLength(0);
 				} while(character >= 0);
 			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			}
 		}
