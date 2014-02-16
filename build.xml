@@ -59,4 +59,12 @@
     </junit>
   </target>
 
+  <target name="package" depends="jar">
+    <zip destfile="git-starteam.zip">
+    	<fileset dir="." includes="bin/syncronizer.jar" />
+    	<zipfileset dir="/usr/share/java" includes="${jargs.jar}" prefix="3rdParty"/>
+    	<fileset dir="." includes="README.md"/>
+    </zip>
+  </target>
+
 </project>
