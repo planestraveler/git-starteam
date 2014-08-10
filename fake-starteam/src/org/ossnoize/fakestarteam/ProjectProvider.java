@@ -42,6 +42,10 @@ public class ProjectProvider {
 		return Reference;
 	}
 	
+	public static void deleteInstance() {
+		Reference = null;
+	}
+	
 	private Map<String, SerializableProject> projects = new HashMap<String, SerializableProject>();
 	
 	private ProjectProvider() {

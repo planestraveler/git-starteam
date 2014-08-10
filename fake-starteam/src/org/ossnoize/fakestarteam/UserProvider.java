@@ -41,6 +41,10 @@ public class UserProvider {
 		return Reference;
 	}
 	
+	public static void deleteInstance() {
+		Reference = null;
+	}
+	
 	private Map<Integer, SerializableUser> users = new HashMap<Integer, SerializableUser>();
 	
 	private UserProvider() {

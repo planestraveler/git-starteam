@@ -30,6 +30,10 @@ public class InternalPropertiesProvider {
 		}
 		return Reference;
 	}
+	
+	public static void deleteInstace() {
+		Reference = null;
+	}
 
 	private File Archive;
 	private File StorageLocation;

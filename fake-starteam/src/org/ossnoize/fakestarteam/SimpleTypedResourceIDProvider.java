@@ -62,6 +62,10 @@ public class SimpleTypedResourceIDProvider implements Serializable {
 		return provider;
 	}
 	
+	public static void deleteProvider() {
+		provider = null;
+	}
+	
 	private void postInit() {
 		existingResource = new HashMap<View, Map<Integer,SimpleTypedResource>>();
 	}
