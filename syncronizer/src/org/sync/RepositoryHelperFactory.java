@@ -79,4 +79,8 @@ public class RepositoryHelperFactory {
 	public void setWorkingFolder(String workingFolder) {
 		this.workingFolder = workingFolder;
 	}
+
+	public static void deleteFactory() {
+		instance = null;
+	}
 }

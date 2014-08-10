@@ -46,6 +46,7 @@ public class MainEntryTest {
 		UserProvider.deleteInstance();
 		InternalPropertiesProvider.deleteInstace();
 		ProjectProvider.deleteInstance();
+		RepositoryHelperFactory.deleteFactory();
 	}
 
 	@Test
@@ -83,6 +84,7 @@ public class MainEntryTest {
 		assertCommit18(i.next());
 		assertCommit19(i.next());
 		assertCommit20(i.next());
+		assertFalse(i.hasNext());
 	}
 	
 	@Test
@@ -111,6 +113,40 @@ public class MainEntryTest {
 		assertCommit09(i.next());
 		assertCommit10(i.next());
 		assertCommit11(i.next());
+		assertFalse(i.hasNext());
+		
+		StarteamProjectBuilder.main(new String[] {"UnitTest", "6", "10"});
+
+		MainEntry.main(new String[] {
+				"-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
+				"-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose", "-R"
+				});
+		
+		entries = helper.getCommitLog(new SmallRef("MAIN"));
+		Collections.reverse(entries);
+		i = entries.iterator();
+		
+		assertCommit01(i.next());
+		assertCommit02(i.next());
+		assertCommit03(i.next());
+		assertCommit04(i.next());
+		assertCommit05(i.next());
+		assertCommit06(i.next());
+		assertCommit07(i.next());
+		assertCommit08(i.next());
+		assertCommit09(i.next());
+		assertCommit10(i.next());
+		assertCommit11(i.next());
+		assertCommit12(i.next());
+		assertCommit13(i.next());
+		assertCommit14(i.next());
+		assertCommit15(i.next());
+		assertCommit16(i.next());
+		assertCommit17(i.next());
+		assertCommit18(i.next());
+		assertCommit19(i.next());
+		assertCommit20(i.next());
+		assertFalse(i.hasNext());
 	}
 
 	private void assertCommit20(LogEntry entry) {
