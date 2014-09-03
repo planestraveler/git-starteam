@@ -243,6 +243,7 @@ public class GitImporter {
 			}
 		}
 		exportStream = helper.getFastImportStream();
+		Commit commit = null;
 		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
 			CommitInformation current = e.getKey();
@@ -302,7 +303,7 @@ public class GitImporter {
 					}
 					lastCommit.addFileOperation(fo);
 				} else {
-					Commit commit = new Commit(userName, userEmail, current.getComment(), head, new java.util.Date(current.getTime()));
+					commit = new Commit(userName, userEmail, current.getComment(), head, new java.util.Date(current.getTime()));
 					commit.addFileOperation(fo);
 					if(null == lastCommit) {
 						if(isResume) {
@@ -352,7 +353,7 @@ public class GitImporter {
 				} else {
 					janitorTime = new java.util.Date(lastModifiedTime);
 				}
-				Commit commit = new Commit("git-starteam File Janitor",
+				commit = new Commit("git-starteam File Janitor",
 						"janitor@" + domain,
 						"Cleaning files move along",
 						head,
@@ -384,9 +385,9 @@ public class GitImporter {
 				e1.printStackTrace();
 			}
 		}
-		if(null != lastCommit) {
+		if(null != commit) {
 			try {
-				helper.writeCommit(lastCommit);
+				helper.writeCommit(commit);
 				TempFileManager.getInstance().deleteTempFiles();
 			} catch (IOException e1) {
 				e1.printStackTrace();
