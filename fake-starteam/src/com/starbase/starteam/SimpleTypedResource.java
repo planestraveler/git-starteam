@@ -39,7 +39,7 @@ public class SimpleTypedResource extends TypedResource implements Cloneable {
 	
 	@Override
 	public int hashCode() {
-		return getID();
+		return super.hashCode();
 	}
 	
 	@Override
