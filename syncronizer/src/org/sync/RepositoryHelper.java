@@ -212,7 +212,6 @@ public abstract class RepositoryHelper {
 			// if we are doing this process for 3 hours
 			writeCheckpoint();
 		}
-		saveFileInformation();
 	}
 
 	/**
@@ -291,6 +290,7 @@ public abstract class RepositoryHelper {
       finishedImport.writeTo(out);
 			out.close();
 		} catch (IOException e) {
+      Log.log(e.getMessage());
 		}
 	}
 	

@@ -245,9 +245,9 @@ public class GitHelper extends RepositoryHelper {
 
 	@Override
 	public void dispose() {
+    super.dispose();
 		try {
 			if(null != gitFastImport) {
-				gitFastImport.getOutputStream().close();
 				int endCode = gitFastImport.waitFor();
 				if(endCode != 0) {
 					Log.log("Git fast-import has finished anormally with code:" + endCode);
@@ -256,8 +256,6 @@ public class GitHelper extends RepositoryHelper {
 				gitFastImportErrorEater.join();
 			}
 		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -323,7 +321,7 @@ public class GitHelper extends RepositoryHelper {
 		if(null == fastExportOverrideToFile) {
 			if(null == gitFastImport) {
 				ProcessBuilder process = new ProcessBuilder();
-				process.command(gitExecutable, "fast-import");
+				process.command(gitExecutable, "fast-import", "--done");
 				process.directory(new File(repositoryDir));
 				try {
 					gitFastImport = process.start();
@@ -354,16 +352,7 @@ public class GitHelper extends RepositoryHelper {
 	@Override
 	public boolean isFastImportRunning() {
 		if(null == fastExportOverrideToFile && null != gitFastImport ) {
-			try {
-				if(0 == gitFastImport.exitValue()) {
-					gitFastImport = null;
-					return false;
-				} else {
-					return true;
-				}
-			} catch (IllegalThreadStateException e) {
-			}
-			return true;
+      return gitFastImport.isAlive();
 		}
 		return false;
 	}
@@ -623,6 +612,8 @@ public class GitHelper extends RepositoryHelper {
 							String filename = firstResponse.substring(54).trim();
 							trackedFiles.get(currentHead).put(filename, new Sha1Ref(sha1));
 						}
+					} else {
+						System.err.println("Unknown response " + firstResponse);
 					}
 					firstResponse.setLength(0);
 				} while(character >= 0);

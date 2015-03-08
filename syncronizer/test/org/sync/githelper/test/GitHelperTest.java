@@ -162,6 +162,7 @@ public class GitHelperTest {
 	@Test
 	public void testLogEntry() {
 		List<LogEntry> renamedLog = test.getCommitLog(new SmallRef("e09d507"));
+    assertTrue(renamedLog.size() > 0);
 		assertEquals("Steve Tousignant <s.tousignant@gmail.com>", renamedLog.get(0).getAuthor());
 		assertEquals("MD5Builder is better placed in the util package.", renamedLog.get(0).getComment());
 		assertEquals(new Sha1Ref("e09d5071e480a2f4906dd8fae05afdbdf3492415"), renamedLog.get(0).getCommitRef());

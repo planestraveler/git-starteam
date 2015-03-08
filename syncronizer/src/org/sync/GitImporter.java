@@ -278,12 +278,12 @@ public class GitImporter {
 						if(revision != f.getContentVersion()) { 
 							helper.updateFileVersion(head, path, f.getContentVersion());
 							if(verbose) {
-							    Log.log("file was updated " + revision + " => " + f.getContentVersion() + ": " + path);
+							    Log.log("File was updated " + revision + " => " + f.getContentVersion() + ": " + path);
 							}
 						}
 					} else {
 						if(verbose)	{
-							Log.log("Not file revision was found for : " + path);
+							Log.log("No file revision was found for : " + path);
 						}
 					}
 					
@@ -406,13 +406,16 @@ public class GitImporter {
 		folder.discardItems(server.getTypeNames().FILE, -1);
 	}
 	
-	@Override
-	protected void finalize() throws Throwable {
-		exportStream.close();
+	private void finish() {
+    
 		while(helper.isFastImportRunning()) {
-			Thread.sleep(500); // active wait but leave him a chance to actually finish.
+      try {
+        Thread.sleep(500); // active wait but leave him a chance to actually finish.
+      } catch (InterruptedException ex) {
+        Log.log(ex.getMessage());
+      }
 		}
-		super.finalize();
+    helper.gc();
 	}
 
 	// Determines what happened to files which were in the view during the previous
@@ -693,7 +696,6 @@ public class GitImporter {
 				lastViewTime = viewTime;
 			}
 		}
-		helper.gc();
 	}
 
 	public void generateAllLabelImport(View view, String baseFolder) {
@@ -804,11 +806,10 @@ public class GitImporter {
 
 			view.close();
 		}
-		helper.gc();
 	}
 
 	private static String labelRef(View view, Label label) {
-		return refName(view.getName() + "." + label.getName());
+		return refName(view.getName() + "/" + label.getName());
 	}
 
 	public static String refName(String name) {
@@ -950,7 +951,6 @@ public class GitImporter {
 			vc.close();
 			lastViewTime = viewTime;
 		}
-		helper.gc();
 	}
 
 	private String getBaseTag(View v) {
@@ -1003,5 +1003,6 @@ public class GitImporter {
 	
 	public void dispose() {
 		helper.dispose();
+    finish();
 	}
 }
