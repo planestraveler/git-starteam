@@ -242,7 +242,7 @@ public class GitImporter {
 				Log.log("Latest file: " + latest.getPath() + " @ " + new java.util.Date(latest.getTime()));
 			}
 		}
-		exportStream = helper.getFastImportStream();
+    
 		Commit commit = null;
 		for(Map.Entry<CommitInformation, File> e : AddedSortedFileList.entrySet()) {
 			File f = e.getValue();
@@ -270,7 +270,6 @@ public class GitImporter {
 						continue;
 					}
 					Blob fileToStage = new Blob(new Data(aFile));
-					
 					helper.writeBlob(fileToStage);
 					
 					Integer revision = helper.getRegisteredFileVersion(head, path);

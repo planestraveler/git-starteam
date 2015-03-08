@@ -85,7 +85,7 @@ public class MainEntryTest {
 		assertCommit19(i.next());
 		assertCommit20(i.next());
 		assertFalse(i.hasNext());
-    String repoInformation = importLocation.getAbsolutePath() + File.pathSeparator + "starteam" + File.pathSeparator + "StarteamFileInfo.gz";
+    String repoInformation = importLocation.getAbsolutePath() + File.separator + "starteam" + File.separator + "StarteamFileInfo.gz";
     assertTrue(new File(repoInformation).exists());
 	}
 	

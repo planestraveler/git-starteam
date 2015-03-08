@@ -254,6 +254,7 @@ public class GitHelper extends RepositoryHelper {
 				}
 				gitFastImportOutputEater.join();
 				gitFastImportErrorEater.join();
+        gitFastImport = null;
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -319,32 +320,32 @@ public class GitHelper extends RepositoryHelper {
 	@Override
 	protected OutputStream getFastImportStream() {
 		if(null == fastExportOverrideToFile) {
-			if(null == gitFastImport) {
-				ProcessBuilder process = new ProcessBuilder();
-				process.command(gitExecutable, "fast-import", "--done");
-				process.directory(new File(repositoryDir));
-				try {
-					gitFastImport = process.start();
-					gitResponse = new GitFastImportOutputReader(gitFastImport.getInputStream());
-					gitFastImportOutputEater = new Thread(gitResponse);
-					gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream(), "fast-import"));
-					gitFastImportOutputEater.start();
-					gitFastImportErrorEater.start();
-					OutputStream out = gitFastImport.getOutputStream();
-					// Validate Feature needed;
-					Feature feature = new Feature(FeatureType.DateFormat, "raw");
-					feature.writeTo(out);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			return gitFastImport.getOutputStream();
+      if(null == gitFastImport) {
+        ProcessBuilder process = new ProcessBuilder();
+        process.command(gitExecutable, "fast-import", "--done");
+        process.directory(new File(repositoryDir));
+        try {
+          gitFastImport = process.start();
+          gitResponse = new GitFastImportOutputReader(gitFastImport.getInputStream());
+          gitFastImportOutputEater = new Thread(gitResponse);
+          gitFastImportErrorEater = new Thread(new ErrorEater(gitFastImport.getErrorStream(), "fast-import"));
+          gitFastImportOutputEater.start();
+          gitFastImportErrorEater.start();
+          OutputStream out = gitFastImport.getOutputStream();
+          // Validate Feature needed;
+          Feature feature = new Feature(FeatureType.DateFormat, "raw");
+          feature.writeTo(out);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      return gitFastImport.getOutputStream();
 		} else {
 			try {
 				return new FileOutputStream(fastExportOverrideToFile.getPath() + "." + (debugFileCounter++));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-			}
+      }
 			return null;
 		}
 	}

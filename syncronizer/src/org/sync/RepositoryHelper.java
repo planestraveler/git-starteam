@@ -34,8 +34,6 @@ import org.sync.util.LogEntry;
 import org.sync.util.SmallRef;
 import org.sync.util.StarteamFileInfo;
 
-import com.starbase.util.MD5;
-
 public abstract class RepositoryHelper {
 	protected final static long timeForEachCheckpoint = 1000L*60L*60L*3L; // 3 Hours
 
