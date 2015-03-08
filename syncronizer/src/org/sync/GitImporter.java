@@ -500,8 +500,11 @@ public class GitImporter {
 				PropertyNames.ITEM_DELETED_TIME,
 				PropertyNames.ITEM_DELETED_USER_ID,
 			};
-			items.populateNow(populateProps);
-
+      try {
+        items.populateNow(populateProps);
+      } catch (com.starbase.starteam.NoSuchPropertyException e) {
+        Log.log("Could not populate the deleted files information");
+      }
 			for (int i = 0; i < nDeleted; i++) {
 				File item = deletedFiles[i];
 				CommitInformation info = new CommitInformation(item.getDeletedTime().getLongValue(),
