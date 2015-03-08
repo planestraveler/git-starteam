@@ -32,7 +32,7 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 	public CommitInformation(long time, int uid, String comment, String path) {
 		this.time = time;
 		this.uid = uid;
-		this.comment = comment;
+		this.comment = comment.trim();
 		this.path = path;
 		this.fileDelete = false;
 	}

@@ -115,5 +115,11 @@ public class CommitInformationTest {
 		assertTrue(commitE.compareTo(commitF) > 0);
 		assertNotSame(commitF, commitE);
 	}
+  
+  @Test
+  @SuppressWarnings("IncompatibleEquals")
+  public void testSomethingAndCommitInfo() {
+    assertFalse(commitF.equals(this));
+  }
 
 }
