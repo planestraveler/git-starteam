@@ -23,7 +23,7 @@ public class Done implements FastImportObject {
 
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
-		out.write("done".getBytes());
+		out.write("done\n".getBytes());
 		out.flush();
 	}
 
