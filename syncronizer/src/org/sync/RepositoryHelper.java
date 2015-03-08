@@ -27,6 +27,7 @@ import java.util.Set;
 import org.ossnoize.git.fastimport.Blob;
 import org.ossnoize.git.fastimport.Checkpoint;
 import org.ossnoize.git.fastimport.Commit;
+import org.ossnoize.git.fastimport.Done;
 import org.ossnoize.git.fastimport.Reset;
 import org.ossnoize.git.fastimport.Tag;
 import org.sync.util.LogEntry;
@@ -285,7 +286,10 @@ public abstract class RepositoryHelper {
 	public void dispose() {
 		saveFileInformation();
 		try {
-			getFastImportStream().close();
+      OutputStream out = getFastImportStream();
+      Done finishedImport = new Done();
+      finishedImport.writeTo(out);
+			out.close();
 		} catch (IOException e) {
 		}
 	}
