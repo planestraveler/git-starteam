@@ -211,6 +211,7 @@ public abstract class RepositoryHelper {
 			// if we are doing this process for 3 hours
 			writeCheckpoint();
 		}
+		saveFileInformation();
 	}
 
 	/**
@@ -222,7 +223,6 @@ public abstract class RepositoryHelper {
 		checkpoint.writeTo(fastImportStream);
 		lastCheckpointTime = System.currentTimeMillis();
 		Log.out("Checkpoint done");
-		saveFileInformation();
 	}
 	
 	/**
