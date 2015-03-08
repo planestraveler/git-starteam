@@ -105,6 +105,7 @@ public class Id6 extends CheckInInstruction {
 				"Copy files from msvcp90", 0);
 
 		view.createViewLabel("Check-in Id 6", "Check Id 6 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
+    view.createViewLabel("Duplicate Id 6", "This is a tag added following a rebuild", new OLEDate(getTimeOfCheckIn() + 1001), true, true);
 	}
 
 	@Override
