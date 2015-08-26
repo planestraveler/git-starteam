@@ -68,7 +68,7 @@ public class RenameFinder {
 		}
 
 		// some folder was probably renamed during the time period
-		if (!oldFolderName.equals(folderName)) {
+		if (null != oldFolderName && !oldFolderName.equals(folderName)) {
 			for (Folder folder = file.getParentFolder(); folder != null; folder = folder.getParentFolder()) {
 				Folder item = folderCache.get(folder);
 				if (item != null) {
