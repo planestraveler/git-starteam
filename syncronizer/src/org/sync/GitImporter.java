@@ -197,9 +197,9 @@ public class GitImporter {
 			return;
 		}
 		
-		String head = view.getName();
+		String head = refName(view.getName());
 		if(null != alternateHead) {
-			head = alternateHead;
+			head = refName(alternateHead);
 		}
 		
 		if(verbose) {
