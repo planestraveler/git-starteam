@@ -197,9 +197,9 @@ public class GitImporter {
 			return;
 		}
 		
-		String head = view.getName();
+		String head = refName(view.getName());
 		if(null != alternateHead) {
-			head = alternateHead;
+			head = refName(alternateHead);
 		}
 		
 		if(verbose) {
@@ -626,7 +626,7 @@ public class GitImporter {
 					if(verbose) Log.out("Added new file <" + info + ">");
 				} else {
 					Integer rev = helper.getRegisteredFileVersion(head, path);
-					if(rev != null && rev < historyFile.getRevisionNumber()) {
+					if(rev != null && rev < historyFile.getContentVersion()) {
 						AddedSortedFileList.put(info, historyFile);
 						if(verbose) Log.out("updated new file <" + info + ">");
 					}

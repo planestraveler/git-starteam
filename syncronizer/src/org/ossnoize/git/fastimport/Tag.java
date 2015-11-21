@@ -46,7 +46,16 @@ public class Tag implements FastImportObject {
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
 		StringBuilder tagMsg = new StringBuilder();
-		tagMsg.append("tag ").append(tagName).append('\n');
+		tagMsg.append("tag ");
+		if (tagName.length() > 255)
+		{
+			tagMsg.append(tagName.substring(0,255));
+		}
+		else
+		{
+			tagMsg.append(tagName);
+		}
+		tagMsg.append('\n');
 		tagMsg.append("from ").append(committish.getId()).append('\n');
 		tagMsg.append("tagger ").append(taggerName)
 			.append(" <").append(taggerEmail).append("> ")
