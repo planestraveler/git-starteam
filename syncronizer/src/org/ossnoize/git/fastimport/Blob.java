@@ -40,6 +40,7 @@ public class Blob implements Markable {
 		Content = data;
 	}
 	
+  @Override
 	public void writeTo(OutputStream out) throws IOException {
 		if(!wasWritten) {
 			out.write(BLOB.getBytes());

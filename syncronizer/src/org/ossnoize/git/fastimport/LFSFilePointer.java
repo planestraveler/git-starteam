@@ -82,4 +82,10 @@ public class LFSFilePointer extends Data {
                      "size " + sizeOfLargeFile + "\n").getBytes("UTF-8"));
     super.writeTo(output);
   }
+  
+  @Override
+  public void writeData(byte[] array)
+  {
+    throw new UnsupportedOperationException("LFSFilePointer should not be used this way");
+  }
 }
