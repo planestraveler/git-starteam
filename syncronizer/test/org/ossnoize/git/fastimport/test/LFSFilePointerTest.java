@@ -19,6 +19,7 @@ package org.ossnoize.git.fastimport.test;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
@@ -34,12 +35,12 @@ import org.ossnoize.git.fastimport.LFSFilePointer;
  */
 public class LFSFilePointerTest {
   
-  private ByteArrayOutputStream mOutput = new ByteArrayOutputStream(2048);
+  private ByteArrayOutputStream mOutput;
   private LFSFilePointer mPointer;
   
   @Before
   public void SetUp() throws NoSuchAlgorithmException, IOException  {
-    mOutput.reset();
+    mOutput = new ByteArrayOutputStream(2048);
     Path tempDirectory = Files.createTempDirectory("LFSTest");
     
     mPointer = new LFSFilePointer(tempDirectory.toString(), new File("../testfiles/bigfile.bin"));
@@ -47,7 +48,8 @@ public class LFSFilePointerTest {
   
   @After
   public void TearDown() {
-    mOutput.reset();
+    mOutput = null;
+    mPointer = null;
   }
   
   @Test
@@ -60,6 +62,11 @@ public class LFSFilePointerTest {
       "oid sha256:de73c67cc17aba8cad0561ad6391d4a1146a81ed7af70efbfd42987599a04761\n" +
       "size 104857600\n\n", // a data command put an extra line feed at the end of the command 
       mOutput.toString("UTF-8"));
+  }
+  
+  @Test(expected=UnsupportedOperationException.class)
+  public void testWriteArray() throws UnsupportedEncodingException {
+    mPointer.writeData("Some fake inforamtion".getBytes("UTF-8"));
   }
   
 }
