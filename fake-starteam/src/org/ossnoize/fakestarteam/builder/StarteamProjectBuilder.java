@@ -119,7 +119,7 @@ public class StarteamProjectBuilder {
 	/* Static section of the builder */
 
 	private final static int first = 1;
-	private final static int last = 10;
+	private final static int last = 12;
 	public static void main(String[] args) {
 		StarteamProjectBuilder builder = StarteamProjectBuilder.createBuilder();
 		builder.createTestUser("Test", "passw0rd");
