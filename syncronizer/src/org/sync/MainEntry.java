@@ -58,6 +58,7 @@ public class MainEntry {
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
 		CmdLineParser.Option isCheckpoint = parser.addBooleanOption("checkpoint");
 		CmdLineParser.Option selectSkipViewsPattern = parser.addStringOption("skip-views");
+    CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs");
 		//TODO: Add a tag filtering functionality default to version like matching ex: .*[0-9]+\.[0-9]+\.[0-9]+[\.]?[0-9]*.*
 
 		try {
@@ -97,11 +98,36 @@ public class MainEntry {
 		boolean verbose = verboseFlag != null && verboseFlag;
 		Boolean checkpointFlag = (Boolean) parser.getOptionValue(isCheckpoint);
 		boolean createCheckpoints = checkpointFlag != null && checkpointFlag;
+    
+    String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
 		
 		if(host == null || port == null || project == null || (view == null && !allViews)) {
 			printHelp();
 			System.exit(3);
 		}
+    
+    long startTrackingAtSize = Long.MAX_VALUE;
+    if (lfsSize != null)
+    {
+      lfsSize = lfsSize.trim();
+      long baseSize = Long.parseLong(lfsSize.substring(0, lfsSize.length() - 2));
+      if (lfsSize.endsWith("K"))
+      {
+        startTrackingAtSize = baseSize * 1024L;
+      }
+      else if (lfsSize.endsWith("M"))
+      {
+        startTrackingAtSize = baseSize * 1024L * 1024L;
+      }
+      else if (lfsSize.endsWith("G"))
+      {
+        startTrackingAtSize = baseSize * 1024L * 1024L * 1024L;
+      }
+      else
+      {
+        startTrackingAtSize = Long.parseLong(lfsSize);
+      }
+    }
 
 		Date date = null;
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -178,6 +204,7 @@ public class MainEntry {
 						importer.setVerbose(verbose);
 						importer.setCreateCheckpoints(createCheckpoints);
 						importer.setDomain(domain);
+            importer.setMinimumLFSSize(startTrackingAtSize);
 
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
@@ -245,6 +272,7 @@ public class MainEntry {
 		System.out.println("[--checkpoint]\t\tCreate git fast-import checkpoints after each label");
 		System.out.println("[--skip-views <regex>]\t\tSkip views matching regex when using -A");
 		System.out.println("[--verbose]\t\tVerbose output");
+    System.out.println("[--lfs <size>[KMG]\t Minimum size to consider using LFS (disabled by default)");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		
 	}

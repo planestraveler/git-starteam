@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -20,7 +21,6 @@ import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.sync.MainEntry;
 import org.sync.RepositoryHelper;
 import org.sync.RepositoryHelperFactory;
-import org.sync.util.FileUtility;
 import org.sync.util.LogEntry;
 import org.sync.util.SmallRef;
 
@@ -29,13 +29,8 @@ public class MainEntryTest {
 	private static File importLocation;
 	@Before
 	public void setUp() throws Exception {
-		String baseFolder = System.getProperty("java.io.tmpdir") + File.separator + "repository";
+		String baseFolder = Files.createTempDirectory("repository").toString();
 		importLocation = new File(baseFolder);
-		if(importLocation.exists())
-		{
-			FileUtility.rmDir(importLocation);
-			System.out.println("Removing " + baseFolder);
-		}
 		InternalPropertiesProvider.getInstance().setBaseStorageLocation(baseFolder);
 	}
 
@@ -51,7 +46,7 @@ public class MainEntryTest {
 
 	@Test
 	public void testLabelImport() throws IOException {
-		StarteamProjectBuilder.main(new String[] {"UnitTest"});
+		StarteamProjectBuilder.main(new String[] {"UnitTest", "1", "10"});
 		MainEntry.main(new String[] {
 				"-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
 				"-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose"
@@ -151,6 +146,27 @@ public class MainEntryTest {
 		assertFalse(i.hasNext());
 	}
 
+  @Test
+  public void testLabelWithLFS() throws IOException {
+		StarteamProjectBuilder.main(new String[] {"UnitTest", "11", "12"});
+
+		MainEntry.main(new String[] {
+				"-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
+				"-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose",
+        "--lfs", "32M"
+				});
+    
+    File lfsBoost155 = new File(importLocation.getAbsolutePath() + File.separator 
+      + "lfs" + File.separator + "objects" + File.separator + "ff" + File.separator
+      + "f0" + File.separator + "fff00023dd79486d444c8e29922f4072e1d451fc5a4d2b6075852ead7f2b7b52");
+    assertTrue(lfsBoost155.exists());
+    
+    File lfsBoost156 = new File(importLocation.getAbsoluteFile() + File.separator
+      + "lfs" + File.separator + "objects" + File.separator + "13" + File.separator
+      + "47" + File.separator + "134732acaf3a6e7eba85988118d943f0fa6b7f0850f65131fff89823ad30ff1d");
+    assertTrue(lfsBoost156.exists());
+  }
+  
 	private void assertCommit20(LogEntry entry) {
 		int index;
 		assertEquals("Load from history and Return it",        entry.getComment());

@@ -302,4 +302,12 @@ public abstract class RepositoryHelper {
 		repositoryDir = dir;
 	}
 
+  /**
+   * Provide the repository directory where every internal files are located
+   * @return Directory where is located the internal files.
+   */
+  public String getWorkingDirectory() {
+    return repositoryDir;
+  }
+
 }

@@ -62,6 +62,8 @@ import com.starbase.starteam.File;
 import com.starbase.starteam.CheckoutManager;
 import com.starbase.starteam.ViewConfiguration;
 import com.starbase.util.OLEDate;
+import java.security.NoSuchAlgorithmException;
+import org.ossnoize.git.fastimport.LFSFilePointer;
 
 public class GitImporter {
 	private Server server;
@@ -95,6 +97,7 @@ public class GitImporter {
 	private Map<String, DataRef> tagMarks = new HashMap<String, DataRef>();
 	// email domain to use
 	private String domain;
+  private long lfsMinimumSize;
 	
 	public GitImporter(Server s, Project p) {
 		server = s;
@@ -252,7 +255,7 @@ public class GitImporter {
 			String path = pathname(f);
 
 			try {
-				FileOperation fo = null;
+				FileOperation fo;
 				if(current.isFileDelete()) {
 					fo = new FileDelete();
 					// path may be the new file, but current.getPath() is the old deleted path.
@@ -269,7 +272,19 @@ public class GitImporter {
 						Log.logf("Failed to checkout %s: %s", path, ex);
 						continue;
 					}
-					Blob fileToStage = new Blob(new Data(aFile));
+          Data fileData;
+          if(aFile.length() < lfsMinimumSize) {
+            fileData = new Data(aFile);
+          } else {
+            try {
+              fileData = new LFSFilePointer(helper.getWorkingDirectory(), aFile);
+            } catch (NoSuchAlgorithmException ex) {
+              Log.logf("Failed to add the file as a largefile %s, reverting to basic behavior", ex);
+              lfsMinimumSize = Long.MAX_VALUE;
+              fileData = new Data(aFile);
+            }
+          }
+					Blob fileToStage = new Blob(fileData);
 					helper.writeBlob(fileToStage);
 					
 					Integer revision = helper.getRegisteredFileVersion(head, path);
@@ -448,7 +463,7 @@ public class GitImporter {
 				} else {
 					item = (File) view.findItem(fileType, fileID);
 					if(null != item) {
-						CommitInformation deleteInfo = null;
+						CommitInformation deleteInfo;
 						Item renameEventItem = renameFinder.findEventItem(view, path, pathname(item), item, lastViewTime);
 						if(null != renameEventItem) {
 							if(verbose) {
@@ -1004,4 +1019,8 @@ public class GitImporter {
 		helper.dispose();
     finish();
 	}
+
+  void setMinimumLFSSize(long startTrackingAtSize) {
+    lfsMinimumSize = startTrackingAtSize;
+  }
 }

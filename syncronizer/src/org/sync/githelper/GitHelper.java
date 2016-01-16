@@ -478,6 +478,14 @@ public class GitHelper extends RepositoryHelper {
 		}
 		isBare = isBareRepository();
 	}
+  
+  @Override
+  public String getWorkingDirectory() {
+    if(isBare) {
+      return repositoryDir;
+    }
+    return repositoryDir + java.io.File.separator + ".git";
+  }
 	
 	private class GitLsFilesReader implements Runnable {
 
