@@ -165,6 +165,48 @@ public class MainEntryTest {
       + "lfs" + File.separator + "objects" + File.separator + "13" + File.separator
       + "47" + File.separator + "134732acaf3a6e7eba85988118d943f0fa6b7f0850f65131fff89823ad30ff1d");
     assertTrue(lfsBoost156.exists());
+    
+		RepositoryHelperFactory.getFactory().setCreateRepo(false);
+		RepositoryHelper helper = RepositoryHelperFactory.getFactory().createHelper();
+    
+    
+		List<LogEntry> entries = helper.getCommitLog(new SmallRef("MAIN"));
+		Collections.reverse(entries);
+		Iterator<LogEntry> i = entries.iterator();
+    assertCommitLFS1(i.next());
+    assertCommitLFS2(i.next());
+  }
+  
+  private void assertCommitLFS1(LogEntry entry) {
+    int index = 0;
+    assertEquals("Boost version 1.55.0 sources",        entry.getComment());
+    assertEquals("Test <Test@test.com>",                entry.getAuthor());
+    assertEquals(2,                                     entry.getFilesEntry().size());
+    assertEquals("archive/Boost_1_55_0.tar.bz2",        entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.NullFile,                  entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                    entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition,  entry.getFilesEntry().get(index).getTypeOfModification());
+    index++;
+    assertEquals(".gitattributes",                      entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.NullFile,                  entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                    entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition,  entry.getFilesEntry().get(index).getTypeOfModification());
+  }
+  
+  private void assertCommitLFS2(LogEntry entry) {
+    int index = 0;
+    assertEquals("Source archive of boost 1.56.0",          entry.getComment());
+    assertEquals("Test <Test@test.com>",                    entry.getAuthor());
+    assertEquals(2,                                         entry.getFilesEntry().size());
+    assertEquals("archive/Boost_1_56_0.tar.bz2",            entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition,      entry.getFilesEntry().get(index).getTypeOfModification());
+    index++;
+    assertEquals(".gitattributes",                          entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
   }
   
 	private void assertCommit20(LogEntry entry) {
