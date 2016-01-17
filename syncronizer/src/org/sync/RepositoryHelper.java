@@ -310,4 +310,14 @@ public abstract class RepositoryHelper {
     return repositoryDir;
   }
 
+  /**
+   * Extract the lastest version of the requested file from the current state
+   * of the fast-import process
+   * 
+   * @param head which branch to look at
+   * @param path which file we should grab
+   * @param stream an output stream where we can store the extracted information
+   */
+  public abstract void getFileContent(String head, String path, java.io.OutputStream stream);
+
 }

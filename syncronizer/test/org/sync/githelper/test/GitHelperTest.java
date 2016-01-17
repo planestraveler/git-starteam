@@ -16,10 +16,13 @@
 ******************************************************************************/
 package org.sync.githelper.test;
 
+import java.io.ByteArrayOutputStream;
 import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Set;
 
@@ -177,4 +180,16 @@ public class GitHelperTest {
 		assertEquals(GitFileType.Normal, renamedLog.get(0).getFilesEntry().get(1).getToType());
 		assertEquals(98, renamedLog.get(0).getFilesEntry().get(1).getDiffRatio());
 	}
+  
+  @Test
+  public void testCatBlob() throws NoSuchAlgorithmException {
+    ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
+    test.getFileContent("master", "testfiles/ipsum1.txt", stream);
+    
+    MessageDigest digest = MessageDigest.getInstance("MD5");
+    byte[] digested = digest.digest(stream.toByteArray());
+    String md5sum = String.format("%032x", new java.math.BigInteger(1, digested));
+    
+    assertEquals("a7e10f59183aa3c456e9059fb7036c9b", md5sum);
+  }
 }

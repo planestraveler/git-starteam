@@ -28,8 +28,6 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,7 +37,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import org.ossnoize.git.fastimport.CatBlob;
 
 import org.ossnoize.git.fastimport.Commit;
 import org.ossnoize.git.fastimport.DataRef;
@@ -335,6 +339,8 @@ public class GitHelper extends RepositoryHelper {
           // Validate Feature needed;
           Feature feature = new Feature(FeatureType.DateFormat, "raw");
           feature.writeTo(out);
+          Feature catBlb = new Feature(FeatureType.CatBlob);
+          catBlb.writeTo(out);
         } catch (IOException e) {
           e.printStackTrace();
         }
@@ -486,6 +492,29 @@ public class GitHelper extends RepositoryHelper {
     }
     return repositoryDir + java.io.File.separator + ".git";
   }
+  
+  @Override
+  public void getFileContent(String head, String path, OutputStream whereToStore) {
+    if(!trackedFiles.containsKey(head)) {
+      grabTrackedFiles(head);
+    }
+    if(trackedFiles.containsKey(head)) {
+      if(trackedFiles.get(head).containsKey(path))
+      {
+        OutputStream gitFastImportStream = getFastImportStream(); // Make sure fast import process is started
+        DataRef fileRef = trackedFiles.get(head).get(path);
+        CatBlob request = new CatBlob(fileRef);
+        try {
+          gitResponse.setCatBlobStream(whereToStore);
+          request.writeTo(gitFastImportStream);
+          gitResponse.waitForCatBlob();
+        } catch (IOException ex) {
+          Log.logf("Failed to cat-blob the path <%s> on head <%s>:%s", path, head, ex);
+        }
+        gitResponse.setCatBlobStream(null);
+      }
+    }
+  }
 	
 	private class GitLsFilesReader implements Runnable {
 
@@ -589,9 +618,14 @@ public class GitHelper extends RepositoryHelper {
 
 	private class GitFastImportOutputReader implements Runnable {
 		
+    private final Lock outputReaderLock = new ReentrantLock();
+    private final Condition outputCatBlobCondition = outputReaderLock.newCondition();
 		private InputStream stream;
 		private String currentHead;
 		private Pattern ls = Pattern.compile("^[0-9]{6} [a-z]+ [0-9a-fA-F]{40}\t.+$");
+    private Pattern catblob = Pattern.compile("^[0-9a-fA-F]{40} blob [0-9]+$");
+    private OutputStream catBlobStream;
+    private boolean catBlobInProgress;
 
 		public GitFastImportOutputReader(InputStream stream) {
 			this.stream = stream;
@@ -600,6 +634,28 @@ public class GitHelper extends RepositoryHelper {
 		public void setCurrentHead(String currentHead) {
 			this.currentHead = currentHead;
 		}
+    
+    public void setCatBlobStream(OutputStream stream) {
+      catBlobInProgress = true;
+      catBlobStream = stream;
+    }
+    
+    public void waitForCatBlob()
+    {
+      outputReaderLock.lock();
+      try {
+        while (catBlobInProgress)
+        {
+          try {
+            outputCatBlobCondition.await();
+          } catch (InterruptedException ex) {
+            Logger.getLogger(GitHelper.class.getName()).log(Level.SEVERE, null, ex);
+          }
+        }
+      } finally {
+        outputReaderLock.unlock();
+      }
+    }
 		
 		public void run() {
 			StringBuilder firstResponse = new StringBuilder(50);
@@ -615,14 +671,48 @@ public class GitHelper extends RepositoryHelper {
 						character = stream.read();
 					}
 					if (ls.matcher(firstResponse).matches()) {
-						String type = firstResponse.substring(6, 10);
-						if(type.equalsIgnoreCase("blob")) {
-							String sha1 = firstResponse.substring(13,53);
-							String filename = firstResponse.substring(54).trim();
-							trackedFiles.get(currentHead).put(filename, new Sha1Ref(sha1));
-						}
+            outputReaderLock.lock();
+            try {
+              String type = firstResponse.substring(6, 10);
+              if(type.equalsIgnoreCase("blob")) {
+                String sha1 = firstResponse.substring(13,53);
+                String filename = firstResponse.substring(54).trim();
+                trackedFiles.get(currentHead).put(filename, new Sha1Ref(sha1));
+              }
+            } finally {
+              outputReaderLock.unlock();
+            }
+          } else if(catblob.matcher(firstResponse).matches()) {
+            outputReaderLock.lock();
+            try {
+              // In case we have a cat-blob response
+              String strSize = firstResponse.substring(45).trim();
+              long size;
+              try
+              {
+                size = Long.parseLong(strSize);
+              } catch(NumberFormatException ex) {
+                continue; // Invalid number go to the next iteration
+              }
+              // we need to read the full object regardless of it's size
+              byte[] buffer = new byte[Math.min((int)size, 4096)];
+              int readSize = stream.read(buffer);
+              while(readSize >= 0) {
+                catBlobStream.write(buffer, 0, readSize);
+                size -= readSize;
+                if(size <= 0) {
+                  break;
+                }
+                readSize = stream.read(buffer);
+              }
+              // Notify we are finished
+              catBlobInProgress = false;
+              outputCatBlobCondition.signalAll();
+            } finally {
+              outputReaderLock.unlock();
+            }
 					} else {
-						System.err.println("Unknown response " + firstResponse);
+						System.err.println("Unknown response <" + firstResponse + ">");
 					}
 					firstResponse.setLength(0);
 				} while(character >= 0);
