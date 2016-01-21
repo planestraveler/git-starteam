@@ -192,4 +192,12 @@ public class GitHelperTest {
     
     assertEquals("a7e10f59183aa3c456e9059fb7036c9b", md5sum);
   }
+  
+  @Test
+  public void testCatBlobNotExist() {
+    ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
+    test.getFileContent("master", "This/file/doesn't/exists.txt", stream);
+    
+    assertEquals(0, stream.size());
+  }
 }
