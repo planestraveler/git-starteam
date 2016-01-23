@@ -268,10 +268,11 @@ public class GitHelper extends RepositoryHelper {
 	@Override
 	public boolean isSpecialFile(String filename) {
 		File testFile = new File(filename);
-		if(testFile.getName().equalsIgnoreCase(".gitignore"))
+		if(testFile.getName().equalsIgnoreCase(".gitignore")) {
 			return true;
-		else if (testFile.getName().equalsIgnoreCase(".gitattributes"))
+    } else if (testFile.getName().equalsIgnoreCase(".gitattributes")) {
 			return true;
+    }
 		return false;
 	}
 	
@@ -343,6 +344,7 @@ public class GitHelper extends RepositoryHelper {
           catBlb.writeTo(out);
         } catch (IOException e) {
           e.printStackTrace();
+          return null;
         }
       }
       return gitFastImport.getOutputStream();
