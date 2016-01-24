@@ -147,6 +147,42 @@ public class MainEntryTest {
 	}
 
   @Test
+  public void testLabelFromDateToTip() throws IOException {
+    StarteamProjectBuilder.main(new String[] {"UnitTest", "1", "10"});
+    
+    MainEntry.main(new String[] {
+      "-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
+      "-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose", "-t", "2010-07-14 00:00:00"
+    });
+    
+    RepositoryHelperFactory.getFactory().setCreateRepo(false);
+    RepositoryHelper helper = RepositoryHelperFactory.getFactory().createHelper();
+    
+    List<LogEntry> entries = helper.getCommitLog(new SmallRef("MAIN"));
+    Collections.reverse(entries);
+    
+    Iterator<LogEntry> i = entries.iterator();
+    assertCommit02(i.next());
+    assertCommit05(i.next());
+    assertCommit06(i.next());
+    assertCommit07Alt(i.next());
+    assertCommit08(i.next());
+    assertCommit09Alt(i.next());
+    assertCommit10(i.next());
+    assertCommit11(i.next());
+    assertCommit12(i.next());
+    assertCommit13(i.next());
+    assertCommit14(i.next());
+    assertCommit15(i.next());
+    assertCommit16(i.next());
+    assertCommit17(i.next());
+    assertCommit18(i.next());
+    assertCommit19(i.next());
+    assertCommit20(i.next());
+    assertFalse(i.hasNext());
+  }
+  
+  @Test
   public void testLabelWithLFS() throws IOException {
 		StarteamProjectBuilder.main(new String[] {"UnitTest", "11", "12"});
 
@@ -457,6 +493,16 @@ public class MainEntryTest {
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(0).getTypeOfModification());
 		assertEquals("Test <Test@test.com>", entry.getAuthor());
 	}
+  
+	private void assertCommit09Alt(LogEntry entry) {
+		assertEquals("Updated lexer", entry.getComment());
+		assertEquals(1, entry.getFilesEntry().size());
+		assertEquals("src/cpp/mesa/glsl/glsl_lexer.ll", entry.getFilesEntry().get(0).getPath());
+		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
+		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
+		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
+		assertEquals("Test <Test@test.com>", entry.getAuthor());
+	}
 
 	private void assertCommit08(LogEntry entry) {
 		assertEquals("Parser should always be with lexer", entry.getComment());
@@ -483,6 +529,24 @@ public class MainEntryTest {
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(2).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(2).getToType());
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(2).getTypeOfModification());
+		assertEquals("Test <Test@test.com>", entry.getAuthor());
+	}
+  
+	private void assertCommit07Alt(LogEntry entry) {
+		assertEquals("Upgrade the version", entry.getComment());
+		assertEquals(3, entry.getFilesEntry().size());
+		assertEquals("src/java/starteam/File.java", entry.getFilesEntry().get(0).getPath());
+		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
+		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
+		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
+		assertEquals("src/java/starteam/Folder.java", entry.getFilesEntry().get(1).getPath());
+		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(1).getFromType());
+		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(1).getToType());
+		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(1).getTypeOfModification());
+		assertEquals("src/java/starteam/Item.java", entry.getFilesEntry().get(2).getPath());
+		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(2).getFromType());
+		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(2).getToType());
+		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(2).getTypeOfModification());
 		assertEquals("Test <Test@test.com>", entry.getAuthor());
 	}
 

@@ -736,7 +736,17 @@ public class GitImporter {
 				Log.log("No newer label are more recent then last commit made at " + lastCommit);
 				return;
 			}
-		}
+		} else if (null != date) {
+      for(int i=0; i < viewLabels.length; ++i) {
+        long labelTime = viewLabels[i].getRevisionTime().getLongValue();
+        long requestStart = date.getTime();
+        if(labelTime > requestStart) {
+          Log.log("Start import from label <" + viewLabels[i].getName() + ">");
+          fromLabel = i;
+          break;
+        }
+      }
+    }
 		setFolder(view, baseFolder);
 		for(int i=fromLabel; i<viewLabels.length; ++i) {
 			if(viewLabels[i].isViewLabel()) {
