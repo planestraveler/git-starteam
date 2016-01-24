@@ -85,4 +85,13 @@ public class GitAttributes {
     }
     return ret;
   }
+
+  public void removePath(String path) {
+    fileContent.remove(path);
+  }
+
+  public boolean pathHasAttributes(String path) {
+    return fileContent.containsKey(path);
+  }
+
 }

@@ -67,8 +67,7 @@ public class GitAttributesTest {
   }
   
   @Test
-  public void testNewLFSTrack()
-  {
+  public void testNewLFSTrack() {
     test.addAttributeToPath("path/to/hugeFile.zip", GitAttributeKind.Binary, GitAttributeKind.FilterLfs, GitAttributeKind.DiffLfs, GitAttributeKind.MergeLfs);
     assertEquals("# some comment that need to be kept\n"
       + "# which are multiline\n"
@@ -77,5 +76,20 @@ public class GitAttributesTest {
       + "UnixScript.sh eol=lf\n"
       + "WindowsScript.bat eol=crlf",
       test.toString());
+  }
+  
+  @Test
+  public void testRemovePathAttributes() {
+    test.removePath("path/to/file.bin");
+    assertEquals("# some comment that need to be kept\n"
+      + "# which are multiline\n"
+      + "UnixScript.sh eol=lf\n"
+      + "WindowsScript.bat eol=crlf",
+      test.toString());
+  }
+  
+  @Test
+  public void testIsPathPartOfAttributes() {
+    assertEquals(true, test.pathHasAttributes("UnixScript.sh"));
   }
 }
