@@ -292,6 +292,8 @@ public class GitImporter {
 					} else {
 						fm.setFileType(GitFileType.Normal);
 					}
+					//TODO: Detect that the EOL property from Starteam is properly transfered to a gitattribute
+					//TOOD: file to prevent spurious conversion.
 					fm.setPath(path);
 					fo = fm;
 				}
