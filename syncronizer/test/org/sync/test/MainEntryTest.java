@@ -1,5 +1,7 @@
 package org.sync.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -21,6 +23,7 @@ import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.sync.MainEntry;
 import org.sync.RepositoryHelper;
 import org.sync.RepositoryHelperFactory;
+import org.sync.githelper.GitAttributes;
 import org.sync.util.LogEntry;
 import org.sync.util.SmallRef;
 
@@ -184,13 +187,13 @@ public class MainEntryTest {
   
   @Test
   public void testLabelWithLFS() throws IOException {
-		StarteamProjectBuilder.main(new String[] {"UnitTest", "11", "12"});
+    StarteamProjectBuilder.main(new String[] {"UnitTest", "11", "13"});
 
-		MainEntry.main(new String[] {
-				"-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
-				"-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose",
-        "--lfs", "32M"
-				});
+    MainEntry.main(new String[] {
+      "-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
+      "-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose",
+      "--lfs-size", "32M", "--lfs-pattern", ".*(tar.bz2|tar.xz|tar.gz|zip|7z|rar)$"
+    });
     
     File lfsBoost155 = new File(importLocation.getAbsolutePath() + File.separator 
       + "lfs" + File.separator + "objects" + File.separator + "ff" + File.separator
@@ -202,15 +205,32 @@ public class MainEntryTest {
       + "47" + File.separator + "134732acaf3a6e7eba85988118d943f0fa6b7f0850f65131fff89823ad30ff1d");
     assertTrue(lfsBoost156.exists());
     
-		RepositoryHelperFactory.getFactory().setCreateRepo(false);
-		RepositoryHelper helper = RepositoryHelperFactory.getFactory().createHelper();
-    
-    
-		List<LogEntry> entries = helper.getCommitLog(new SmallRef("MAIN"));
-		Collections.reverse(entries);
-		Iterator<LogEntry> i = entries.iterator();
+    File lfsFileRoller = new File(importLocation.getAbsoluteFile() + File.separator
+      + "lfs" + File.separator + "objects" + File.separator + "2b" + File.separator
+      + "3a" + File.separator + "2b3a1111caba26e67b96559a3118a700dbfb6a4c6ad7ebd3e509df227995411c");
+    assertTrue(lfsFileRoller.exists());
+
+    RepositoryHelperFactory.getFactory().setCreateRepo(false);
+    RepositoryHelper helper = RepositoryHelperFactory.getFactory().createHelper();
+
+
+    List<LogEntry> entries = helper.getCommitLog(new SmallRef("MAIN"));
+    Collections.reverse(entries);
+    Iterator<LogEntry> i = entries.iterator();
+
     assertCommitLFS1(i.next());
     assertCommitLFS2(i.next());
+    assertCommitLFS3(i.next());
+
+    ByteArrayOutputStream attributesFile = new ByteArrayOutputStream(4096);
+    helper.getFileContent("MAIN", ".gitattributes", attributesFile);
+
+    GitAttributes attributes = new GitAttributes();
+    attributes.parse(new ByteArrayInputStream(attributesFile.toByteArray()));
+
+    assertEquals(false, attributes.pathHasAttributes("archive/boost_1_55_0.tar.bz2"));
+    assertEquals(true,  attributes.pathHasAttributes("archive/boost_1_56_0.tar.bz2"));
+    assertEquals(true,  attributes.pathHasAttributes("archive/file-roller-3.16.3.tar.xz"));
   }
   
   private void assertCommitLFS1(LogEntry entry) {
@@ -223,7 +243,7 @@ public class MainEntryTest {
     assertEquals(GitFileType.Normal,                    entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Addition,  entry.getFilesEntry().get(index).getTypeOfModification());
     index++;
-    assertEquals("archive/Boost_1_55_0.tar.bz2",        entry.getFilesEntry().get(index).getPath());
+    assertEquals("archive/boost_1_55_0.tar.bz2",        entry.getFilesEntry().get(index).getPath());
     assertEquals(GitFileType.NullFile,                  entry.getFilesEntry().get(index).getFromType());
     assertEquals(GitFileType.Normal,                    entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Addition,  entry.getFilesEntry().get(index).getTypeOfModification());
@@ -239,7 +259,23 @@ public class MainEntryTest {
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
     index++;
-    assertEquals("archive/Boost_1_56_0.tar.bz2",            entry.getFilesEntry().get(index).getPath());
+    assertEquals("archive/boost_1_56_0.tar.bz2",            entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition,      entry.getFilesEntry().get(index).getTypeOfModification());
+  }
+  
+  private void assertCommitLFS3(LogEntry entry) {
+    int index = 0;
+    assertEquals("Source archive of file-roller 3.16.3",          entry.getComment());
+    assertEquals("Test <Test@test.com>",                    entry.getAuthor());
+    assertEquals(2,                                         entry.getFilesEntry().size());
+    assertEquals(".gitattributes",                          entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
+    index++;
+    assertEquals("archive/file-roller-3.16.3.tar.xz",       entry.getFilesEntry().get(index).getPath());
     assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getFromType());
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Addition,      entry.getFilesEntry().get(index).getTypeOfModification());
