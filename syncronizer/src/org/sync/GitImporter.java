@@ -361,14 +361,8 @@ public class GitImporter {
 							commit.setFromRef(fromRef);
 						}
 					} else {
-            if(fattributes != null)
-            {
-              Data attributeFile = new Data();
-              attributeFile.writeData(fattributes.toString().getBytes("UTF-8"));
-              FileModification attributes = new FileModification(attributeFile);
-              attributes.setPath(".gitattributes");
-              attributes.setFileType(GitFileType.Normal);
-              lastCommit.addFileOperation(attributes);
+            if(fattributes != null) {
+              addAttributeToCommit(fattributes, lastCommit);
               fattributes = null;
             }
 						helper.writeCommit(lastCommit);
@@ -425,6 +419,10 @@ public class GitImporter {
 					}
 				} else {
 					helper.writeCommit(lastCommit);
+          if(fattributes != null) {
+            addAttributeToCommit(fattributes, lastCommit);
+            fattributes = null;
+          }
 					commit.setFromCommit(lastCommit);
 					TempFileManager.getInstance().deleteTempFiles();
 				}
@@ -446,19 +444,9 @@ public class GitImporter {
 		}
 		if(null != commit) {
 			try {
-        if(fattributes != null)
-        {
-          try {
-            Data attributeFile = new Data();
-            attributeFile.writeData(fattributes.toString().getBytes("UTF-8"));
-            FileModification attributes = new FileModification(attributeFile);
-            attributes.setFileType(GitFileType.Normal);
-            attributes.setPath(".gitattributes");
-            commit.addFileOperation(attributes);
-            fattributes = null;
-          } catch (InvalidPathException ex) {
-            ex.printStackTrace();
-          }
+        if(fattributes != null) {
+          addAttributeToCommit(fattributes, commit);
+          fattributes = null;
         }
 				helper.writeCommit(commit);
 				TempFileManager.getInstance().deleteTempFiles();
@@ -478,10 +466,24 @@ public class GitImporter {
 		cm = null;
 		folder.discardItems(server.getTypeNames().FILE, -1);
 	}
-	
+
+  private void addAttributeToCommit(GitAttributes fattributes, Commit commit) throws IOException {
+    try {
+      Data attributeFile = new Data();
+      attributeFile.writeData(fattributes.toString().getBytes("UTF-8"));
+      Blob aMarkedBlob = new Blob(attributeFile);
+      helper.writeBlob(aMarkedBlob);
+      FileModification attributes = new FileModification(aMarkedBlob);
+      attributes.setFileType(GitFileType.Normal);
+      attributes.setPath(".gitattributes");
+      commit.addFileOperation(attributes);
+    } catch (InvalidPathException ex) {
+      ex.printStackTrace();
+    }
+  }
+
 	private void finish() {
-    
-		while(helper.isFastImportRunning()) {
+    while(helper.isFastImportRunning()) {
       try {
         Thread.sleep(500); // active wait but leave him a chance to actually finish.
       } catch (InterruptedException ex) {
@@ -675,7 +677,6 @@ public class GitImporter {
 						// We register with version -1 to be sure to add it. Since this is a discovered file, when we are 
 						// going to pass trough the files, we will make sure to get it's version 0.
 						helper.registerFileId(head, path, historyFile.getItemID(), -1);
-						fileid = historyFile.getItemID();
 					}
 				}
 				if(deletedFiles.contains(path)) {
