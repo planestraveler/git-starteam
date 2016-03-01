@@ -81,8 +81,9 @@ public class Commit implements Markable {
 
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
-		if(written)
+		if(written) {
 			return;
+    }
 		StringBuilder commitMsg = new StringBuilder();
 		commitMsg.append(COMMIT).append(" ").append(MessageFormat.format(headFormat, reference, "")).append('\n');
 		out.write(commitMsg.toString().getBytes());
@@ -141,4 +142,8 @@ public class Commit implements Markable {
 	public String getReference() {
 		return reference;
 	}
+  
+  public boolean isWritten() {
+    return written;
+  }
 }

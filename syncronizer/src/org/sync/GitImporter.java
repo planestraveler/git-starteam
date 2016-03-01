@@ -360,7 +360,7 @@ public class GitImporter {
 						} else if(null != fromRef) {
 							commit.setFromRef(fromRef);
 						}
-					} else {
+					} else if (!lastCommit.isWritten()) {
             if(fattributes != null) {
               addAttributeToCommit(fattributes, lastCommit);
               fattributes = null;
@@ -417,7 +417,7 @@ public class GitImporter {
 					} else if(null != fromRef) {
 						commit.setFromRef(fromRef);
 					}
-				} else {
+				} else if (!lastCommit.isWritten()){
 					helper.writeCommit(lastCommit);
           if(fattributes != null) {
             addAttributeToCommit(fattributes, lastCommit);
