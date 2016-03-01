@@ -192,7 +192,7 @@ public class MainEntryTest {
     MainEntry.main(new String[] {
       "-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
       "-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose",
-      "--lfs-size", "32M", "--lfs-pattern", ".*(tar.bz2|tar.xz|tar.gz|zip|7z|rar)$"
+      "--lfs-size", "32M", "--lfs-pattern", ".*(tar.xz|tar.gz|zip|7z|rar)$"
     });
     
     File lfsBoost155 = new File(importLocation.getAbsolutePath() + File.separator 
@@ -253,11 +253,16 @@ public class MainEntryTest {
     int index = 0;
     assertEquals("Source archive of boost 1.56.0",          entry.getComment());
     assertEquals("Test <Test@test.com>",                    entry.getAuthor());
-    assertEquals(2,                                         entry.getFilesEntry().size());
+    assertEquals(3,                                         entry.getFilesEntry().size());
     assertEquals(".gitattributes",                          entry.getFilesEntry().get(index).getPath());
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getFromType());
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
+    index++;
+    assertEquals("archive/boost_1_55_0.tar.bz2",            entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Delete,        entry.getFilesEntry().get(index).getTypeOfModification());
     index++;
     assertEquals("archive/boost_1_56_0.tar.bz2",            entry.getFilesEntry().get(index).getPath());
     assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getFromType());

@@ -101,7 +101,8 @@ public class GitImporter {
 	private Map<String, DataRef> tagMarks = new HashMap<String, DataRef>();
 	// email domain to use
 	private String domain;
-  private long lfsMinimumSize;
+  private long lfsMinimumSize = Long.MAX_VALUE;
+  private Pattern lfsRegex;
 	
 	public GitImporter(Server s, Project p) {
 		server = s;
@@ -279,7 +280,11 @@ public class GitImporter {
 						continue;
 					}
           Data fileData;
-          if(aFile.length() < lfsMinimumSize) {
+          boolean matchPattern = false;
+          if(lfsRegex != null) {
+            matchPattern = lfsRegex.matcher(current.getPath()).matches();
+          }
+          if(aFile.length() < lfsMinimumSize && !matchPattern) {
             fileData = new Data(aFile);
           } else {
             try {
@@ -1073,7 +1078,11 @@ public class GitImporter {
     finish();
 	}
 
-  void setMinimumLFSSize(long startTrackingAtSize) {
+  public void setMinimumLFSSize(long startTrackingAtSize) {
     lfsMinimumSize = startTrackingAtSize;
+  }
+
+  public void setLFSPattern(Pattern lfsRegexPattern) {
+    lfsRegex = lfsRegexPattern;
   }
 }

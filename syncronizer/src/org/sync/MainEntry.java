@@ -28,6 +28,8 @@ import com.starbase.starteam.vts.comm.NetMonitor;
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class MainEntry {
 
@@ -58,7 +60,8 @@ public class MainEntry {
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
 		CmdLineParser.Option isCheckpoint = parser.addBooleanOption("checkpoint");
 		CmdLineParser.Option selectSkipViewsPattern = parser.addStringOption("skip-views");
-    CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs");
+    CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs-size");
+    CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
 		//TODO: Add a tag filtering functionality default to version like matching ex: .*[0-9]+\.[0-9]+\.[0-9]+[\.]?[0-9]*.*
 
 		try {
@@ -100,6 +103,7 @@ public class MainEntry {
 		boolean createCheckpoints = checkpointFlag != null && checkpointFlag;
     
     String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
+    String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
 		
 		if(host == null || port == null || project == null || (view == null && !allViews)) {
 			printHelp();
@@ -126,6 +130,18 @@ public class MainEntry {
       else
       {
         startTrackingAtSize = Long.parseLong(lfsSize);
+      }
+    }
+    
+    Pattern lfsRegexPattern = null;
+    if (lfsPattern != null)
+    {
+      try {
+        lfsRegexPattern = Pattern.compile(lfsPattern, Pattern.CASE_INSENSITIVE);
+      } catch (PatternSyntaxException ex) {
+        System.err.printf("Requested pattern %s didn't compile properly\n%s\n", lfsPattern, ex.getMessage());
+        printHelp();
+        System.exit(4);
       }
     }
 
@@ -205,6 +221,7 @@ public class MainEntry {
 						importer.setCreateCheckpoints(createCheckpoints);
 						importer.setDomain(domain);
             importer.setMinimumLFSSize(startTrackingAtSize);
+            importer.setLFSPattern(lfsRegexPattern);
 
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
