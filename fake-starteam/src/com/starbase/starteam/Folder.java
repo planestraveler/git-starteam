@@ -136,10 +136,23 @@ public class Folder extends Item {
 						} else {
 							aFile = new com.starbase.starteam.File(id, this.view);
 						}
-						if((this.view instanceof RecycleBin && aFile.isDeleted()) || isFromHistory() ||
-						   !((this.view instanceof RecycleBin) || aFile.isDeleted())) {
-							generatedList.add(aFile);
-						}
+						if(this.view instanceof RecycleBin && aFile.isDeleted()) {
+              generatedList.add(aFile);
+            } else if (isFromHistory()) {
+              if (this.view.getConfiguration().isLabelBased())
+              {
+                Label findTime = new Label(this.view.getID(), this.view.getConfiguration().getLabelID());
+                if (findTime.getTime().getLongValue() < aFile.getDeletedTime().getLongValue()) {
+                  generatedList.add(aFile);
+                }
+              } else if (this.view.getConfiguration().isTimeBased()) {
+                if (this.view.getConfiguration().getTime().getLongValue() < aFile.getDeletedTime().getLongValue()) {
+                  generatedList.add(aFile);
+                }
+              }
+            } else {
+              generatedList.add(aFile);
+            }
 					} catch (NumberFormatException ne) {
 						ne.printStackTrace();
 						throw new InvalidOperationException("Folder child id corrupted.");
