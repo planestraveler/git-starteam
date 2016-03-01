@@ -331,7 +331,8 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	public void remove() {
 		decrementRefCount();
 		if(itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0")) {
-			itemProperties.setProperty(propertyKeys.DELETED_TIME, Long.toString(System.currentTimeMillis()));
+			itemProperties.setProperty(propertyKeys.DELETED_TIME,
+          Long.toString(InternalPropertiesProvider.getInstance().getCurrentServer().getCurrentTime().getLongValue()));
 			itemProperties.setProperty(propertyKeys.DELETED_USER_ID, 
 					Integer.toString(InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID()));
 			itemProperties.setProperty(PropertyNames.ITEM_DELETED_TIME, itemProperties.getProperty(propertyKeys.DELETED_TIME));
