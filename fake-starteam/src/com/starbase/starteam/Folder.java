@@ -142,11 +142,19 @@ public class Folder extends Item {
               if (this.view.getConfiguration().isLabelBased())
               {
                 Label findTime = new Label(this.view.getID(), this.view.getConfiguration().getLabelID());
-                if (findTime.getTime().getLongValue() < aFile.getDeletedTime().getLongValue()) {
+                if (aFile.isDeleted()) {
+                  if (findTime.getTime().getLongValue() < aFile.getDeletedTime().getLongValue()) {
+                    generatedList.add(aFile);
+                  }
+                } else {
                   generatedList.add(aFile);
                 }
               } else if (this.view.getConfiguration().isTimeBased()) {
-                if (this.view.getConfiguration().getTime().getLongValue() < aFile.getDeletedTime().getLongValue()) {
+                if (aFile.isDeleted()) {
+                  if (this.view.getConfiguration().getTime().getLongValue() < aFile.getDeletedTime().getLongValue()) {
+                    generatedList.add(aFile);
+                  }
+                } else {
                   generatedList.add(aFile);
                 }
               }
