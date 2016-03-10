@@ -318,7 +318,7 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public boolean isDeleted() {
 		return itemProperties.containsKey(propertyKeys._REF_COUNT) && 
-				itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0") && (view instanceof RecycleBin);
+				itemProperties.getProperty(propertyKeys._REF_COUNT).equals("0");
 	}
 
 	public void moveTo(Folder folder) {
