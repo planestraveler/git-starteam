@@ -283,6 +283,8 @@ public class GitImporter {
           }
           if (fattributes.pathHasAttributes(current.getPath())) {
             fattributes.removePath(current.getPath());
+          } else {
+            fattributes = null;
           }
 					helper.unregisterFileId(head, current.getPath());
 					if(verbose) {

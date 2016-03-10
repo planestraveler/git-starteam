@@ -233,6 +233,68 @@ public class MainEntryTest {
     assertEquals(true,  attributes.pathHasAttributes("archive/file-roller-3.16.3.tar.xz"));
   }
   
+  @Test
+  public void testFileDeletion() throws IOException {
+    
+    StarteamProjectBuilder.main(new String[] {"UnitTest", "20", "21"});
+
+    MainEntry.main(new String[] {
+      "-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
+      "-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose",
+      "--lfs-size", "32M", "--lfs-pattern", ".*(tar.xz|tar.gz|zip|7z|rar)$"
+    });
+    
+    RepositoryHelperFactory.getFactory().setCreateRepo(false);
+    RepositoryHelper helper = RepositoryHelperFactory.getFactory().createHelper();
+    
+    List<LogEntry> entries = helper.getCommitLog(new SmallRef("MAIN"));
+    Collections.reverse(entries);
+    Iterator<LogEntry> i = entries.iterator();
+    
+    assertCommitFD1(i.next());
+    assertCommitFD2(i.next());
+    assertCommitFD3(i.next());
+    assertFalse(i.hasNext());
+  }
+  
+  private void assertCommitFD1(LogEntry entry) {
+    int index = 0;
+    assertEquals("A blob representation for git", entry.getComment());
+    assertEquals("Test <Test@test.com>",          entry.getAuthor());
+    assertEquals(1,                               entry.getFilesEntry().size());
+    assertEquals("src/blob.java",                 entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.NullFile,            entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,              entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(index).getTypeOfModification());
+  }
+  
+  private void assertCommitFD2(LogEntry entry) {
+    int index = 0; 
+    assertEquals("A data representation for git", entry.getComment());
+    assertEquals("Test <Test@test.com>",          entry.getAuthor());
+    assertEquals(1,                               entry.getFilesEntry().size());
+    assertEquals("src/data.java",                 entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.NullFile,            entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,              entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(index).getTypeOfModification());
+  }
+  
+  private void assertCommitFD3(LogEntry entry) {
+    int index = 0;
+    assertEquals("Correction for better ease of use", entry.getComment());
+    assertEquals("Test <Test@test.com>",              entry.getAuthor());
+    assertEquals(2,                                   entry.getFilesEntry().size());
+    assertEquals("src/blob.java",                     entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.Normal,                  entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                  entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(index).getTypeOfModification());
+    index++;
+    assertEquals("src/data.java",                     entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.Normal,                  entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.NullFile,                entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Delete,  entry.getFilesEntry().get(index).getTypeOfModification());
+  }
+  
   private void assertCommitLFS1(LogEntry entry) {
     int index = 0;
     assertEquals("Boost version 1.55.0 sources",        entry.getComment());
