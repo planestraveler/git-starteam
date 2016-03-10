@@ -37,7 +37,7 @@ public class Id20 extends CheckInInstruction {
     Folder src = new Folder(root, "src", null);
     
     File blob = new File(src);
-    URL blobVer = new URL("https://raw.githubusercontent.com/planestraveler/git-starteam/c0d5d26a24f8592421c043523bdd411fb1055e76/syncronizer/src/org/ossnoize/git/fastimport/Blob.java");
+    URL blobVer = new URL("https://raw.githubusercontent.com/planestraveler/git-starteam/6007e74c43272737e5f6ffd18f07a0e29d69827a/syncronizer/src/org/ossnoize/git/fastimport/Blob.java");
     blob.addFromStream(blobVer.openStream(),
       "blob.java",
       "A blob representation for git",
