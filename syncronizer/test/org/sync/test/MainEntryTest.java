@@ -221,7 +221,10 @@ public class MainEntryTest {
     assertCommitLFS1(i.next());
     assertCommitLFS2(i.next());
     assertCommitLFS3(i.next());
+    assertCommitLFS4(i.next());
+    assertCommitLFS5(i.next());
 
+    assertFalse(i.hasNext());
     ByteArrayOutputStream attributesFile = new ByteArrayOutputStream(4096);
     helper.getFileContent("MAIN", ".gitattributes", attributesFile);
 
@@ -231,6 +234,8 @@ public class MainEntryTest {
     assertEquals(false, attributes.pathHasAttributes("archive/boost_1_55_0.tar.bz2"));
     assertEquals(true,  attributes.pathHasAttributes("archive/boost_1_56_0.tar.bz2"));
     assertEquals(true,  attributes.pathHasAttributes("archive/file-roller-3.16.3.tar.xz"));
+    assertEquals(true,  attributes.pathHasAttributes("archive/ImageMagick-6.9.2-10.tar.xz"));
+    assertEquals(true,  attributes.pathHasAttributes("archive/appliance-1.28.1.tar.xz"));
   }
   
   @Test
@@ -304,6 +309,7 @@ public class MainEntryTest {
     assertEquals(GitFileType.NullFile,                  entry.getFilesEntry().get(index).getFromType());
     assertEquals(GitFileType.Normal,                    entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Addition,  entry.getFilesEntry().get(index).getTypeOfModification());
+    assertEquals("f62641a",                             entry.getFilesEntry().get(index).getToSHA().getRef());
     index++;
     assertEquals("archive/boost_1_55_0.tar.bz2",        entry.getFilesEntry().get(index).getPath());
     assertEquals(GitFileType.NullFile,                  entry.getFilesEntry().get(index).getFromType());
@@ -320,6 +326,7 @@ public class MainEntryTest {
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getFromType());
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
+    assertEquals("b9c13de",                                 entry.getFilesEntry().get(index).getToSHA().getRef());
     index++;
     assertEquals("archive/boost_1_55_0.tar.bz2",            entry.getFilesEntry().get(index).getPath());
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getFromType());
@@ -334,7 +341,39 @@ public class MainEntryTest {
   
   private void assertCommitLFS3(LogEntry entry) {
     int index = 0;
-    assertEquals("Source archive of file-roller 3.16.3",          entry.getComment());
+    assertEquals("Source archive of ImageMagick 6.9.2",     entry.getComment());
+    assertEquals("Test <Test@test.com>",                    entry.getAuthor());
+    assertEquals(2,                                         entry.getFilesEntry().size());
+    assertEquals(".gitattributes",                          entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
+    index++;
+    assertEquals("archive/ImageMagick-6.9.2-10.tar.xz",     entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition,      entry.getFilesEntry().get(index).getTypeOfModification());
+  }
+  
+  private void assertCommitLFS4(LogEntry entry) {
+    int index = 0;
+    assertEquals("Source archive of appliance",             entry.getComment());
+    assertEquals("Test <Test@test.com>",                    entry.getAuthor());
+    assertEquals(2,                                         entry.getFilesEntry().size());
+    assertEquals(".gitattributes",                          entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
+    index++;
+    assertEquals("archive/appliance-1.28.1.tar.xz",         entry.getFilesEntry().get(index).getPath());
+    assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getFromType());
+    assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition,      entry.getFilesEntry().get(index).getTypeOfModification());
+  }
+  
+  private void assertCommitLFS5(LogEntry entry) {
+    int index = 0;
+    assertEquals("Source archive of file-roller 3.16.3",    entry.getComment());
     assertEquals("Test <Test@test.com>",                    entry.getAuthor());
     assertEquals(2,                                         entry.getFilesEntry().size());
     assertEquals(".gitattributes",                          entry.getFilesEntry().get(index).getPath());

@@ -106,6 +106,14 @@ public class LogEntry {
 		public GitFileType getToType() {
 			return toType;
 		}
+    
+    public SmallRef getFromSHA() {
+      return fromSha;
+    }
+    
+    public SmallRef getToSHA() {
+      return toSha;
+    }
 		
 		@Override
 		public String toString() {

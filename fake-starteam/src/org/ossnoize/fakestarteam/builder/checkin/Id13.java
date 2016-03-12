@@ -44,6 +44,20 @@ public class Id13 extends CheckInInstruction {
       "Source archive of file-roller 3.16.3",
       "Source archive of file-roller 3.16.3", 0);
     
+    File imageMagic = new File(archive);
+    URL imageMagicDL = new URL("http://gentoo.mirrors.tera-byte.com/distfiles/ImageMagick-6.9.2-10.tar.xz");
+    imageMagic.addFromStream(imageMagicDL.openStream(),
+      "ImageMagick-6.9.2-10.tar.xz",
+      "Source archive of ImageMagick 6.9.2",
+      "Source archive of ImageMagick 6.9.2", 0);
+    
+    File appliance = new File(archive);
+    URL applianceDL = new URL("http://gentoo.mirrors.tera-byte.com/distfiles/appliance-1.28.1.tar.xz");
+    appliance.addFromStream(applianceDL.openStream(),
+      "appliance-1.28.1.tar.xz",
+      "Source archive of appliance",
+      "Source archive of appliance", 0);
+    
     view.createViewLabel("Check-in Id 13", "Check Id 13 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
   }
 
