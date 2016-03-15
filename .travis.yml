@@ -1,0 +1,4 @@
+language: java
+install: ant deps jargs junit4
+jdk:
+  - openjdk7
