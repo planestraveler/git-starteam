@@ -6,6 +6,6 @@ jdk:
 addons:
   apt:
     packages:
-      - junit
+      - junit4
       - jargs
       - libhamcrest-java
