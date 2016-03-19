@@ -23,7 +23,7 @@ import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.sync.MainEntry;
 import org.sync.RepositoryHelper;
 import org.sync.RepositoryHelperFactory;
-import org.sync.githelper.GitAttributes;
+import org.ossnoize.git.fastimport.GitAttributes;
 import org.sync.util.LogEntry;
 import org.sync.util.SmallRef;
 

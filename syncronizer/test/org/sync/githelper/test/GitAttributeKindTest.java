@@ -18,7 +18,7 @@ package org.sync.githelper.test;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.sync.githelper.GitAttributeKind;
+import org.ossnoize.git.fastimport.GitAttributeKind;
 
 public class GitAttributeKindTest {
   

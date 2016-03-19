@@ -22,8 +22,8 @@ import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
-import org.sync.githelper.GitAttributeKind;
-import org.sync.githelper.GitAttributes;
+import org.ossnoize.git.fastimport.GitAttributeKind;
+import org.ossnoize.git.fastimport.GitAttributes;
 
 public class GitAttributesTest {
   

@@ -7,6 +7,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.ossnoize.git.fastimport.enumeration.GitFileType;
+import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
 public class Commit implements Markable {
 	private final static String COMMIT = "commit";
@@ -27,10 +33,11 @@ public class Commit implements Markable {
 	private MarkID from;
 	private MarkID merge;
 	private DataRef fromRef;
-	private List<FileOperation> listOfOperation;
+	private Map<String, FileOperation> listOfOperation;
 	private Date commitDate;
 	private boolean resumeFastImport;
 	private boolean written;
+  private GitAttributes filesAttributes;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -42,7 +49,8 @@ public class Commit implements Markable {
 		this.reference = reference;
 		this.commitDate = commitDate;
 		mark = new Mark();
-		listOfOperation = new ArrayList<FileOperation>();
+		listOfOperation = new TreeMap<String, FileOperation>();
+    filesAttributes = null;
 	}
 
 	public void setAuthor(String name, String email) {
@@ -76,13 +84,26 @@ public class Commit implements Markable {
 	}
 	
 	public void addFileOperation(FileOperation ops) {
-		listOfOperation.add(ops);
+		listOfOperation.put(ops.getPath(), ops);
 	}
 
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
 		if(written) {
 			return;
+    }
+    if (null != filesAttributes) {
+      try {
+        Data attributeFile = new Data();
+        attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
+        Blob aMarkedBlob = new Blob(attributeFile);
+        aMarkedBlob.writeTo(out);
+        FileModification attributes = new FileModification(aMarkedBlob);
+        attributes.setFileType(GitFileType.Normal);
+        attributes.setPath(".gitattributes");
+        this.addFileOperation(attributes);
+      } catch (InvalidPathException ex) {
+      }
     }
 		StringBuilder commitMsg = new StringBuilder();
 		commitMsg.append(COMMIT).append(" ").append(MessageFormat.format(headFormat, reference, "")).append('\n');
@@ -119,7 +140,7 @@ public class Commit implements Markable {
 			merge.writeTo(out);
 			out.write('\n');
 		}
-		for(FileOperation ops : listOfOperation) {
+		for(FileOperation ops : listOfOperation.values()) {
 			ops.writeTo(out);
 		}
 		out.write('\n');
@@ -136,7 +157,7 @@ public class Commit implements Markable {
 	}
 	
 	public List<FileOperation> getFileOperation() {
-		return listOfOperation;
+		return new ArrayList<FileOperation>(listOfOperation.values());
 	}
 	
 	public String getReference() {
@@ -145,5 +166,13 @@ public class Commit implements Markable {
   
   public boolean isWritten() {
     return written;
+  }
+  
+  public GitAttributes getAttributes() {
+    return filesAttributes;
+  }
+  
+  public void setAttributes(GitAttributes attr) {
+    filesAttributes = attr;
   }
 }

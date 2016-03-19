@@ -65,8 +65,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.NoSuchAlgorithmException;
 import org.ossnoize.git.fastimport.LFSFilePointer;
-import org.sync.githelper.GitAttributeKind;
-import org.sync.githelper.GitAttributes;
+import org.ossnoize.git.fastimport.GitAttributeKind;
+import org.ossnoize.git.fastimport.GitAttributes;
 
 public class GitImporter {
 	private Server server;
@@ -278,12 +278,14 @@ public class GitImporter {
 					fo = new FileDelete();
 					// path may be the new file, but current.getPath() is the old deleted path.
 					fo.setPath(current.getPath());
+          if (null != lastCommit) {
+            fattributes = lastCommit.getAttributes();
+          }
           if (null == fattributes) {
             fattributes = readAttributes(head);
           }
           if (fattributes.pathHasAttributes(current.getPath())) {
             fattributes.removePath(current.getPath());
-          } else {
             fattributes = null;
           }
 					helper.unregisterFileId(head, current.getPath());
@@ -308,6 +310,9 @@ public class GitImporter {
           } else {
             try {
               fileData = new LFSFilePointer(helper.getWorkingDirectory(), aFile);
+              if (null != lastCommit) {
+                fattributes = lastCommit.getAttributes();
+              }
               if (null == fattributes) {
                 fattributes = readAttributes(head);
               }
@@ -352,9 +357,15 @@ public class GitImporter {
 						lastCommit.setComment(current.getComment());
 					}
 					lastCommit.addFileOperation(fo);
+          if (fattributes != null) {
+            lastCommit.setAttributes(fattributes);
+          }
 				} else {
 					commit = new Commit(userName, userEmail, current.getComment(), head, new java.util.Date(current.getTime()));
 					commit.addFileOperation(fo);
+          if (fattributes != null) {
+            commit.setAttributes(fattributes);
+          }
 					if(null == lastCommit) {
 						if(isResume) {
 							commit.resumeOnTopOfRef();
@@ -362,14 +373,13 @@ public class GitImporter {
 							commit.setFromRef(fromRef);
 						}
 					} else if (!lastCommit.isWritten()) {
-            if(fattributes != null) {
-              addAttributeToCommit(fattributes, lastCommit);
-              fattributes = null;
-            }
 						helper.writeCommit(lastCommit);
 						TempFileManager.getInstance().deleteTempFiles();
 						commit.setFromCommit(lastCommit);
 					}
+          if(fattributes != null) {
+            fattributes = null;
+          }
 					/** Keep last for information **/
 					lastCommit = commit;
 					lastInformation = current;
@@ -420,10 +430,6 @@ public class GitImporter {
 					}
 				} else if (!lastCommit.isWritten()){
 					helper.writeCommit(lastCommit);
-          if(fattributes != null) {
-            addAttributeToCommit(fattributes, lastCommit);
-            fattributes = null;
-          }
 					commit.setFromCommit(lastCommit);
 					TempFileManager.getInstance().deleteTempFiles();
 				}
@@ -445,10 +451,6 @@ public class GitImporter {
 		}
 		if(null != commit) {
 			try {
-        if(fattributes != null) {
-          addAttributeToCommit(fattributes, commit);
-          fattributes = null;
-        }
 				helper.writeCommit(commit);
 				TempFileManager.getInstance().deleteTempFiles();
 			} catch (IOException e1) {
@@ -467,21 +469,6 @@ public class GitImporter {
 		cm = null;
 		folder.discardItems(server.getTypeNames().FILE, -1);
 	}
-
-  private void addAttributeToCommit(GitAttributes fattributes, Commit commit) throws IOException {
-    try {
-      Data attributeFile = new Data();
-      attributeFile.writeData(fattributes.toString().getBytes("UTF-8"));
-      Blob aMarkedBlob = new Blob(attributeFile);
-      helper.writeBlob(aMarkedBlob);
-      FileModification attributes = new FileModification(aMarkedBlob);
-      attributes.setFileType(GitFileType.Normal);
-      attributes.setPath(".gitattributes");
-      commit.addFileOperation(attributes);
-    } catch (InvalidPathException ex) {
-      ex.printStackTrace();
-    }
-  }
 
 	private void finish() {
     while(helper.isFastImportRunning()) {
