@@ -361,7 +361,11 @@ public class GitHelper extends RepositoryHelper {
 	@Override
 	public boolean isFastImportRunning() {
 		if(null == fastExportOverrideToFile && null != gitFastImport ) {
-      return gitFastImport.isAlive();
+      try {
+        gitFastImport.exitValue();
+      } catch (IllegalThreadStateException e) {
+        return true;
+      }
 		}
 		return false;
 	}
