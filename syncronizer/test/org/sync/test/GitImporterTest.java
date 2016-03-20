@@ -70,8 +70,7 @@ public class GitImporterTest {
       String want = test1[1];
       String got = GitImporter.refName(test);
       Matcher<String> comparator = equalTo(want);
-      collector.checkThat("refName("+test+")",
-        got, comparator);
+      assertEquals(want, got);
     }
 	}
 
