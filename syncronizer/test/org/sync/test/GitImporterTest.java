@@ -19,6 +19,7 @@ package org.sync.test;
 import static org.junit.Assert.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -64,13 +65,14 @@ public class GitImporterTest {
 			{"119_ BootesOchre.114.00", "119__BootesOchre.114.00"},
 			{"\"This is a quoted String\"", "_This_is_a_quoted_String_"},
 		};
-		for (int i = 0; i < tests.length; i++) {
-			String test = tests[i][0];
-			String want = tests[i][1];
-			String got = GitImporter.refName(test);
-			collector.checkThat("refName("+test+")",
-								got, equalTo(want));
-		}
+    for (String[] test1 : tests) {
+      String test = test1[0];
+      String want = test1[1];
+      String got = GitImporter.refName(test);
+      Matcher<String> comparator = equalTo(want);
+      collector.checkThat("refName("+test+")",
+        got, comparator);
+    }
 	}
 
 }
