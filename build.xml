@@ -1,9 +1,10 @@
 <project name="git-starteam" default="jar" basedir=".">
 
   <target name="init">
-    <property name="jargs.jar" value="jargs.jar"/>
+    <property name="jargs.jar" value="${basedir}/lib/jargs.jar"/>
     <property name="junit.jar" value="junit.jar"/>
     <property name="starteam.jar" value="starteam110.jar"/>
+    <property name="hamcrest.jar" value="/usr/share/java/hamcrest/core.jar"/>
   </target>
 
   <target name="clean">
@@ -40,13 +41,13 @@
     <mkdir dir="syncronizer/testclasses"/>
     <mkdir dir="syncronizer/testreports"/>
     <javac srcdir="syncronizer/test" destdir="syncronizer/testclasses"
-           deprecation="on" debug="on" extdirs="/usr/share/java"
+           deprecation="on" debug="on" extdirs="/usr/share/java:/usr/share/java/hamcrest"
            includeAntRuntime="false"
-           classpath="syncronizer/classes:${jargs.jar}:${starteam.jar}:${junit.jar}:fake-starteam/classes"/>
-    <junit printsummary="yes" haltonfailure="no">
+           classpath="syncronizer/classes:fake-starteam/classes:${jargs.jar}"/>
+    <junit printsummary="yes" haltonfailure="no" haltonerror="no" showoutput="yes">
       <classpath>
         <pathelement location="syncronizer/testclasses"/>
-        <pathelement path="syncronizer/testclasses:syncronizer/classes:${jargs.jar}:${starteam.jar}"/>
+        <pathelement path="syncronizer/testclasses:syncronizer/classes:fake-starteam/classes:${jargs.jar}:${hamcrest.jar}"/>
       </classpath>
 
       <formatter type="plain"/>
