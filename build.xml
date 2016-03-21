@@ -2,7 +2,7 @@
 
   <target name="init">
     <property name="jargs.jar" value="jargs.jar"/>
-    <property name="junit.jar" value="junit.jar"/>
+    <property name="junit.jar" value="junit.jar:junit4.jar"/>
     <property name="starteam.jar" value="starteam110.jar"/>
   </target>
 
