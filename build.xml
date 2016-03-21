@@ -47,7 +47,7 @@
     <junit printsummary="yes" haltonfailure="no" haltonerror="no" showoutput="yes">
       <classpath>
         <pathelement location="syncronizer/testclasses"/>
-        <pathelement path="syncronizer/testclasses:syncronizer/classes:fake-starteam/classes:${jargs.jar}:${hamcrest.jar}"/>
+        <pathelement path="syncronizer/testclasses:syncronizer/classes:fake-starteam/classes:${jargs.jar}:${junit.jar}:${hamcrest.jar}"/>
       </classpath>
 
       <formatter type="plain"/>
