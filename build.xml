@@ -2,7 +2,7 @@
 
   <target name="init">
     <property name="jargs.jar" value="${basedir}/lib/jargs.jar"/>
-    <property name="junit.jar" value="junit.jar"/>
+    <property name="junit.jar" value="junit.jar:juni4.jar"/>
     <property name="starteam.jar" value="starteam110.jar"/>
     <property name="hamcrest.jar" value="/usr/share/java/hamcrest/core.jar"/>
   </target>
