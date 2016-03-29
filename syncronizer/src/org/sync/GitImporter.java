@@ -281,11 +281,14 @@ public class GitImporter {
           if (null != lastCommit) {
             fattributes = lastCommit.getAttributes();
           }
+          boolean justRead = false;
           if (null == fattributes) {
             fattributes = readAttributes(head);
+            justRead = true;
           }
           if (fattributes.pathHasAttributes(current.getPath())) {
             fattributes.removePath(current.getPath());
+          } else if (justRead) {
             fattributes = null;
           }
 					helper.unregisterFileId(head, current.getPath());
