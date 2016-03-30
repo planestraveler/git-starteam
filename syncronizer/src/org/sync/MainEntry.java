@@ -290,7 +290,7 @@ public class MainEntry {
 		System.out.println("[--skip-views <regex>]\t\tSkip views matching regex when using -A");
 		System.out.println("[--verbose]\t\tVerbose output");
     System.out.println("[--lfs-size <size>[KMG]\tMinimum size to consider using LFS (disabled by default)");
-    System.out.println("[--lfs-pattern <regex>\tRegular expression on filename.")
+    System.out.println("[--lfs-pattern <regex>\tRegular expression on filename.");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		
 	}

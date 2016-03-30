@@ -79,6 +79,17 @@ public class GitAttributesTest {
   }
   
   @Test
+  public void testAddAttributesToExistingTrack() {
+    test.addAttributeToPath("path/to/file.bin", GitAttributeKind.Binary, GitAttributeKind.FilterLfs);
+    assertEquals("# some comment that need to be kept\n"
+        + "# which are multiline\n"
+        + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
+        + "UnixScript.sh eol=lf\n"
+        + "WindowsScript.bat eol=crlf", 
+        test.toString());
+  }
+  
+  @Test
   public void testRemovePathAttributes() {
     test.removePath("path/to/file.bin");
     assertEquals("# some comment that need to be kept\n"

@@ -71,7 +71,9 @@ public class GitAttributes {
     if(!fileContent.containsKey(path)) {
       fileContent.put(path, new ArrayList<GitAttributeKind>());
     }
-    fileContent.get(path).addAll(Arrays.asList(allAttributes));
+    ArrayList<GitAttributeKind> tempList = new ArrayList(Arrays.asList(allAttributes));
+    tempList.removeAll(fileContent.get(path));
+    fileContent.get(path).addAll(tempList);
   }
   
   @Override
