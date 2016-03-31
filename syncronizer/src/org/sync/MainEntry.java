@@ -63,6 +63,7 @@ public class MainEntry {
     CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs-size");
     CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
 		//TODO: Add a tag filtering functionality default to version like matching ex: .*[0-9]+\.[0-9]+\.[0-9]+[\.]?[0-9]*.*
+		//TODO: Add a label creation at tip before starting the importation
 
 		try {
 			parser.parse(args);
