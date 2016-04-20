@@ -234,7 +234,7 @@ public class GitImporter {
 		String[] populateProps = new String[] {
 			propNames.FILE_NAME,
 			propNames.COMMENT,
-			propNames.FILE_CONTENT_REVISION,
+			//propNames.FILE_CONTENT_REVISION,
 			propNames.FILE_DESCRIPTION,
 			propNames.MODIFIED_TIME,
 			propNames.MODIFIED_USER_ID,
