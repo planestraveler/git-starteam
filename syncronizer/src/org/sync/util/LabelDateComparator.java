@@ -24,11 +24,11 @@ public class LabelDateComparator implements Comparator<Label> {
 
 	@Override
 	public int compare(Label arg0, Label arg1) {
-		if(arg0.getRevisionTime().getLongValue() > arg1.getRevisionTime().getLongValue())
+		if(arg0.getTime().getLongValue() > arg1.getTime().getLongValue())
 		{
 			return 1;
 		}
-		else if(arg0.getRevisionTime().getLongValue() < arg1.getRevisionTime().getLongValue())
+		else if(arg0.getTime().getLongValue() < arg1.getTime().getLongValue())
 		{
 			return -1;
 		}

@@ -45,6 +45,7 @@ public class MainEntry {
 		CmdLineParser.Option isAllViews = parser.addBooleanOption('A', "all-views");
 		CmdLineParser.Option selectTimeBasedImport = parser.addBooleanOption('T', "time-based");
 		CmdLineParser.Option selectLabelBasedImport = parser.addBooleanOption('L', "label-based");
+		CmdLineParser.Option selectRevisionLabelBasedImport = parser.addBooleanOption('r', "revision-label-based");
 		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
 		CmdLineParser.Option selectFolder = parser.addStringOption('f', "folder");
 		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
@@ -60,8 +61,8 @@ public class MainEntry {
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
 		CmdLineParser.Option isCheckpoint = parser.addBooleanOption("checkpoint");
 		CmdLineParser.Option selectSkipViewsPattern = parser.addStringOption("skip-views");
-    CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs-size");
-    CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
+        CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs-size");
+        CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
 		//TODO: Add a tag filtering functionality default to version like matching ex: .*[0-9]+\.[0-9]+\.[0-9]+[\.]?[0-9]*.*
 		//TODO: Add a label creation at tip before starting the importation
 
@@ -87,6 +88,7 @@ public class MainEntry {
 		String time = (String) parser.getOptionValue(selectTime);
 		Boolean timeBased = (Boolean) parser.getOptionValue(selectTimeBasedImport);
 		Boolean labelBased = (Boolean) parser.getOptionValue(selectLabelBasedImport);
+		Boolean revisionLabelBased = (Boolean) parser.getOptionValue(selectRevisionLabelBasedImport);
 		String folder = (String) parser.getOptionValue(selectFolder);
 		String domain = (String) parser.getOptionValue(selectDomain);
 		Boolean keyword = (Boolean) parser.getOptionValue(isExpandKeywords);
@@ -239,6 +241,8 @@ public class MainEntry {
 										importer.generateDayByDayImport(v, date, folder);
 									} else if (null != labelBased && labelBased) {
 										importer.generateByLabelImport(v, date, folder);
+									} else if(revisionLabelBased != null && revisionLabelBased){
+										importer.generateByRevisionLabelImport(v, date, folder);
 									} else {
 										importer.generateFastImportStream(v, folder);
 									}
@@ -278,6 +282,7 @@ public class MainEntry {
 		System.out.println("[-f <folder regex>]\t\tSelect the folder (in Java regex format) to import from");
 		System.out.println("[-T]\t\t\tDo a day by day importation of the starteam view");
 		System.out.println("[-L]\t\t\tDo a label by label importation of the starteam view");
+		System.out.println("[-r]\t\t\tDo a revision label by revision label importation of the starteam view");
 		System.out.println("[-k]\t\t\tSet to enable keyword expansion in text files");
 		System.out.println("[-U <user>]\t\tPreselect the user login");
 		System.out.println("[-R]\t\t\tResume the file history importation for branch view");
@@ -290,8 +295,8 @@ public class MainEntry {
 		System.out.println("[--checkpoint]\t\tCreate git fast-import checkpoints after each label");
 		System.out.println("[--skip-views <regex>]\t\tSkip views matching regex when using -A");
 		System.out.println("[--verbose]\t\tVerbose output");
-    System.out.println("[--lfs-size <size>[KMG]\tMinimum size to consider using LFS (disabled by default)");
-    System.out.println("[--lfs-pattern <regex>\tRegular expression on filename.");
+        System.out.println("[--lfs-size <size>[KMG]\tMinimum size to consider using LFS (disabled by default)");
+        System.out.println("[--lfs-pattern <regex>\tRegular expression on filename.");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		
 	}
