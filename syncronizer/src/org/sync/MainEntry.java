@@ -21,6 +21,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.starbase.starteam.ClientApplication;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
