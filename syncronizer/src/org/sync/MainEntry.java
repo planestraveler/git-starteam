@@ -172,6 +172,7 @@ public class MainEntry {
 			RepositoryHelperFactory.getFactory().setWorkingFolder(workingFolder);
 		}
 
+		ClientApplication.setName("git-starteam");
 		Server starteam = new Server(host, port);
 		starteam.connect();
 
