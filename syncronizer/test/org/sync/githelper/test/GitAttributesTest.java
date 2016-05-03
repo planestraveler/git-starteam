@@ -35,7 +35,7 @@ public class GitAttributesTest {
     ByteArrayInputStream stream = new ByteArrayInputStream(
       ("# some comment that need to be kept\n"
         + "# which are multiline\n"
-        + "pa th/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
+        + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
         + "UnixScript.sh eol=lf\n"
         + "WindowsScript.bat eol=crlf").getBytes());
     test.parse(stream);
@@ -60,7 +60,7 @@ public class GitAttributesTest {
   public void testPreservedAttributes() {
     assertEquals("# some comment that need to be kept\n"
         + "# which are multiline\n"
-        + "pa[:space:]th/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
+        + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
         + "UnixScript.sh eol=lf\n"
         + "WindowsScript.bat eol=crlf",
       test.toString());
@@ -71,7 +71,7 @@ public class GitAttributesTest {
     test.addAttributeToPath("path/to/hugeFile.zip", GitAttributeKind.Binary, GitAttributeKind.FilterLfs, GitAttributeKind.DiffLfs, GitAttributeKind.MergeLfs);
     assertEquals("# some comment that need to be kept\n"
       + "# which are multiline\n"
-      + "pa[:space:]th/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
+      + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
       + "path/to/hugeFile.zip -text filter=lfs diff=lfs merge=lfs\n"
       + "UnixScript.sh eol=lf\n"
       + "WindowsScript.bat eol=crlf",
@@ -80,10 +80,10 @@ public class GitAttributesTest {
   
   @Test
   public void testAddAttributesToExistingTrack() {
-    test.addAttributeToPath("pa th/to/file.bin", GitAttributeKind.Binary, GitAttributeKind.FilterLfs);
+    test.addAttributeToPath("path/to/file.bin", GitAttributeKind.Binary, GitAttributeKind.FilterLfs);
     assertEquals("# some comment that need to be kept\n"
         + "# which are multiline\n"
-        + "pa[:space:]th/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
+        + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
         + "UnixScript.sh eol=lf\n"
         + "WindowsScript.bat eol=crlf", 
         test.toString());
@@ -91,7 +91,7 @@ public class GitAttributesTest {
   
   @Test
   public void testRemovePathAttributes() {
-    test.removePath("pa th/to/file.bin");
+    test.removePath("path/to/file.bin");
     assertEquals("# some comment that need to be kept\n"
       + "# which are multiline\n"
       + "UnixScript.sh eol=lf\n"
@@ -102,5 +102,17 @@ public class GitAttributesTest {
   @Test
   public void testIsPathPartOfAttributes() {
     assertEquals(true, test.pathHasAttributes("UnixScript.sh"));
+  }
+  
+  @Test
+  public void testEscapeSpace() {
+    test.addAttributeToPath("path with spaces/file withSpace.bin", GitAttributeKind.Binary, GitAttributeKind.FilterLfs);
+    assertEquals("# some comment that need to be kept\n"
+        + "# which are multiline\n"
+        + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
+        + "path[:space:]with[:space:]spaces/file[:space:]withSpace.bin -text filter=lfs\n"
+        + "UnixScript.sh eol=lf\n"
+        + "WindowsScript.bat eol=crlf",
+        test.toString());
   }
 }
