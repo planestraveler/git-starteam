@@ -53,7 +53,8 @@ public class GitAttributes {
           }
           if(attrList.size() > 0)
           {
-            fileContent.put(line, attrList);
+        	String cleanLine = escapeSpace(line);
+            fileContent.put(cleanLine, attrList);
           }
         }
         line = parser.readLine();
@@ -67,13 +68,22 @@ public class GitAttributes {
     topComment = "#" + comment.replace("\n", "\n#");
   }
   
+  private String escapeSpace(String path) {
+	if (path == null || path.isEmpty())
+      return path;
+	
+	String newPath = path.replace(" ", "[[:space:]]");
+	return newPath;
+  }
   public void addAttributeToPath(String path, GitAttributeKind ... allAttributes) {
-    if(!fileContent.containsKey(path)) {
-      fileContent.put(path, new ArrayList<GitAttributeKind>());
+	String cleanPath = escapeSpace(path);
+	  
+    if(!fileContent.containsKey(cleanPath)) {
+      fileContent.put(cleanPath, new ArrayList<GitAttributeKind>());
     }
     ArrayList<GitAttributeKind> tempList = new ArrayList(Arrays.asList(allAttributes));
-    tempList.removeAll(fileContent.get(path));
-    fileContent.get(path).addAll(tempList);
+    tempList.removeAll(fileContent.get(cleanPath));
+    fileContent.get(cleanPath).addAll(tempList);
   }
   
   @Override
@@ -89,11 +99,13 @@ public class GitAttributes {
   }
 
   public void removePath(String path) {
-    fileContent.remove(path);
+	String cleanPath = escapeSpace(path);
+    fileContent.remove(cleanPath);
   }
 
   public boolean pathHasAttributes(String path) {
-    return fileContent.containsKey(path);
+	String cleanPath = escapeSpace(path);
+    return fileContent.containsKey(cleanPath);
   }
 
 }
