@@ -72,7 +72,7 @@ public class GitAttributes {
 	if (path == null || path.isEmpty())
       return path;
 	
-	String newPath = path.replace(" ", "[:space:]");
+	String newPath = path.replace(" ", "[[:space:]]");
 	return newPath;
   }
   public void addAttributeToPath(String path, GitAttributeKind ... allAttributes) {
