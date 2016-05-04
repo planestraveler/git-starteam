@@ -729,26 +729,40 @@ public class GitImporter {
 		}
 	}
 
-	private Label[] fetchAllViewLabels(View view){
+	private Label[] fetchAllViewLabels(View view, String filteringLabelPattern){
 		Label[] labels = view.fetchAllLabels();
 		List<Label> viewLabels = new ArrayList<Label>();
 		
 		for(Label label : labels){
 			if(label.isViewLabel()){
-				viewLabels.add(label);
+				if (filteringLabelPattern != null && !filteringLabelPattern.isEmpty()){
+	                if (Pattern.matches(filteringLabelPattern, label.getName())){
+					  viewLabels.add(label);
+	                }
+				}
+				else{
+					viewLabels.add(label);
+				}
 			}
 		}
 		
 		return viewLabels.toArray(new Label[0]);
 	}
 	
-	private Label[] fetchAllRevisionLabels(View view){
+	private Label[] fetchAllRevisionLabels(View view, String filteringLabelPattern){
 		Label[] labels = view.fetchAllLabels();
 		List<Label> revisionLabels = new ArrayList<Label>();
 		
 		for(Label label : labels){
 			if(label.isRevisionLabel() && label.getDescription().contains(buildDateToken)){
-				revisionLabels.add(label);
+				if (filteringLabelPattern != null && !filteringLabelPattern.isEmpty()){
+	                if (Pattern.matches(filteringLabelPattern, label.getName())){
+	    				revisionLabels.add(label);
+	                }
+				}
+				else{
+    				revisionLabels.add(label);
+				}
 			}
 		}
 		
@@ -767,8 +781,8 @@ public class GitImporter {
 	}
 	
 	
-	public void generateByRevisionLabelImport(View view, Date date, String baseFolder){
-		Label[] revisionLabels = fetchAllRevisionLabels(view);
+	public void generateByRevisionLabelImport(View view, Date date, String baseFolder, String revisionLabelPattern){
+		Label[] revisionLabels = fetchAllRevisionLabels(view, revisionLabelPattern);
 	
 		String head = view.getName();
 		if(null != alternateHead) {
@@ -833,7 +847,7 @@ public class GitImporter {
 				setLastFilesLastSortedFileList(vc, head, baseFolder);
 			}
 			
-			Log.log("View configuration label <" + revisionLabels[i].getName() + ">");
+			Log.log("Revision configuration label <" + revisionLabels[i].getName() + ">");
 			generateFastImportStream(vc, baseFolder);
 			writeLabelTag(view, revisionLabels[i]);
 			checkpoint();
@@ -842,8 +856,8 @@ public class GitImporter {
 		}
 	}
 
-	public void generateByLabelImport(View view, Date date, String baseFolder) {
-		Label[] viewLabels = fetchAllViewLabels(view);
+	public void generateByLabelImport(View view, Date date, String baseFolder, String labelFilteringPattern) {
+		Label[] viewLabels = fetchAllViewLabels(view, labelFilteringPattern);
 		String head = view.getName();
 		if(null != alternateHead) {
 			head = alternateHead;

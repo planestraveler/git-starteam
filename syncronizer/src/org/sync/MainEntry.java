@@ -63,7 +63,8 @@ public class MainEntry {
 		CmdLineParser.Option selectSkipViewsPattern = parser.addStringOption("skip-views");
         CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs-size");
         CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
-		//TODO: Add a tag filtering functionality default to version like matching ex: .*[0-9]+\.[0-9]+\.[0-9]+[\.]?[0-9]*.*
+        CmdLineParser.Option filteringViewLabel = parser.addStringOption("view-label-pattern");
+        CmdLineParser.Option filteringRevisionLabel = parser.addStringOption("revision-label-pattern");
 		//TODO: Add a label creation at tip before starting the importation
 
 		try {
@@ -104,6 +105,8 @@ public class MainEntry {
 		boolean verbose = verboseFlag != null && verboseFlag;
 		Boolean checkpointFlag = (Boolean) parser.getOptionValue(isCheckpoint);
 		boolean createCheckpoints = checkpointFlag != null && checkpointFlag;
+		String viewLabelPattern = (String) parser.getOptionValue(filteringViewLabel);
+		String revisionLabelPattern = (String) parser.getOptionValue(filteringRevisionLabel);
     
     String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
     String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
@@ -240,9 +243,9 @@ public class MainEntry {
 									} else if(null != timeBased && timeBased) {
 										importer.generateDayByDayImport(v, date, folder);
 									} else if (null != labelBased && labelBased) {
-										importer.generateByLabelImport(v, date, folder);
+										importer.generateByLabelImport(v, date, folder, viewLabelPattern);
 									} else if(revisionLabelBased != null && revisionLabelBased){
-										importer.generateByRevisionLabelImport(v, date, folder);
+										importer.generateByRevisionLabelImport(v, date, folder, revisionLabelPattern);
 									} else {
 										importer.generateFastImportStream(v, folder);
 									}
@@ -297,6 +300,8 @@ public class MainEntry {
 		System.out.println("[--verbose]\t\tVerbose output");
         System.out.println("[--lfs-size <size>[KMG]\tMinimum size to consider using LFS (disabled by default)");
         System.out.println("[--lfs-pattern <regex>\tRegular expression on filename.");
+        System.out.println("[--view-label-pattern <regex>\tRegular expression to filter which view label to keep.");
+        System.out.println("[--revision-label-pattern <regex>\tRegular expression on to filter which revision label to keep.");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		
 	}
