@@ -110,7 +110,7 @@ public class GitAttributesTest {
     assertEquals("# some comment that need to be kept\n"
         + "# which are multiline\n"
         + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
-        + "path[:space:]with[:space:]spaces/file[:space:]withSpace.bin -text filter=lfs\n"
+        + "path[[:space:]]with[[:space:]]spaces/file[[:space:]]withSpace.bin -text filter=lfs\n"
         + "UnixScript.sh eol=lf\n"
         + "WindowsScript.bat eol=crlf",
         test.toString());
