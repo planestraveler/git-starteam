@@ -16,10 +16,15 @@
 ******************************************************************************/
 package org.sync;
 
+import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import com.starbase.starteam.ClientApplication;
 import com.starbase.starteam.Project;
@@ -56,6 +61,7 @@ public class MainEntry {
 		CmdLineParser.Option selectPath = parser.addStringOption('X', "path-to-program");
 		CmdLineParser.Option isCreateRepo = parser.addBooleanOption('c', "create-new-repo");
 		CmdLineParser.Option selectPassword = parser.addStringOption("password");
+		CmdLineParser.Option selectPasswordFilePath = parser.addStringOption('F', "password-file");
 		CmdLineParser.Option dumpToFile = parser.addStringOption('D', "dump");
 		CmdLineParser.Option selectWorkingFolder = parser.addStringOption('W', "working-folder");
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
@@ -97,6 +103,7 @@ public class MainEntry {
 		String pathToProgram = (String) parser.getOptionValue(selectPath);
 		Boolean createNewRepo = (Boolean) parser.getOptionValue(isCreateRepo);
 		String password = (String) parser.getOptionValue(selectPassword);
+		String passwordFilePath = (String) parser.getOptionValue(selectPasswordFilePath);
 		String dumpTo = (String) parser.getOptionValue(dumpToFile);
 		String workingFolder = (String) parser.getOptionValue(selectWorkingFolder);
 		Boolean verboseFlag = (Boolean) parser.getOptionValue(isVerbose);
@@ -181,7 +188,34 @@ public class MainEntry {
 		if(null != con && null == user) {
 			user = con.readLine("Username:");
 		}
-		if(null != con && null == password) {
+		if (passwordFilePath != null) {
+			//check if given file path exists as a file
+			File f = new File(passwordFilePath);
+			
+			if (f.exists() && !f.isDirectory()) {
+				//read file
+				List<String> lines = null;
+				try {
+					lines = Files.readAllLines(f.toPath(), Charset.defaultCharset());
+				
+					StringBuilder sb = new StringBuilder(); 
+					for (String line : lines) { 
+						sb.append(line); 
+					}
+					
+					password = sb.toString();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} 
+				
+				//make sure password is not left on disk
+				f.delete();
+			}
+			else {
+				password = null;
+			}
+		}
+		else if(null != con && null == password) {
 			char[] passwordChars = con.readPassword("Password:");
 			if(null != passwordChars) {
 				password = new String(passwordChars);
@@ -288,6 +322,7 @@ public class MainEntry {
 		System.out.println("[-c]\t\t\tCreate a new repository if one does not exist");
 		System.out.println("[-W <folder>]\t\tSelect where the repository is located");
 		System.out.println("[--password]\t\tStarTeam password");
+		System.out.println("[-F]\t\tFile path where StarTeam password is written");
 		System.out.println("[-D <dump file prefix>]\tDump fast-import data to files");
 		System.out.println("[--checkpoint]\t\tCreate git fast-import checkpoints after each label");
 		System.out.println("[--skip-views <regex>]\t\tSkip views matching regex when using -A");
