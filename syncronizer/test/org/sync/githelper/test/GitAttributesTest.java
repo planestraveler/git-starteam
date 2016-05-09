@@ -103,4 +103,16 @@ public class GitAttributesTest {
   public void testIsPathPartOfAttributes() {
     assertEquals(true, test.pathHasAttributes("UnixScript.sh"));
   }
+  
+  @Test
+  public void testEscapeSpace() {
+    test.addAttributeToPath("path with spaces/file withSpace.bin", GitAttributeKind.Binary, GitAttributeKind.FilterLfs);
+    assertEquals("# some comment that need to be kept\n"
+        + "# which are multiline\n"
+        + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
+        + "path[[:space:]]with[[:space:]]spaces/file[[:space:]]withSpace.bin -text filter=lfs\n"
+        + "UnixScript.sh eol=lf\n"
+        + "WindowsScript.bat eol=crlf",
+        test.toString());
+  }
 }
