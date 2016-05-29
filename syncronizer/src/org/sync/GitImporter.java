@@ -48,6 +48,7 @@ import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import org.sync.util.CommitInformation;
 import org.sync.util.LabelDateComparator;
+import org.sync.util.RevisionDateComparator;
 import org.sync.util.TempFileManager;
 
 import com.starbase.starteam.Folder;
@@ -767,19 +768,7 @@ public class GitImporter {
 		}
 		
 		return revisionLabels.toArray(new Label[0]);
-	}
-	
-	private OLEDate getRevisionLabelDate(Label revisionLabel) throws ParseException{
-		String labelDescription = revisionLabel.getDescription();
-		int buildDateDescriptionIndex = labelDescription.indexOf(buildDateToken);
-		String buildDateDescription = labelDescription.substring(buildDateDescriptionIndex + buildDateToken.length());
-	    String date = buildDateDescription.substring(1, buildDateDescription.indexOf(')'));
-
-	    DateFormat dateFormat = new java.text.SimpleDateFormat(buildDateFormat);
-
-	    return new OLEDate(dateFormat.parse(date));
-	}
-	
+	}	
 	
 	public void generateByRevisionLabelImport(View view, Date date, String baseFolder, String revisionLabelPattern){
 		Label[] revisionLabels = fetchAllRevisionLabels(view, revisionLabelPattern);
@@ -789,13 +778,11 @@ public class GitImporter {
 			head = alternateHead;
 		}
 		
-		Arrays.sort(revisionLabels, new LabelDateComparator());
-	
+		Arrays.sort(revisionLabels, new RevisionDateComparator());
 		int fromLabel = 0;
 		
 		if(isResume) {
 			fromLabel = -1;
-			
 			java.util.Date lastCommit = null ;
 			if(null != date) {
 				lastCommit = date;
@@ -805,10 +792,15 @@ public class GitImporter {
 			}
 			
 			for(int i=0; i < revisionLabels.length; ++i) {
-				if(revisionLabels[i].getRevisionTime().getLongValue() > lastCommit.getTime()) {
-					Log.log("Importing from label <" + revisionLabels[i].getName() + ">");
-					fromLabel = i;
-					break;
+				try {
+					if(RevisionDateComparator.getLabelDate(revisionLabels[i]).getLongValue() > lastCommit.getTime()) {
+						Log.log("Importing from label <" + revisionLabels[i].getName() + ">");
+						fromLabel = i;
+						break;
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 			if(-1 == fromLabel) {
@@ -817,10 +809,17 @@ public class GitImporter {
 			}
 		} else if (null != date) {
 			for(int i=0; i < revisionLabels.length; ++i) {
-				long labelTime = revisionLabels[i].getRevisionTime().getLongValue();
+				OLEDate revisionDate = null;
+				try {
+					revisionDate = RevisionDateComparator.getLabelDate(revisionLabels[i]);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				long revisionTime = revisionDate.getLongValue();
 				long requestStart = date.getTime();
-				if(labelTime > requestStart) {
-					Log.log("Start import from label <" + revisionLabels[i].getName() + ">");
+				if(revisionTime > requestStart) {
+					Log.log("Start import from label <" + revisionLabels[i].getName() + "> at time <" + revisionDate.toString() + ">");
 					fromLabel = i;
 					break;
 				}
@@ -828,11 +827,11 @@ public class GitImporter {
 		}
 		
 		setFolder(view, baseFolder);
-		for(int i=fromLabel; i<revisionLabels.length; ++i) {
+		for(int i=fromLabel; i<revisionLabels.length ; ++i) {
 			OLEDate rollbackDate;
 			
 			try {
-				rollbackDate = getRevisionLabelDate(revisionLabels[i]);
+				rollbackDate = RevisionDateComparator.getLabelDate(revisionLabels[i]);
 			} catch (ParseException e) {
 				Log.log("Could not retreive build date from revision label :" + revisionLabels[i]);
 				e.printStackTrace();
