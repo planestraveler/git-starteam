@@ -38,6 +38,12 @@ public class Type extends NamedCacheRef {
 		return typeName.equals(type.typeName);
 	}
 	
+	
+	public Property propertyForName(String propertyName){
+		throw new RuntimeException("Method not implemented.");
+	}
+	
+	
 	@Override
 	public boolean equals(Object type) {
 		if(type instanceof Type) {
