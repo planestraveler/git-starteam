@@ -322,6 +322,16 @@ public class File extends Item {
 		}
 	}
 	
+	public String getFullName() {
+		if(null != itemProperties) {
+			return itemProperties.getProperty(propertyKeys.FOLDER_PATH) 
+					+ java.io.File.pathSeparator 
+					+ itemProperties.getProperty(propertyKeys.FILE_NAME);
+		} else {
+			throw new InvalidOperationException("Item properties are not initialized");
+		}
+	}
+	
 	public long getSizeEx() {
 		if(null != itemProperties) {
 			try {

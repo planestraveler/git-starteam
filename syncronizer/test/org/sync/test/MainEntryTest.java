@@ -1,4 +1,4 @@
-package org.sync.test;
+/*package org.sync.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -759,4 +759,4 @@ public class MainEntryTest {
 		//TODO: Validate the logs to see if everything is all right.
 	}
 
-}
+}*/

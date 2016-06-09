@@ -16,7 +16,6 @@
 ******************************************************************************/
 package org.sync;
 
-import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +71,8 @@ public class MainEntry {
         CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
         CmdLineParser.Option filteringViewLabel = parser.addStringOption("view-label-pattern");
         CmdLineParser.Option filteringRevisionLabel = parser.addStringOption("revision-label-pattern");
+        CmdLineParser.Option selectChangeRequestImport = parser.addStringOption("change-request");
+        
 		//TODO: Add a label creation at tip before starting the importation
 
 		try {
@@ -115,6 +116,7 @@ public class MainEntry {
 		boolean createCheckpoints = checkpointFlag != null && checkpointFlag;
 		String viewLabelPattern = (String) parser.getOptionValue(filteringViewLabel);
 		String revisionLabelPattern = (String) parser.getOptionValue(filteringRevisionLabel);
+		String changeRequestFilePattern = (String) parser.getOptionValue(selectChangeRequestImport);
     
     String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
     String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
@@ -262,8 +264,8 @@ public class MainEntry {
 						importer.setVerbose(verbose);
 						importer.setCreateCheckpoints(createCheckpoints);
 						importer.setDomain(domain);
-            importer.setMinimumLFSSize(startTrackingAtSize);
-            importer.setLFSPattern(lfsRegexPattern);
+                        importer.setMinimumLFSSize(startTrackingAtSize);
+                        importer.setLFSPattern(lfsRegexPattern);
 
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
@@ -279,7 +281,7 @@ public class MainEntry {
 									} else if(null != timeBased && timeBased) {
 										importer.generateDayByDayImport(v, date, folder);
 									} else if (null != labelBased && labelBased) {
-										importer.generateByLabelImport(v, date, folder, viewLabelPattern);
+										importer.generateByLabelImport(v, date, folder, viewLabelPattern, changeRequestFilePattern);
 									} else if(revisionLabelBased != null && revisionLabelBased){
 										importer.generateByRevisionLabelImport(v, date, folder, revisionLabelPattern);
 									} else {
