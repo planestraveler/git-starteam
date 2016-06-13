@@ -19,7 +19,8 @@ import com.starbase.starteam.View;
 public class ChangeRequestsHelper implements IChangeRequestsHelper{
 
 	private String filePattern = null; 
-	private Pattern crDescriptionPattern =  Pattern.compile(".*\\[CR(\\d+)\\].*");
+	private Pattern crDescriptionPattern = Pattern.compile(".*\\[CR(\\d+)\\].*");
+	private Pattern commentFilterPattern = Pattern.compile("Automatic Update from CRForm \\(version \\d+\\.\\d+\\.\\d+\\.\\d+\\)");
 	
 	
 	public ChangeRequestsHelper(){
@@ -50,6 +51,20 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 		return changeRequestInfo;
 	}
 	
+	@Override
+	public void setFilePattern(String filePattern) {
+		this.filePattern = filePattern;
+	}
+
+	@Override
+	public boolean commentMatchFilter(String comment) {
+		if(comment == null || comment.isEmpty()){
+			return false;
+		}
+		
+		Matcher matcher = commentFilterPattern.matcher(comment);
+		return matcher.matches();
+	}
 	
 	private ChangeRequest getChangeRequest(View view, Folder folder, Label label){
         int crNumber = getCRNumber(label);
@@ -91,10 +106,5 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 		
 		QueryInfo query = new QueryInfo(crType,false,"My Temporary Query",node);
 		return query;
-	}
-
-	@Override
-	public void setFilePattern(String filePattern) {
-		this.filePattern = filePattern;
 	}
 }

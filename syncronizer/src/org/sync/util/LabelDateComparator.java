@@ -32,7 +32,8 @@ public class LabelDateComparator implements Comparator<Label> {
 		{
 			return -1;
 		}
-		return 0;
+		
+		return arg0.getName().compareTo(arg1.getName());
 	}
 
 }

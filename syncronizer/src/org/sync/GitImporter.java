@@ -378,6 +378,9 @@ public class GitImporter {
 					fm.setPath(path);
 					fo = fm;
 				}
+				
+				//Need to check this here !
+				
 				if(null != lastCommit && lastInformation.equivalent(current)) {
 					if(lastInformation.getComment().trim().length() == 0 && current.getComment().trim().length() > 0) {
 						lastInformation = current;
@@ -681,8 +684,6 @@ public class GitImporter {
 		}
 		return path;
 	}
-	
-	//TODO insert here.
 
 	private void recursiveFilePopulation(String head, Folder f, ChangeRequestInformation changeRequestInformation) {
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
@@ -727,8 +728,12 @@ public class GitImporter {
 
 				//TODO: find a proper solution to file update.
 				if(!lastSortedFileList.containsKey(info)) {
-					AddedSortedFileList.put(info, historyFile);
-					if(verbose) Log.out("Added new file <" + info + ">");
+					//If CR filtering enable, skip commit with comment that match CR filter.
+					//This prevent a commit with no file associated.
+					if(changeRequestHelper.isChangeRequestsFeatureEnable() && changeRequestHelper.commentMatchFilter(info.getComment())){
+						AddedSortedFileList.put(info, historyFile);
+						if(verbose) Log.out("Added new file <" + info + ">");
+					}
 				} else {
 					Integer rev = repositoryHelper.getRegisteredFileVersion(head, path);
 					if(rev != null && rev < historyFile.getContentVersion()) {
