@@ -3,6 +3,7 @@ package org.sync.changerequests;
 import java.util.regex.Pattern;
 
 import com.starbase.starteam.ChangeRequest;
+import com.starbase.starteam.Label;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.User;
 
@@ -55,6 +56,20 @@ public class ChangeRequestInformation {
 		return changeRequest.getFix();
 	}
 
+	public String getAdressedIn(){
+		int labelId = changeRequest.getAddressedIn();
+		
+		Label[] labels = changeRequest.getAllLabels();
+		
+		for(Label label : labels){
+			if(label.getID() == labelId){
+				return label.getName();
+			}
+		}
+		
+		return "";
+	}
+	
 	public String getComponent(){
 		return changeRequest.getComponent();
 	}
@@ -99,6 +114,10 @@ public class ChangeRequestInformation {
 		stringBuilder.append(getWorkflowStatus());
 		stringBuilder.append("\n");
 		*/
+		
+		stringBuilder.append("Addressed In: ");
+		stringBuilder.append(getAdressedIn());
+		stringBuilder.append("\n");
 		
 		stringBuilder.append("Type: ");
 		stringBuilder.append(getType());
