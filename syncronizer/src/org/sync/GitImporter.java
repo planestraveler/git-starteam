@@ -730,7 +730,7 @@ public class GitImporter {
 				if(!lastSortedFileList.containsKey(info)) {
 					//If CR filtering enable, skip commit with comment that match CR filter.
 					//This prevent a commit with no file associated.
-					if(changeRequestHelper.isChangeRequestsFeatureEnable() && changeRequestHelper.commentMatchFilter(info.getComment())){
+					if(!changeRequestHelper.isChangeRequestsFeatureEnable() || !changeRequestHelper.commentMatchFilter(info.getComment())){
 						AddedSortedFileList.put(info, historyFile);
 						if(verbose) Log.out("Added new file <" + info + ">");
 					}
