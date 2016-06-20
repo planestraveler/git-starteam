@@ -819,9 +819,11 @@ public class GitImporter {
 				long revisionTime = revisionDate.getLongValue();
 				long requestStart = date.getTime();
 				if(revisionTime > requestStart) {
-					Log.log("Start import from label <" + revisionLabels[i].getName() + "> at time <" + revisionDate.toString() + ">");
+					Log.log("Start import from label <" + revisionLabels[i].getName() + "> at time <" + revisionDate.toString() + "> index:" + i);
 					fromLabel = i;
 					break;
+				} else {
+					Log.log("Skipping label <" + revisionLabels[i].getName() + "> at time <" + revisionDate.toString() + "> index:" + i);
 				}
 			}
 		}
