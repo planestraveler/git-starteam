@@ -163,8 +163,9 @@ public class MainEntry {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		if(null != time) {
 			if(!((null != timeBased && timeBased) ||
-				 (null != labelBased && labelBased))) {
-				System.out.println("-t option can only be used with -T or -L options.");
+				 (null != labelBased && labelBased) ||
+				 (null != revisionLabelBased && revisionLabelBased))) {
+				System.out.println("-t option can only be used with -T, -r or -L options.");
 				System.exit(3);
 			}
 			try {
