@@ -13,7 +13,6 @@ public class ChangeRequestInformation {
 	private final String Release_Notes_Property = "Usr_ReleaseNote";
 	private final String SIM_Issue_ID_Property = "Usr_SimIssueID";
 	private final String JIRA_Issue_Property = "Usr_SimSRS";
-	private final String Workflow_Status_Property = "Usr_StarFlowStatus";
 	
 	private ChangeRequest changeRequest;
 	
@@ -23,8 +22,7 @@ public class ChangeRequestInformation {
 		this.changeRequest = changeRequest;
 		this.associatedFilePattern = associatedFilePattern;
 	}
-	
-	
+
 	public int getNumber(){
 		return changeRequest.getNumber();
 	}
@@ -48,8 +46,7 @@ public class ChangeRequestInformation {
 	}
 	
 	public String getWorkflowStatus(){
-		Object workflowStatusObject = changeRequest.get(Workflow_Status_Property);
-		return changeRequest.getFlagDisplayName((int) workflowStatusObject);
+		return changeRequest.getStatusDisplayName(changeRequest.getStatus());
 	}
 	
 	public String getFixDetails() {
@@ -105,15 +102,16 @@ public class ChangeRequestInformation {
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
 		
-		stringBuilder.append("CR: ");
+		stringBuilder.append("[CR");
 		stringBuilder.append(getNumber());
-		stringBuilder.append("\n");
+		stringBuilder.append("] ");
+
+		stringBuilder.append(getFixSummary());
+		stringBuilder.append("\n\n");
 		
-		/*
 		stringBuilder.append("Workflow Status: ");
 		stringBuilder.append(getWorkflowStatus());
 		stringBuilder.append("\n");
-		*/
 		
 		stringBuilder.append("Addressed In: ");
 		stringBuilder.append(getAdressedIn());
@@ -137,14 +135,9 @@ public class ChangeRequestInformation {
 		stringBuilder.append("Code Reviewer: ");
 		stringBuilder.append(getCodeReviewer());
 		stringBuilder.append("        ");
-		
-
+	
 		stringBuilder.append("Component: \n");
 		stringBuilder.append(getComponent());
-		stringBuilder.append("\n\n");
-		
-		stringBuilder.append("Fix Summary: \n");
-		stringBuilder.append(getFixSummary());
 		stringBuilder.append("\n\n");
 
 		stringBuilder.append("ReleaseNotes: \n");
