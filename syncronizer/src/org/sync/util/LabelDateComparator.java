@@ -21,7 +21,8 @@ import java.util.Comparator;
 import com.starbase.starteam.Label;
 
 public class LabelDateComparator implements Comparator<Label> {
-
+  
+  private AlphanumComparator Fallback;
 	@Override
 	public int compare(Label arg0, Label arg1) {
 		if(arg0.getRevisionTime().getLongValue() > arg1.getRevisionTime().getLongValue())
@@ -32,7 +33,7 @@ public class LabelDateComparator implements Comparator<Label> {
 		{
 			return -1;
 		}
-		return arg0.getName().compareTo(arg1.getName());
+		return Fallback.compare(arg0.getName(), arg1.getName());
 	}
 
 }

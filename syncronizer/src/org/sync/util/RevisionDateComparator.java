@@ -27,6 +27,7 @@ public class RevisionDateComparator implements Comparator<Label> {
 private static String buildDateToken = "build.date=";
 private static String buildDateFormat = "MM/dd/yy hh:mm a";
 
+  private AlphanumComparator Fallback;
 	@Override
 	public int compare(Label arg0, Label arg1) {
 		long date0 = 0;
@@ -47,7 +48,7 @@ private static String buildDateFormat = "MM/dd/yy hh:mm a";
 		{
 			return -1;
 		}
-		return 0;
+		return Fallback.compare(arg0.getName(), arg1.getName());
 	}
 	
 	public static OLEDate getLabelDate(Label revisionLabel) throws ParseException{
