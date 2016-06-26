@@ -1,8 +1,9 @@
 
-package org.sync.util;
+package org.sync.util.test;
 
 import java.util.ArrayList;
 import org.junit.Test;
+import org.sync.util.AlphanumComparator;
 import static org.junit.Assert.*;
 
 /**
