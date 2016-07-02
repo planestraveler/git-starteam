@@ -368,4 +368,8 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	public PropertyNames getPropertyNames() {
 		return propertyKeys;
 	}
+  
+  public Label[] getAllLabels() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 }
