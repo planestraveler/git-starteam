@@ -22,7 +22,7 @@ import com.starbase.starteam.Label;
 
 public class LabelDateComparator implements Comparator<Label> {
   
-  private AlphanumComparator Fallback;
+  private AlphanumComparator Fallback = new AlphanumComparator();
 	@Override
 	public int compare(Label arg0, Label arg1) {
 		if(arg0.getRevisionTime().getLongValue() > arg1.getRevisionTime().getLongValue())
