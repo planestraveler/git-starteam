@@ -27,7 +27,7 @@ public class RevisionDateComparator implements Comparator<Label> {
 private static String buildDateToken = "build.date=";
 private static String buildDateFormat = "MM/dd/yy hh:mm a";
 
-  private AlphanumComparator Fallback;
+  private AlphanumComparator Fallback = new AlphanumComparator();
 	@Override
 	public int compare(Label arg0, Label arg1) {
 		long date0 = 0;
