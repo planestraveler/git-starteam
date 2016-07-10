@@ -432,20 +432,6 @@ public class GitImporter {
 				java.util.Date janitorTime;
 				if(view.getConfiguration().isTimeBased()) {
 					janitorTime = new java.util.Date(view.getConfiguration().getTime().getLongValue());
-				} else if (view.getConfiguration().isLabelBased()) {
-					long labelTime = Long.MIN_VALUE;
-					for(Label l : view.fetchAllLabels()) {
-						if(l.getID() == view.getConfiguration().getLabelID()) {
-							labelTime = l.getRevisionTime().getLongValue();
-							break;
-						}
-					}
-					if(labelTime != Long.MIN_VALUE) {
-						janitorTime = new java.util.Date(labelTime);
-					} else {
-						Log.log("Could not figure out what is the time of the label id " + view.getConfiguration().getLabelID());
-						janitorTime = new java.util.Date();
-					}
 				} else {
 					janitorTime = new java.util.Date(lastModifiedTime);
 				}
