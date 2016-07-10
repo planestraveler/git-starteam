@@ -751,9 +751,9 @@ public class GitImporter {
 		for(Label label : labels){
 			if(label.isViewLabel()){
 				if (filteringLabelPattern != null && !filteringLabelPattern.isEmpty()){
-	                if (Pattern.matches(filteringLabelPattern, label.getName())){
-					  viewLabels.add(label);
-	                }
+          if (Pattern.matches(filteringLabelPattern, label.getName())) {
+            viewLabels.add(label);
+          }
 				}
 				else{
 					viewLabels.add(label);
@@ -770,11 +770,11 @@ public class GitImporter {
 		
 		for(Label label : labels){
 			if(label.isRevisionLabel() && label.getDescription().contains(buildDateToken)){
-				if (filteringLabelPattern != null && !filteringLabelPattern.isEmpty()){
-	                if (Pattern.matches(filteringLabelPattern, label.getName())){
-	    				revisionLabels.add(label);
-	                }
-				}
+				if (filteringLabelPattern != null && !filteringLabelPattern.isEmpty()) {
+          if (Pattern.matches(filteringLabelPattern, label.getName())) {
+            revisionLabels.add(label);
+          }
+        }
 				else{
     				revisionLabels.add(label);
 				}
