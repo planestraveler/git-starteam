@@ -1,4 +1,4 @@
-/*package org.sync.test;
+package org.sync.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -259,6 +259,31 @@ public class MainEntryTest {
     assertCommitFD1(i.next());
     assertCommitFD2(i.next());
     assertCommitFD3(i.next());
+    assertFalse(i.hasNext());
+  }
+  
+  @Test
+  public void testSubfolderImport() throws IOException
+  {
+    StarteamProjectBuilder.main(new String[] {"UnitTest", "30", "34"});
+    
+    MainEntry.main(new String[] {
+      "-h", "localhost", "-P", "23456", "-U", "Test", "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
+      "-d", "test.com", "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose", "--folder", "src/java"
+    });
+    
+    RepositoryHelperFactory.getFactory().setCreateRepo(false);
+    RepositoryHelper helper = RepositoryHelperFactory.getFactory().createHelper();
+    
+    List<LogEntry> entries = helper.getCommitLog(new SmallRef("MAIN"));
+    Collections.reverse(entries);
+    Iterator<LogEntry> i = entries.iterator();
+    
+    assertSubCommit30(i.next());
+    assertSubCommit31(i.next());
+    assertSubCommit32(i.next());
+    assertSubCommit33(i.next());
+    assertSubCommit34(i.next());
     assertFalse(i.hasNext());
   }
   
@@ -752,6 +777,55 @@ public class MainEntryTest {
 		assertEquals("Test <Test@test.com>", entry.getAuthor());
 	}
 	
+  private void assertSubCommit30(LogEntry entry) {
+    assertEquals("A blob representation for git", entry.getComment());
+    assertEquals(1, entry.getFilesEntry().size());
+    assertEquals("blob.java", entry.getFilesEntry().get(0).getPath());
+    assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
+    assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
+    assertEquals("Test <Test@test.com>", entry.getAuthor());
+  }
+  
+  private void assertSubCommit31(LogEntry entry) {
+    assertEquals("Fix license", entry.getComment());
+    assertEquals(1, entry.getFilesEntry().size());
+    assertEquals("blob.java", entry.getFilesEntry().get(0).getPath());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getFromType());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(0).getTypeOfModification());
+    assertEquals("Test <Test@test.com>", entry.getAuthor());
+  }
+  
+  private void assertSubCommit32(LogEntry entry) {
+    assertEquals("Add assignation data", entry.getComment());
+    assertEquals(1, entry.getFilesEntry().size());
+    assertEquals("blob.java", entry.getFilesEntry().get(0).getPath());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getFromType());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(0).getTypeOfModification());
+    assertEquals("Test <Test@test.com>", entry.getAuthor());
+  }
+  
+  private void assertSubCommit33(LogEntry entry) {
+    assertEquals("Only write a blob once", entry.getComment());
+    assertEquals(1, entry.getFilesEntry().size());
+    assertEquals("blob.java", entry.getFilesEntry().get(0).getPath());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getFromType());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(0).getTypeOfModification());
+    assertEquals("Test <Test@test.com>", entry.getAuthor());
+  }
+  
+  private void assertSubCommit34(LogEntry entry) {
+    assertEquals("Overriden method should have @Override keyword", entry.getComment());
+    assertEquals(1, entry.getFilesEntry().size());
+    assertEquals("blob.java", entry.getFilesEntry().get(0).getPath());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getFromType());
+    assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
+    assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(0).getTypeOfModification());
+    assertEquals("Test <Test@test.com>", entry.getAuthor());
+  }
 	
 	public void testTimeImport() {
 		// TODO: create repo with the right parameters
@@ -759,4 +833,4 @@ public class MainEntryTest {
 		//TODO: Validate the logs to see if everything is all right.
 	}
 
-}*/
+}
