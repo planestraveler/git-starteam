@@ -18,7 +18,6 @@ package org.sync;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.ArrayDeque;
@@ -645,11 +644,6 @@ public class GitImporter {
 	}
 
 	private Folder findFirstFolder(Folder f, String folderPattern) {
-		//if(verbose) {
-		//	Log.log("Looking for folder regex: " + folderPattern);
-		//}
-		Pattern pattern = Pattern.compile(folderPattern);
-
 		// Bread-first search queue
 		Deque<Folder> deque = new ArrayDeque<Folder>();
 		deque.addLast(f);
@@ -660,7 +654,7 @@ public class GitImporter {
 			int indexOfFirstPath = path.indexOf('/');
 
 			path = path.substring(indexOfFirstPath + 1);
-			if(pattern.matcher(path).find()) {
+			if(path.startsWith(folderPattern) && Math.abs(path.length() - folderPattern.length()) < 2) {
 				return folder;
 			}
 			//if(verbose) {
