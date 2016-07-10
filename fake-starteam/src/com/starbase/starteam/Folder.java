@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -113,6 +114,7 @@ public class Folder extends Item {
 			}
 		}
 		Folder[] buffer = new Folder[generatedList.size()];
+    Collections.shuffle(generatedList); // to cause failures faster
 		return generatedList.toArray(buffer);
 	}
 
@@ -169,6 +171,7 @@ public class Folder extends Item {
 			}
 		}
 		com.starbase.starteam.File[] buffer = new com.starbase.starteam.File[generatedList.size()];
+    Collections.shuffle(generatedList); // to more rapidly cause some failures.
 		return generatedList.toArray(buffer);
 	}
 	
