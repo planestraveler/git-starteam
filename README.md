@@ -1,6 +1,8 @@
 Git-StarTeam imports [StarTeam](http://www.borland.com/products/starteam/)
 projects into [Git](http://git-scm.com).
 
+![Build Status](https://travis-ci.org/planestraveler/git-starteam.svg?branch=master)
+
 Supported Features
 ------------------
 * Day-by-day import
