@@ -175,4 +175,10 @@ public class Commit implements Markable {
   public void setAttributes(GitAttributes attr) {
     filesAttributes = attr;
   }
+
+  public Date getCommitDate() {
+    return commitDate;
+  }
+  
+  
 }
