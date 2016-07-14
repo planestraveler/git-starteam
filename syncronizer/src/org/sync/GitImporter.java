@@ -704,8 +704,16 @@ public class GitImporter {
 						comment = changeRequestInformation.toString();
 					}
 				}
-				
-				CommitInformation info = new CommitInformation(i.getModifiedTime().getLongValue(), i.getModifiedBy(), comment, path);
+        
+        // This is a patchup time to prevent commit jumping up in time between view labels
+        long timeOfCommit = i.getModifiedTime().getLongValue();
+        if (lastCommit != null) {
+          if (lastCommit.getCommitDate().getTime() > i.getModifiedTime().getLongValue()) {
+            timeOfCommit = lastCommit.getCommitDate().getTime();
+          }
+        }
+
+				CommitInformation info = new CommitInformation(timeOfCommit, i.getModifiedBy(), comment, path);
 
 				//TODO: find a proper solution to file update.
 				if(!lastSortedFileList.containsKey(info)) {
