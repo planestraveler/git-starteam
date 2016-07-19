@@ -433,7 +433,7 @@ public class GitImporter {
 				if(view.getConfiguration().isTimeBased()) {
 					janitorTime = new java.util.Date(view.getConfiguration().getTime().getLongValue());
 				} else {
-					janitorTime = new java.util.Date(lastModifiedTime);
+					janitorTime = lastCommit.getCommitDate(); //At this stage, there should always be a last commit
 				}
 				commit = new Commit("git-starteam File Janitor",
 						"janitor@" + domain,
