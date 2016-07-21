@@ -391,8 +391,13 @@ public class GitImporter {
 						lastCommit.setAttributes(fattributes);
 					}
 				} else {
-					commit = new Commit(userName, userEmail, current.getComment(), head, new java.util.Date(current.getTime()));
-					
+					java.util.Date commitDate = new java.util.Date(current.getTime());
+					// validate that the last commit done wasn't newer than the commit we will be doing
+					if (null != lastCommit && lastCommit.getCommitDate().getTime() >= current.getTime()) {
+						// we add a seconds for each time we see a commit that is newer or same as the previous commit.
+						commitDate = new java.util.Date(lastCommit.getCommitDate().getTime() + 1000);
+					}
+					commit = new Commit(userName, userEmail, current.getComment(), head, commitDate);
 					
 					commit.addFileOperation(fo);
 					if (fattributes != null) {
