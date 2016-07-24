@@ -19,7 +19,7 @@ package com.starbase.starteam;
 public class QueryPart {
   public static final int REL_EQUAL = 3;
 
-  public QueryPart(int propertyID, int REL_EQUAL, int crNumber) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  public QueryPart(int propertyID, int relation, int value) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 }

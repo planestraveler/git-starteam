@@ -18,7 +18,7 @@ package com.starbase.starteam;
 
 public class QueryInfo extends NamedCacheRef {
 
-  public QueryInfo(Type crType, boolean b, String my_Temporary_Query, QueryNode node) {
+  public QueryInfo(Type type, boolean bPublic, String name, QueryNode node) {
     throw new UnsupportedOperationException("Not supported yet."); 
   }
   
