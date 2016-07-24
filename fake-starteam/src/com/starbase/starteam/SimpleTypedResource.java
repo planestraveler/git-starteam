@@ -51,4 +51,7 @@ public class SimpleTypedResource extends TypedResource implements Cloneable {
 		return false;
 	}
 	
+	public Object get(String key) throws NoSuchPropertyException {
+		return null;
+	}
 }

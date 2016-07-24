@@ -372,4 +372,21 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
   public Label[] getAllLabels() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
+  
+  @Override
+	public Object get(String key) throws NoSuchPropertyException {
+		return itemProperties.get(key);
+	}
+  
+	public int getCreatedBy(){
+    return getModifiedBy();
+	}
+  
+  public String getFlagDisplayName(int flag) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+	
+	public Server getServer(){
+		return getView().getServer();
+	}
 }
