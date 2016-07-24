@@ -55,6 +55,7 @@ private static String buildDateFormat = "MM/dd/yy hh:mm a";
 		String labelDescription = revisionLabel.getDescription();
 		int buildDateDescriptionIndex = labelDescription.indexOf(buildDateToken);
 		String buildDateDescription = labelDescription.substring(buildDateDescriptionIndex + buildDateToken.length());
+<<<<<<< HEAD
 
 		String date = buildDateDescription.startsWith("0")
 				? buildDateDescription.substring(1, buildDateDescription.indexOf('('))
@@ -63,5 +64,15 @@ private static String buildDateFormat = "MM/dd/yy hh:mm a";
 		DateFormat dateFormat = new java.text.SimpleDateFormat(buildDateFormat);
 
 		return new OLEDate(dateFormat.parse(date.trim()));
+=======
+		
+		String date = buildDateDescription.startsWith("0") 
+				? buildDateDescription.substring(1, buildDateDescription.indexOf('(')) 
+				: buildDateDescription.substring(0, buildDateDescription.indexOf('('));
+	
+	    DateFormat dateFormat = new java.text.SimpleDateFormat(buildDateFormat);
+	
+	    return new OLEDate(dateFormat.parse(date.trim()));
+>>>>>>> RevisionLabel_DateFix
 	}
 }
