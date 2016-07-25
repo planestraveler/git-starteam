@@ -22,7 +22,7 @@ public class ItemListManager {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
-  public void getItems() {
+  public Items getItems() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
