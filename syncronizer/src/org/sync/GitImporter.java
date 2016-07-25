@@ -256,14 +256,14 @@ public class GitImporter {
 				propNames.FILE_DESCRIPTION,
 				
 				//Note: Require StarTeam SDK 12.5
-				//propNames.FILE_CONTENT_REVISION,
-				//propNames.MODIFIED_TIME,
-				//propNames.MODIFIED_USER_ID,
-				//propNames.EXCLUSIVE_LOCKER,
-				//propNames.NON_EXCLUSIVE_LOCKERS,
-				//propNames.FILE_ENCODING,
-				//propNames.FILE_EOL_CHARACTER,
-				//propNames.FILE_EXECUTABLE,
+				propNames.FILE_CONTENT_REVISION,
+				propNames.MODIFIED_TIME,
+				propNames.MODIFIED_USER_ID,
+				propNames.EXCLUSIVE_LOCKER,
+				propNames.NON_EXCLUSIVE_LOCKERS,
+				propNames.FILE_ENCODING,
+				propNames.FILE_EOL_CHARACTER,
+				propNames.FILE_EXECUTABLE,
 		};
 		
 		folder.populateNow(server.getTypeNames().FILE, populateProps, -1);
