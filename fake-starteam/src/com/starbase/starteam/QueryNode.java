@@ -19,7 +19,7 @@ package com.starbase.starteam;
 public class QueryNode {
   public static final int OP_AND = 0;
 
-  public QueryNode(int OP_AND) {
+  public QueryNode(int operator) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
