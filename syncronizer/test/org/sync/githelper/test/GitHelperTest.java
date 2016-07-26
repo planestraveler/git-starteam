@@ -60,7 +60,7 @@ public class GitHelperTest {
 	public void tearDown() throws Exception {
 		test.dispose();
 		test = null;
-		FileUtility.rmDir(bareRepo);
+		//FileUtility.rmDir(bareRepo);
 		bareRepo = null;
 		blob1 = null;
 	}
@@ -199,5 +199,33 @@ public class GitHelperTest {
     test.getFileContent("master", "This/file/doesn't/exists.txt", stream);
     
     assertEquals(0, stream.size());
+  }
+  
+  @Test
+  public void generate15kEntryAndCheckExists() throws Exception {
+    bareRepo.mkdir();
+    test.setWorkingDirectory(bareRepo.getAbsolutePath(), true);
+    
+    for (int i = 0; i < 125; i++) {
+      for (int j = 0; j < 125; j++) {
+        test.registerFileId("master", "test/" + i + "/file" + j + ".txt", i + (j << 16), 2);
+      }
+    }
+    test.dispose();
+    test = null;
+    
+    File starteamFile = new File(bareRepo.getAbsolutePath() + "/starteam/StarteamFileInfo.gz");
+    
+    assertTrue(starteamFile.exists());
+    assertTrue(starteamFile.isFile());
+    
+    test = new GitHelper(null, false, null);
+    test.setWorkingDirectory(bareRepo.getAbsolutePath(), false);
+    for (int i = 0; i < 125; i++) {
+      for (int j = 0; j < 125; j++) {
+        assertEquals(new Integer(i + (j << 16)), test.getRegisteredFileId("master", "test/" + i + "/file" + j + ".txt"));
+        assertEquals(new Integer(2), test.getRegisteredFileVersion("master", "test/" + i + "/file" + j+".txt"));
+      }
+    }
   }
 }
