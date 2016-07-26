@@ -60,7 +60,7 @@ public class GitHelperTest {
 	public void tearDown() throws Exception {
 		test.dispose();
 		test = null;
-		//FileUtility.rmDir(bareRepo);
+		FileUtility.rmDir(bareRepo);
 		bareRepo = null;
 		blob1 = null;
 	}
