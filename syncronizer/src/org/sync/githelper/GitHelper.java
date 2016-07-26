@@ -717,7 +717,7 @@ public class GitHelper extends RepositoryHelper {
             } finally {
               outputReaderLock.unlock();
             }
-					} else {
+					} else if (firstResponse.toString().trim().length() > 0) {
 						System.err.println("Unknown response <" + firstResponse + ">");
 					}
 					firstResponse.setLength(0);
