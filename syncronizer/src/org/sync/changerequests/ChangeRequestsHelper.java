@@ -77,7 +77,7 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 		Type crType = server.typeForName(server.getTypeNames().CHANGEREQUEST);
 		
 		ItemListManager ilm = new ItemListManager(crType,flm);
-		ilm.getItems();
+		//ilm.getItems(); // doesn't seem like it is necessary.
 		QueryInfo query = buildQuery(server, crType, crNumber);
 		Items items = ilm.selectByQuery(query);
 		
