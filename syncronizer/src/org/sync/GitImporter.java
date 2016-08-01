@@ -360,6 +360,10 @@ public class GitImporter {
 							if(verbose) {
 								Log.log("File was updated " + revision + " => " + f.getContentVersion() + ": " + path);
 							}
+						} else {
+							if(verbose) {
+								Log.log("File revision : " + revision + " is same: " + path);
+							}
 						}
 					} else {
 						if(verbose)	{
