@@ -87,8 +87,6 @@ public class GitImporter {
 	private NavigableMap<CommitInformation, File> sortedFileList = new TreeMap<CommitInformation, File>();
 	// files found in the current view configuration but not the previous view configuration
 	private NavigableMap<CommitInformation, File> AddedSortedFileList = new TreeMap<CommitInformation, File>();
-	// all files discovered in the previous view configuration
-	private NavigableMap<CommitInformation, File> lastSortedFileList = new TreeMap<CommitInformation, File>();
 	private Commit lastCommit; 
 	// get the really old time as base information;
 	private CommitInformation lastInformation = null;
@@ -172,7 +170,6 @@ public class GitImporter {
 		deletedFiles.clear();
 		sortedFileList.clear();
 		lastFiles.clear();
-		lastSortedFileList.clear();
 		AddedSortedFileList.clear();
 	}
 
@@ -191,8 +188,6 @@ public class GitImporter {
 		recursiveFilePopulation(head, folder, null);
 		lastFiles.clear();
 		lastFiles.addAll(files);
-		lastSortedFileList.clear();
-		lastSortedFileList.putAll(sortedFileList);
 
 		AddedSortedFileList.clear();
 	}
@@ -270,8 +265,6 @@ public class GitImporter {
 		recursiveFilePopulation(head, folder, changeRequestInformation);
 		lastFiles.clear();
 		lastFiles.addAll(files);
-		lastSortedFileList.clear();
-		lastSortedFileList.putAll(sortedFileList);
 		recoverDeleteInformation(deletedFiles, head, view);
 
 		if(verbose) {
@@ -676,19 +669,23 @@ public class GitImporter {
 	}
 
 	private void recursiveFilePopulation(String head, Folder f, ChangeRequestInformation changeRequestInformation) {
+    if (null == head) {
+      throw new NullPointerException("Head cannot be null");
+    }
+    if (null == f) {
+      throw new NullPointerException("Folder cannot be null");
+    }
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
 				String path = pathname(historyFile);
 
-				if(null != head) {
-					Integer fileid = repositoryHelper.getRegisteredFileId(head, path);
-					if(null == fileid) {
-						// We register with version -1 to be sure to add it. Since this is a discovered file, when we are 
-						// going to pass trough the files, we will make sure to get it's version 0.
-						repositoryHelper.registerFileId(head, path, historyFile.getItemID(), -1);
-					}
-				}
+        Integer fileid = repositoryHelper.getRegisteredFileId(head, path);
+        if(null == fileid) {
+          // We register with version -1 to be sure to add it. Since this is a discovered file, when we are 
+          // going to pass trough the files, we will make sure to get it's version 0.
+          repositoryHelper.registerFileId(head, path, historyFile.getItemID(), -1);
+        }
 				if(deletedFiles.contains(path)) {
 					deletedFiles.remove(path);
 				}
@@ -724,21 +721,16 @@ public class GitImporter {
 
 				CommitInformation info = new CommitInformation(timeOfCommit, i.getModifiedBy(), comment, path);
 
-				//TODO: find a proper solution to file update.
-				if(!lastSortedFileList.containsKey(info)) {
-					//If CR filtering enable, skip commit with comment that match CR filter.
-					//This prevent a commit with no file associated.
-					if(!changeRequestHelper.isChangeRequestsFeatureEnable() || !changeRequestHelper.commentMatchFilter(info.getComment())){
-						AddedSortedFileList.put(info, historyFile);
-						if(verbose) Log.out("Added new file <" + info + ">");
-					}
-				} else {
-					Integer rev = repositoryHelper.getRegisteredFileVersion(head, path);
-					if(rev != null && rev < historyFile.getContentVersion()) {
-						AddedSortedFileList.put(info, historyFile);
-						if(verbose) Log.out("updated new file <" + info + ">");
-					}
-				}
+        // Check if we ever seen that file before. 
+        Integer rev = repositoryHelper.getRegisteredFileVersion(head, path);
+        if(rev != null && rev < historyFile.getContentVersion()) {
+          //If CR filtering enable, skip commit with comment that match CR filter.
+          //This prevent a commit with no file associated.
+          if(!changeRequestHelper.isChangeRequestsFeatureEnable() || !changeRequestHelper.commentMatchFilter(info.getComment())){
+            AddedSortedFileList.put(info, historyFile);
+            if(verbose) Log.out("New file change <" + info + ">");
+          }
+        }
 				sortedFileList.put(info, historyFile);
 			} else {
 				Log.log("Item " + f + "/" + i + " is not a file");
@@ -1167,10 +1159,7 @@ public class GitImporter {
 			if(isResume) {
 				// -R is for branch view
 				// 2000 mSec here is to avoid side effect in StarTeam View Configuration
-				viewTime = firstTime + 2000;
-				vc = new View(view, ViewConfiguration.createFromTime(new OLEDate(viewTime)));
-				setLastFilesLastSortedFileList(vc, head, baseFolder);
-				vc.close();
+				lastFiles.addAll(repositoryHelper.getListOfTrackedFile(head));
 			} 
 			Calendar time = Calendar.getInstance();
 			time.setTimeInMillis(firstTime);
