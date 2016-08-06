@@ -75,7 +75,6 @@ public class GitHelperTest {
 		Set<String> listOfNoFiles = test.getListOfTrackedFile("Non-existing-branch");
 		assertNotNull(listOfNoFiles);
 		assertEquals(0, listOfNoFiles.size());
-		System.err.println("GitListOfTrackedFiles PASSED");
 	}
 	
 	@Test
@@ -86,7 +85,6 @@ public class GitHelperTest {
 		assertTrue(test.isSpecialFile("a/deep/down/git/directory/.gitattributes"));
 		assertFalse(test.isSpecialFile("aFile.txt"));
 		assertFalse(test.isSpecialFile("some/random/directory/file.gitignore"));
-		System.err.println("SpecialFiles PASSED");
 	}
 
 	@Test
@@ -94,7 +92,6 @@ public class GitHelperTest {
 		assertEquals(0, test.gc());
 		test.setWorkingDirectory(System.getProperty("java.io.tmpdir"), false);
 		assertEquals(128, test.gc());
-		System.err.println("GitGC PASSED");
 	}
 	
 	@Test
@@ -103,15 +100,12 @@ public class GitHelperTest {
 		bareRepo.mkdir();
 		test.setWorkingDirectory(bareRepo.getAbsolutePath(), true);
 		assertEquals(true, test.isBareRepository());
-		System.err.println("IsBare PASSED");
 	}
 	
 	@Test
 	public void testAlternateDirectory() throws Exception {
 		GitHelper helper = new GitHelper("/usr/bin", false, null);
 		helper.dispose();
-		
-		System.err.println("stopping PASSED");
 	}
 	
 	@Test
@@ -142,7 +136,6 @@ public class GitHelperTest {
 		assertNotNull(lastCommit);
 		System.out.println(lastCommit.getTime() + " " + System.currentTimeMillis());
 		assertTrue((lastCommit.getTime() - System.currentTimeMillis()) < 2500);
-		System.err.println("CommitInBare PASSED");
 	}
 	
 	@Test
@@ -167,7 +160,6 @@ public class GitHelperTest {
 		
 		assertFalse(test.updateFileVersion("master", "unexistingFile.txt", 4));
 		assertFalse(test.registerFileId("master", "test/path/of/file.txt", 12356, 6));
-		System.err.println("FileRegistration PASSED");
 	}
 	
 	@Test
@@ -187,7 +179,6 @@ public class GitHelperTest {
 		assertEquals(GitFileType.Normal, renamedLog.get(0).getFilesEntry().get(1).getFromType());
 		assertEquals(GitFileType.Normal, renamedLog.get(0).getFilesEntry().get(1).getToType());
 		assertEquals(98, renamedLog.get(0).getFilesEntry().get(1).getDiffRatio());
-		System.err.println("GitLogRead PASSED");
 	}
   
   @Test
@@ -200,7 +191,6 @@ public class GitHelperTest {
     String md5sum = String.format("%032x", new java.math.BigInteger(1, digested));
     
     assertEquals("a7e10f59183aa3c456e9059fb7036c9b", md5sum);
-    System.err.println("CatBlob PASSED");
   }
   
   @Test
@@ -209,7 +199,6 @@ public class GitHelperTest {
     test.getFileContent("master", "This/file/doesn't/exists.txt", stream);
     
     assertEquals(0, stream.size());
-    System.err.println("NotExistingBlob PASSED");
   }
   
   @Test
@@ -238,6 +227,5 @@ public class GitHelperTest {
         assertEquals(new Integer(2), test.getRegisteredFileVersion("master", "test/" + i + "/file" + j+".txt"));
       }
     }
-    System.err.println("GitListOfTrackedFiles Stress Test PASSED");
   }
 }
