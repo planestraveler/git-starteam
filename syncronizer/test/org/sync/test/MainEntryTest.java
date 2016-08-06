@@ -206,8 +206,8 @@ public class MainEntryTest {
     assertTrue(lfsBoost156.exists());
     
     File lfsFileRoller = new File(importLocation.getAbsoluteFile() + File.separator
-      + "lfs" + File.separator + "objects" + File.separator + "2b" + File.separator
-      + "3a" + File.separator + "2b3a1111caba26e67b96559a3118a700dbfb6a4c6ad7ebd3e509df227995411c");
+      + "lfs" + File.separator + "objects" + File.separator + "09" + File.separator
+      + "a6" + File.separator + "09a68db98aa33febdad76e6977d7771b3b444da7f57ab6f4fe7d6a77e39d5a91");
     assertTrue(lfsFileRoller.exists());
 
     RepositoryHelperFactory.getFactory().setCreateRepo(false);
@@ -233,8 +233,8 @@ public class MainEntryTest {
 
     assertEquals(false, attributes.pathHasAttributes("archive/boost_1_55_0.tar.bz2"));
     assertEquals(true,  attributes.pathHasAttributes("archive/boost_1_56_0.tar.bz2"));
-    assertEquals(true,  attributes.pathHasAttributes("archive/file-roller-3.16.3.tar.xz"));
-    assertEquals(true,  attributes.pathHasAttributes("archive/ImageMagick-6.9.2-10.tar.xz"));
+    assertEquals(true,  attributes.pathHasAttributes("archive/file-roller-3.16.5.tar.xz"));
+    assertEquals(true,  attributes.pathHasAttributes("archive/ImageMagick-6.9.4-7.tar.xz"));
     assertEquals(true,  attributes.pathHasAttributes("archive/appliance-1.28.1.tar.xz"));
   }
   
@@ -366,7 +366,7 @@ public class MainEntryTest {
   
   private void assertCommitLFS3(LogEntry entry) {
     int index = 0;
-    assertEquals("Source archive of ImageMagick 6.9.2",     entry.getComment());
+    assertEquals("Source archive of ImageMagick 6.9.4",     entry.getComment());
     assertEquals("Test <Test@test.com>",                    entry.getAuthor());
     assertEquals(2,                                         entry.getFilesEntry().size());
     assertEquals(".gitattributes",                          entry.getFilesEntry().get(index).getPath());
@@ -374,7 +374,7 @@ public class MainEntryTest {
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
     index++;
-    assertEquals("archive/ImageMagick-6.9.2-10.tar.xz",     entry.getFilesEntry().get(index).getPath());
+    assertEquals("archive/ImageMagick-6.9.4-7.tar.xz",     entry.getFilesEntry().get(index).getPath());
     assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getFromType());
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Addition,      entry.getFilesEntry().get(index).getTypeOfModification());
@@ -398,7 +398,7 @@ public class MainEntryTest {
   
   private void assertCommitLFS5(LogEntry entry) {
     int index = 0;
-    assertEquals("Source archive of file-roller 3.16.3",    entry.getComment());
+    assertEquals("Source archive of file-roller 3.16.5",    entry.getComment());
     assertEquals("Test <Test@test.com>",                    entry.getAuthor());
     assertEquals(2,                                         entry.getFilesEntry().size());
     assertEquals(".gitattributes",                          entry.getFilesEntry().get(index).getPath());
@@ -406,7 +406,7 @@ public class MainEntryTest {
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Modification,  entry.getFilesEntry().get(index).getTypeOfModification());
     index++;
-    assertEquals("archive/file-roller-3.16.3.tar.xz",       entry.getFilesEntry().get(index).getPath());
+    assertEquals("archive/file-roller-3.16.5.tar.xz",       entry.getFilesEntry().get(index).getPath());
     assertEquals(GitFileType.NullFile,                      entry.getFilesEntry().get(index).getFromType());
     assertEquals(GitFileType.Normal,                        entry.getFilesEntry().get(index).getToType());
     assertEquals(LogEntry.TypeOfModification.Addition,      entry.getFilesEntry().get(index).getTypeOfModification());

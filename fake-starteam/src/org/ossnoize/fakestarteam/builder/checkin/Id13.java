@@ -38,18 +38,18 @@ public class Id13 extends CheckInInstruction {
     
     
     File fileRollerv3163 = new File(archive);
-    URL fileRollerDL = new URL("http://gentoo.mirrors.tera-byte.com/distfiles/file-roller-3.16.3.tar.xz");
+    URL fileRollerDL = new URL("http://gentoo.mirrors.tera-byte.com/distfiles/file-roller-3.16.5.tar.xz");
     fileRollerv3163.addFromStream(fileRollerDL.openStream(),
-      "file-roller-3.16.3.tar.xz",
-      "Source archive of file-roller 3.16.3",
-      "Source archive of file-roller 3.16.3", 0);
+      "file-roller-3.16.5.tar.xz",
+      "Source archive of file-roller 3.16.5",
+      "Source archive of file-roller 3.16.5", 0);
     
     File imageMagic = new File(archive);
-    URL imageMagicDL = new URL("http://gentoo.mirrors.tera-byte.com/distfiles/ImageMagick-6.9.2-10.tar.xz");
+    URL imageMagicDL = new URL("http://gentoo.mirrors.tera-byte.com/distfiles/ImageMagick-6.9.4-7.tar.xz");
     imageMagic.addFromStream(imageMagicDL.openStream(),
-      "ImageMagick-6.9.2-10.tar.xz",
-      "Source archive of ImageMagick 6.9.2",
-      "Source archive of ImageMagick 6.9.2", 0);
+      "ImageMagick-6.9.4-7.tar.xz",
+      "Source archive of ImageMagick 6.9.4",
+      "Source archive of ImageMagick 6.9.4", 0);
     
     File appliance = new File(archive);
     URL applianceDL = new URL("http://gentoo.mirrors.tera-byte.com/distfiles/appliance-1.28.1.tar.xz");
