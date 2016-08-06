@@ -130,17 +130,19 @@ public class MainEntry {
     if (lfsSize != null)
     {
       lfsSize = lfsSize.trim();
-      long baseSize = Long.parseLong(lfsSize.substring(0, lfsSize.length() - 2));
       if (lfsSize.endsWith("K"))
       {
+        long baseSize = Long.parseLong(lfsSize.replace('K', ' ').trim());
         startTrackingAtSize = baseSize * 1024L;
       }
       else if (lfsSize.endsWith("M"))
       {
+        long baseSize = Long.parseLong(lfsSize.replace('M', ' ').trim());
         startTrackingAtSize = baseSize * 1024L * 1024L;
       }
       else if (lfsSize.endsWith("G"))
       {
+        long baseSize = Long.parseLong(lfsSize.replace('G', ' ').trim());
         startTrackingAtSize = baseSize * 1024L * 1024L * 1024L;
       }
       else
