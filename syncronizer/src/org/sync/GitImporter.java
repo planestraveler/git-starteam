@@ -690,11 +690,12 @@ public class GitImporter {
 					deletedFiles.remove(path);
 				}
 				files.add(path);
-				String comment = i.getComment();
-				if(0 == comment.length()) {
+				String comment = i.getComment().trim();
+				if(0 == comment.length()) { // if the file doesn't have comment
 					if(1 == historyFile.getContentVersion()) {
-						comment = historyFile.getDescription();
-					} else {
+						comment = historyFile.getDescription().trim();
+					}
+          if (0 == comment.length()) { // Still has no comment...
 						comment = "Modification without comments";
 					}
 				} else if(comment.matches("Merge from .*?, Revision .*")) {
