@@ -869,6 +869,7 @@ public class GitImporter {
 			
 			long viewTime = revisionLabels[i].getRevisionTime().getLongValue();
 			if(i == fromLabel && isResume) {
+        lastFiles.addAll(repositoryHelper.getListOfTrackedFile(head));
 				setLastFilesLastSortedFileList(vc, head, baseFolder);
 			}
 			
@@ -928,6 +929,7 @@ public class GitImporter {
 			View vc = new View(view, ViewConfiguration.createFromLabel(viewLabels[i].getID()));
 			long viewTime = viewLabels[i].getTime().getLongValue();
 			if(i == fromLabel && isResume) {
+        lastFiles.addAll(repositoryHelper.getListOfTrackedFile(head));
 				setLastFilesLastSortedFileList(vc, head, baseFolder);
 			}
 			Log.log("View configuration label <" + viewLabels[i].getName() + ">");
