@@ -935,7 +935,7 @@ public class GitImporter {
 			Log.log("View configuration label <" + viewLabels[i].getName() + ">");
 			
 			if(changeRequestHelper.isChangeRequestsFeatureEnable()  && changeRequestHelper.labelHasCRInfoAttached(viewLabels[i])){
-				ChangeRequestInformation changeRequestInformation = changeRequestHelper.getChangeRequestsInformation(vc, getFolder(), viewLabels[i]);
+				ChangeRequestInformation changeRequestInformation = changeRequestHelper.getChangeRequestsInformation(vc, viewLabels[i]);
 				generateFastImportStream(vc, baseFolder, changeRequestInformation);
 			}
 			else{

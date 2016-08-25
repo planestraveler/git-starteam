@@ -1,6 +1,5 @@
 package org.sync.changerequests;
 
-import com.starbase.starteam.Folder;
 import com.starbase.starteam.Label;
 import com.starbase.starteam.View;
 
@@ -12,7 +11,7 @@ public interface IChangeRequestsHelper {
 
 	public boolean commentMatchFilter(String comment);
 	
-	public ChangeRequestInformation getChangeRequestsInformation(View view, Folder folder, Label label);
+	public ChangeRequestInformation getChangeRequestsInformation(View view, Label label);
 	
 	public void setFilePattern(String filePattern);
 	

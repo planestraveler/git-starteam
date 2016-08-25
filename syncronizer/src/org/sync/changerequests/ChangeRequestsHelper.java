@@ -4,7 +4,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.starbase.starteam.ChangeRequest;
-import com.starbase.starteam.Folder;
 import com.starbase.starteam.FolderListManager;
 import com.starbase.starteam.ItemListManager;
 import com.starbase.starteam.Items;
@@ -44,8 +43,8 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 	}
 
 	@Override
-	public ChangeRequestInformation getChangeRequestsInformation(View view, Folder folder, Label label) {
-		ChangeRequest changeRequest = getChangeRequest(view, folder, label);
+	public ChangeRequestInformation getChangeRequestsInformation(View view, Label label) {
+		ChangeRequest changeRequest = getChangeRequest(view, label);
 		ChangeRequestInformation changeRequestInfo = new ChangeRequestInformation(changeRequest, filePattern);
 		
 		return changeRequestInfo;
@@ -66,11 +65,11 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 		return matcher.matches();
 	}
 	
-	private ChangeRequest getChangeRequest(View view, Folder folder, Label label){
+	private ChangeRequest getChangeRequest(View view, Label label){
         int crNumber = getCRNumber(label);
 		
 		FolderListManager flm = new FolderListManager(view);
-		flm.includeFolders(folder, -1);
+		flm.includeFolders(view.getRootFolder(), -1);
 		
 		Server server = view.getServer();
 		
@@ -80,6 +79,10 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 		//ilm.getItems(); // doesn't seem like it is necessary.
 		QueryInfo query = buildQuery(server, crType, crNumber);
 		Items items = ilm.selectByQuery(query);
+		
+		if(items.size() == 0){
+			throw new NoSuchChangeRequestException("Change Request #" + crNumber + " not found.");
+		}
 		
 		return (ChangeRequest)items.getAt(0);
 	}
@@ -106,5 +109,16 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 		
 		QueryInfo query = new QueryInfo(crType,false,"My Temporary Query",node);
 		return query;
+	}
+	
+	public class NoSuchChangeRequestException extends RuntimeException{
+		
+		public NoSuchChangeRequestException(){
+			super();
+		}
+		
+		public NoSuchChangeRequestException(String message){
+			super(message);
+		}
 	}
 }
