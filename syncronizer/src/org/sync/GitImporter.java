@@ -1071,7 +1071,7 @@ public class GitImporter {
 	}
 
 	private static String labelRef(View view, Label label) {
-		return refName(label.getName());
+		return refName(view.getName() + "/" + label.getName());
 	}
 
 	public static String refName(String name) {
