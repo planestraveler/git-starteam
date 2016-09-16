@@ -109,23 +109,31 @@ public abstract class RepositoryHelper {
 			fileInformation.put(head, new HashMap<String, StarteamFileInfo>());
 		}
 		if(!fileInformation.get(head).containsKey(filename)) {
-			fileInformation.get(head).put(filename, new StarteamFileInfo(filename, fileId, fileVersion));
+			fileInformation.get(head).put(filename, new StarteamFileInfo(filename, fileId, fileVersion, fileVersion));
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * Save in file hidden inside the repository (.git, .bazaar, ...) the version of an
-	 * already registered file existing inside the repository.
-	 * @param head the reference name
-	 * @param filename the full path of the file and its name inside the repository
-	 * @param fileVersion the Starteam version of this file.
+	 * Save in file hidden inside the repository (.git, .bazaar, ...) the version
+	 * of an already registered file existing inside the repository.
+	 * 
+	 * @param head
+	 *          the reference name
+	 * @param filename
+	 *          the full path of the file and its name inside the repository
+	 * @param fileVersion
+	 *          the Starteam version of this file.
+	 * @param contentVersion
+	 *          The Starteam File Content version.
 	 */
-	public boolean updateFileVersion(String head, String filename, int fileVersion) {
+	public boolean updateFileVersion(String head, String filename, int fileVersion, int contentVersion) {
 		if(null != fileInformation) {
 			if(fileInformation.containsKey(head) && fileInformation.get(head).containsKey(filename)) {
-				fileInformation.get(head).get(filename).setVersion(fileVersion);
+				StarteamFileInfo info = fileInformation.get(head).get(filename);
+				info.setVersion(fileVersion);
+				info.setContentVersion(contentVersion);
 				return true;
 			}
 		}
@@ -177,6 +185,29 @@ public abstract class RepositoryHelper {
 			if(fileInformation.containsKey(head)) {
 				if(fileInformation.get(head).containsKey(filename)) {
 					return fileInformation.get(head).get(filename).getVersion();
+				}
+			}
+		} else if (loadFileInformation()) {
+			return getRegisteredFileVersion(head, filename);
+		}
+		return null;
+	}
+
+	/**
+	 * Return the registered file version from the repository tracked file.
+	 * 
+	 * @param head
+	 *          the name of the branch to check
+	 * @param filename
+	 *          the full path of the file and its name inside the repository
+	 * 
+	 * @return the id of the file or NULL if not found.
+	 */
+	public Integer getRegisteredFileContentVersion(String head, String filename) {
+		if (null != fileInformation) {
+			if (fileInformation.containsKey(head)) {
+				if (fileInformation.get(head).containsKey(filename)) {
+					return fileInformation.get(head).get(filename).getContentVersion();
 				}
 			}
 		} else if (loadFileInformation()) {

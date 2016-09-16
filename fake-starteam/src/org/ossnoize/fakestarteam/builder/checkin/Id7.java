@@ -22,6 +22,7 @@ import java.util.Calendar;
 import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
 import com.starbase.starteam.Folder;
+import com.starbase.starteam.Label;
 import com.starbase.starteam.View;
 import com.starbase.util.OLEDate;
 
@@ -37,6 +38,9 @@ public class Id7 extends CheckInInstruction {
 		wine.moveTo(c);
 		
 		view.createViewLabel("Check-in Id 7", "Check Id 7 description <Move files around>", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
+		Label wineSrc = view.createRevisionLabel("Wine 3", "Moved wine to a better location", true);
+		wineSrc.attachToFolder(wine, Label.SCOPE_ITEM_AND_CONTENTS);
+		wineSrc.update();
 	}
 
 	@Override

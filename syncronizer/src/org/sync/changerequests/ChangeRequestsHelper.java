@@ -1,7 +1,25 @@
+/*****************************************************************************
+    This file is part of Git-Starteam.
+
+    Git-Starteam is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Git-Starteam is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Git-Starteam.  If not, see <http://www.gnu.org/licenses/>.
+******************************************************************************/
 package org.sync.changerequests;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.sync.Log;
 
 import com.starbase.starteam.ChangeRequest;
 import com.starbase.starteam.FolderListManager;
@@ -20,10 +38,27 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 	private String filePattern = null; 
 	private Pattern crDescriptionPattern = Pattern.compile(".*\\[CR(\\d+)\\].*");
 	private Pattern commentFilterPattern = Pattern.compile("Automatic Update from CRForm \\(version \\d+\\.\\d+\\.\\d+\\.\\d+\\)");
+	private View currentView = null;
+	private Type crType = null;
 	
-	
-	public ChangeRequestsHelper(){
-		
+	private FolderListManager flm = null;
+	private ItemListManager ilm = null;
+
+	public ChangeRequestsHelper(View view) {
+		currentView = view;
+		long start = System.nanoTime();
+		flm = new FolderListManager(currentView);
+		flm.includeFolders(currentView.getRootFolder(), -1);
+
+		Server server = currentView.getServer();
+
+		crType = server.typeForName(server.getTypeNames().CHANGEREQUEST);
+
+		ilm = new ItemListManager(crType, flm);
+		ilm.getItems(); // Fetch all CR from the current view so we can poke them
+		                // later.
+		long duration = System.nanoTime() - start;
+		Log.logf("Creating cache of CR took %dns for view %s", duration, currentView.getName());
 	}
 	
 	@Override
@@ -43,8 +78,13 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 	}
 
 	@Override
-	public ChangeRequestInformation getChangeRequestsInformation(View view, Label label) {
-		ChangeRequest changeRequest = getChangeRequest(view, label);
+	public ChangeRequestInformation getChangeRequestsInformation(Label label) {
+		long start = System.nanoTime();
+		ChangeRequest changeRequest = getChangeRequest(label);
+		long duration = System.nanoTime() - start;
+		if (duration > 1000000) {
+			Log.logf("Getting change request took %dns for label %s", duration, label.getName());
+		}
 		ChangeRequestInformation changeRequestInfo = new ChangeRequestInformation(changeRequest, filePattern);
 		
 		return changeRequestInfo;
@@ -65,18 +105,10 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 		return matcher.matches();
 	}
 	
-	private ChangeRequest getChangeRequest(View view, Label label){
-        int crNumber = getCRNumber(label);
-		
-		FolderListManager flm = new FolderListManager(view);
-		flm.includeFolders(view.getRootFolder(), -1);
-		
-		Server server = view.getServer();
-		
-		Type crType = server.typeForName(server.getTypeNames().CHANGEREQUEST);
-		
-		ItemListManager ilm = new ItemListManager(crType,flm);
-		//ilm.getItems(); // doesn't seem like it is necessary.
+	private ChangeRequest getChangeRequest(Label label) {
+		int crNumber = getCRNumber(label);
+		Server server = currentView.getServer();
+
 		QueryInfo query = buildQuery(server, crType, crNumber);
 		Items items = ilm.selectByQuery(query);
 		
@@ -86,7 +118,6 @@ public class ChangeRequestsHelper implements IChangeRequestsHelper{
 		
 		return (ChangeRequest)items.getAt(0);
 	}
-	
 	
 	public int getCRNumber(Label label){
 		String description = label.getDescription();

@@ -1,9 +1,11 @@
 package org.sync.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,11 +21,12 @@ import org.ossnoize.fakestarteam.ProjectProvider;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
 import org.ossnoize.fakestarteam.UserProvider;
 import org.ossnoize.fakestarteam.builder.StarteamProjectBuilder;
+import org.ossnoize.git.fastimport.GitAttributes;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.sync.MainEntry;
 import org.sync.RepositoryHelper;
 import org.sync.RepositoryHelperFactory;
-import org.ossnoize.git.fastimport.GitAttributes;
+import org.sync.util.FileUtility;
 import org.sync.util.LogEntry;
 import org.sync.util.SmallRef;
 
@@ -39,7 +42,7 @@ public class MainEntryTest {
 
 	@After
 	public void tearDown() throws Exception {
-		//FileUtility.rmDir(importLocation);
+		FileUtility.rmDir(importLocation);
 		SimpleTypedResourceIDProvider.deleteProvider();
 		UserProvider.deleteInstance();
 		InternalPropertiesProvider.deleteInstace();
@@ -502,7 +505,7 @@ public class MainEntryTest {
 	}
 
 	private void assertCommit13(LogEntry entry) {
-		assertEquals("",                                  entry.getComment());
+		assertEquals("Unexpected Move", entry.getComment());
 		assertEquals(11,                                  entry.getFilesEntry().size());
 		int index = 0;
 		assertEquals("src/c/wine/msvcp100/Makefile.in",   entry.getFilesEntry().get(index).renamedTo());

@@ -37,7 +37,6 @@ private static String buildDateFormat = "MM/dd/yy hh:mm a";
 			date0 = getLabelDate(arg0).getLongValue();
 			date1 = getLabelDate(arg1).getLongValue();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if(date0 > date1)
@@ -54,14 +53,17 @@ private static String buildDateFormat = "MM/dd/yy hh:mm a";
 	public static OLEDate getLabelDate(Label revisionLabel) throws ParseException{
 		String labelDescription = revisionLabel.getDescription();
 		int buildDateDescriptionIndex = labelDescription.indexOf(buildDateToken);
-		String buildDateDescription = labelDescription.substring(buildDateDescriptionIndex + buildDateToken.length());
+		if (buildDateDescriptionIndex >= 0) {
+			String buildDateDescription = labelDescription.substring(buildDateDescriptionIndex + buildDateToken.length());
 
-		String date = buildDateDescription.startsWith("0")
-				? buildDateDescription.substring(1, buildDateDescription.indexOf('('))
-				: buildDateDescription.substring(0, buildDateDescription.indexOf('('));
-				
-		DateFormat dateFormat = new java.text.SimpleDateFormat(buildDateFormat);
+			String date = buildDateDescription.startsWith("0")
+			    ? buildDateDescription.substring(1, buildDateDescription.indexOf('('))
+			    : buildDateDescription.substring(0, buildDateDescription.indexOf('('));
 
-		return new OLEDate(dateFormat.parse(date.trim()));
+			DateFormat dateFormat = new java.text.SimpleDateFormat(buildDateFormat);
+
+			return new OLEDate(dateFormat.parse(date.trim()));
+		}
+		return revisionLabel.getRevisionTime();
 	}
 }
