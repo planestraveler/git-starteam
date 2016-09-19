@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
@@ -416,6 +417,7 @@ public class File extends Item {
 		for(int i=0; i < getRevisionNumber(); i++) {
 			ret.add(new File(getObjectID(), i, getView()));
 		}
+		Collections.reverse(ret);
 		return ret;
 	}
 
@@ -534,5 +536,10 @@ public class File extends Item {
 			revision = getRevisionNumber();
 		}
 		return revision;
+	}
+	
+	@Override
+	protected int getObjectSpecificVersion() {
+		return getContentVersion();
 	}
 }

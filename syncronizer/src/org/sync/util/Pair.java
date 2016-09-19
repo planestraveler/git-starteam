@@ -14,22 +14,23 @@
     You should have received a copy of the GNU General Public License
     along with Git-Starteam.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
-package org.sync.changerequests;
+package org.sync.util;
 
-import com.starbase.starteam.Label;
+public class Pair<L, R> {
 
-public interface IChangeRequestsHelper {
-
-	public boolean isChangeRequestsFeatureEnable();
+	private L First;
+	private R Second;
 	
-	public boolean labelHasCRInfoAttached(Label label);
-
-	public boolean commentMatchFilter(String comment);
+	public Pair(L first, R second) {
+		this.First = first;
+		this.Second = second;
+	}
 	
-	public ChangeRequestInformation getChangeRequestsInformation(Label label);
+	public L getFirst() {
+		return First;
+	}
 	
-	public void setFilePattern(String filePattern);
-	
-	public int getCRNumber(Label label);
-
+	public R getSecond() {
+		return Second;
+	}
 }

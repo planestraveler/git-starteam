@@ -99,14 +99,8 @@ public class Folder extends Item {
 				if(null != folderId && 0 < folderId.length()) {
 					try {
 						int id = Integer.parseInt(folderId);
-						SimpleTypedResource ressource = null;
-								//SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
-						if(null != ressource && ressource instanceof Folder) {
-							generatedList.add((Folder)ressource);
-						} else {
-							Folder child = new FakeFolder(this.view, id, this);
-							generatedList.add(child);
-						}
+						Folder child = new FakeFolder(this.view, id, this);
+						generatedList.add(child);
 					} catch (NumberFormatException ne) {
 						throw new InvalidOperationException("Folder child id corrupted.");
 					}
@@ -114,7 +108,7 @@ public class Folder extends Item {
 			}
 		}
 		Folder[] buffer = new Folder[generatedList.size()];
-    Collections.shuffle(generatedList); // to cause failures faster
+		Collections.shuffle(generatedList); // to cause failures faster
 		return generatedList.toArray(buffer);
 	}
 
@@ -129,15 +123,8 @@ public class Folder extends Item {
 				if(null != fileID && 0 < fileID.length()) {
 					try {
 						int id = Integer.parseInt(fileID);
-						SimpleTypedResource ressource = null;
-								//SimpleTypedResourceIDProvider.getProvider().findExisting(view, id);
+						com.starbase.starteam.File aFile = new com.starbase.starteam.File(id, this.view);
 
-						com.starbase.starteam.File aFile = null;
-						if(null != ressource && ressource instanceof com.starbase.starteam.File) {
-							aFile = ((com.starbase.starteam.File)ressource);
-						} else {
-							aFile = new com.starbase.starteam.File(id, this.view);
-						}
 						if(this.view instanceof RecycleBin && aFile.isDeleted()) {
               generatedList.add(aFile);
             } else if (isFromHistory()) {
@@ -217,6 +204,11 @@ public class Folder extends Item {
 	}
 	
 	@Override
+	protected int getObjectSpecificVersion() {
+		return getRevisionNumber() + 1;
+	}
+	
+	@Override
 	public String toString() {
 		return getName();
 	}
@@ -247,11 +239,8 @@ public class Folder extends Item {
 				SimpleTypedResourceIDProvider.getProvider().registerExisting(view, id, this);
 
 				if(null == parent) {
-					SimpleTypedResource parent = SimpleTypedResourceIDProvider.getProvider().findExisting(view, getParentObjectID());
-					if(parent instanceof Folder) {
-						this.parent = (Folder)parent;
-					} else if(getParentObjectID() != 0) {
-						this.parent = new FakeFolder(this.view, getParentObjectID(), null);
+					if (getParentObjectID() != 0) {
+						parent = new FakeFolder(this.view, getParentObjectID(), null);
 					}
 				}
 			} else {
@@ -282,8 +271,9 @@ public class Folder extends Item {
 		}
 		childIdList.append(getObjectID());
 		folder.itemProperties.setProperty(propertyKeys._CHILD_FOLDER, childIdList.toString());
+		Item toRet = super.shareTo(folder);
 		folder.update();
-		return super.shareTo(folder);
+		return toRet;
 	}
 	
 	@Override
@@ -346,5 +336,16 @@ public class Folder extends Item {
 
 	public void discardItems(String file, int i) {
 		// Nothing special to do unless we have some memory retension issue.
+	}
+
+	@Override
+	public Item[] getHistory() {
+		ArrayList<Item> history = new ArrayList<Item>();
+		for (int rev = 1; rev < getRevisionNumber(); rev++) {
+			history.add(new FakeFolder(this.view, this.getObjectID(), this.parent, rev));
+		}
+		history.add(this);
+		Collections.reverse(history);
+		return history.toArray(new Item[history.size()]);
 	}
 }

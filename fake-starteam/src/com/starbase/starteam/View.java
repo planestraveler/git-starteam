@@ -173,8 +173,18 @@ public class View extends SimpleTypedResource implements ISecurableContainer, IS
 	
 	public Label createViewLabel(String name, String description, OLEDate time, boolean buildLabel, boolean frozen) {
 		Label ret = new Label(this, name, description, time, buildLabel, frozen);
+		ret.setAsViewLabel();
 		ret.attachToFolder(getRootFolder(), Label.SCOPE_ITEM_AND_CONTENTS);
 		ret.update();
+		return ret;
+	}
+	
+	public Label createRevisionLabel(String name, String description, boolean frozen) {
+		// Internal properties Provider => getCurrentTime is the actual now
+		// perceived by the "server"
+		Label ret = new Label(this, name, description, InternalPropertiesProvider.getInstance().getCurrentTime(), false,
+		    frozen);
+		ret.setAsRevisionLabel(); // Revision will manually set their own items to the label (folder i guess)
 		return ret;
 	}
 	

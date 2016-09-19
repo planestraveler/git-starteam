@@ -24,6 +24,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
+import com.starbase.starteam.Label;
 import com.starbase.starteam.View;
 import com.starbase.util.OLEDate;
 
@@ -106,6 +107,9 @@ public class Id6 extends CheckInInstruction {
 
 		view.createViewLabel("Check-in Id 6", "Check Id 6 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
     view.createViewLabel("Duplicate Id 6", "This is a tag added following a rebuild", new OLEDate(getTimeOfCheckIn() + 1001), true, true);
+    Label wineSrc = view.createRevisionLabel("Wine 2", "Second version of Wine sources", true);
+    wineSrc.attachToFolder(wine, Label.SCOPE_ITEM_AND_CONTENTS);
+    wineSrc.update();
 	}
 
 	@Override

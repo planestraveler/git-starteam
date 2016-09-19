@@ -48,6 +48,7 @@ public class Label extends CacheRef {
 	private final String BUILD_LABEL = "build label";
 	private final String FROZEN = "frozen";
 	private final String DELETED = "deleted";
+	private final String IS_VIEW_LABEL = "is view label";
 	
 	private int id;
 	private Map<Integer, Integer> itemList = new HashMap<Integer,Integer>();
@@ -61,6 +62,7 @@ public class Label extends CacheRef {
 	private boolean buildLabel;
 	private boolean frozen;
 	private boolean deleted;
+	private boolean isViewLabel;
 
 	protected Label(View view, String name, String description, OLEDate time, boolean buildLabel, boolean frozen) {
 		isNew = true;
@@ -83,13 +85,14 @@ public class Label extends CacheRef {
 		this.buildLabel = buildLabel;
 		this.frozen = frozen;
 		this.deleted = false;
+		this.isViewLabel = true;
 	}
 	
 	protected Label(int viewId, int labelId) {
 		isNew = false;
 		loadInformation(viewId, labelId);
 	}
-	
+
 	protected static Label[] getLabelList(int viewId, boolean onlyActive) {
 		File dir = buildStoragePath(viewId);
 		ArrayList<Label> list = new ArrayList<Label>();
@@ -107,6 +110,10 @@ public class Label extends CacheRef {
 		if(!itemList.containsKey(itemId))
 			throw new InvalidOperationException("This item id " + itemId + " was not labeled in the view for label " + getDescription());
 		return itemList.get(itemId);
+	}
+	
+	protected boolean hasItemIdInList(int itemID) {
+		return itemList.containsKey(itemID);
 	}
 	
 	public boolean isNew() {
@@ -165,6 +172,7 @@ public class Label extends CacheRef {
 		toSave.setProperty(BUILD_LABEL, Boolean.toString(buildLabel));
 		toSave.setProperty(FROZEN, Boolean.toString(frozen));
 		toSave.setProperty(DELETED, Boolean.toString(deleted));
+		toSave.setProperty(IS_VIEW_LABEL, Boolean.toString(isViewLabel));
 		FileWriter fout = null;
 		try {
 			java.io.File labelInformation = new java.io.File(storageLocation.getAbsolutePath() + File.separator + id);
@@ -242,6 +250,7 @@ public class Label extends CacheRef {
 			buildLabel = labelProps.getProperty(BUILD_LABEL).equalsIgnoreCase("true");
 			frozen = labelProps.getProperty(FROZEN).equalsIgnoreCase("true");
 			deleted = labelProps.getProperty(DELETED).equalsIgnoreCase("true");
+			isViewLabel = labelProps.getProperty(IS_VIEW_LABEL).equalsIgnoreCase("true");
 			if(viewID != viewId) {
 				throw new InvalidOperationException("The view id (" + viewID +") does not match with the requested view id(" + viewId + ")");
 			}
@@ -253,17 +262,25 @@ public class Label extends CacheRef {
 	}
 
 	public boolean isViewLabel() {
-		//TODO: create revision label in the fake starteam. We have no goal for simple revision but maybe later.
-		return true;
+		return isViewLabel;
 	}
 
 	public boolean isRevisionLabel() {
 		// We do not support Revision label in the fake-starteam. See comment about isViewLabel();
-		return false;
+		return !isViewLabel;
+	}
+	
+	protected void setAsRevisionLabel() {
+		isViewLabel = false;
+	}
+	
+	protected void setAsViewLabel() {
+		isViewLabel = true;
 	}
 	
 	public void remove() {
 		deleted = true;
 		update();
 	}
+
 }

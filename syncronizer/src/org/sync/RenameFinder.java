@@ -81,8 +81,7 @@ public class RenameFinder {
 					if (time < startTime) {
 						break;
 					}
-					if (i+1 < hist.length &&
-						!item.getName().equals(((Folder)hist[i+1]).getName())) {
+					if (i + 1 < hist.length && !item.getName().equals(((Folder) hist[i + 1]).getName())) {
 						cacheFolders(file.getParentFolder(), folder, item);
 						return item;
 					}

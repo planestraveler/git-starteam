@@ -177,6 +177,28 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 		}
 	}
 	
+	public Item getFromHistoryByVersion(int viewVersion) {
+		if (getType().getName().equals(getTypeNames().FILE)) {
+			// In the fake storage version numbering start at 0
+			// Technically wrong as the view Version != Content Version => fake-starteam doesn't make any difference.
+			return new com.starbase.starteam.File(getItemID(), viewVersion - 1, getView());
+		}
+		// don't be fooled this work with the real starteam
+		throw new InvalidOperationException("The operation isn't supported for anything that isn't a file");
+	}
+	
+	public Item getFromHistoryByLabelID(int labelID) {
+		Label toFindInHistory = new Label(getView().getID(), labelID);
+		if (getType().getName().equals(getTypeNames().FILE)) {
+			if (toFindInHistory.hasItemIdInList(getItemID())) {
+				return new com.starbase.starteam.File(getItemID(), toFindInHistory.getRevisionOfItem(getItemID()), getView());
+			}
+			return null;
+		}
+		// don't be fooled this work with the real starteam
+		throw new InvalidOperationException("The operation isn't supported for anything that isn't a file");
+	}
+	
 	protected void setModifiedBy() {
 		int myUserID = InternalPropertiesProvider.getInstance().getCurrentServer().getMyUserAccount().getID();
 		itemProperties.setProperty(propertyKeys.MODIFIED_USER_ID, Integer.toString(myUserID));
@@ -364,6 +386,14 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	protected void loadProperties() {
 	}
 	
+	protected int getObjectSpecificVersion() {
+		throw new InvalidOperationException("Shall not be called at this level");
+	}
+	
+	public int getViewVersion() {
+		return getObjectSpecificVersion();
+	}
+	
 	@Override
 	public PropertyNames getPropertyNames() {
 		return propertyKeys;
@@ -388,5 +418,14 @@ public class Item extends SimpleTypedResource implements ISecurableObject {
 	
 	public Server getServer(){
 		return getView().getServer();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Item) {
+			Item other = (Item) obj;
+			return other.getObjectID() == getObjectID() && other.getRevisionNumber() == getRevisionNumber();
+		}
+		return false;
 	}
 }

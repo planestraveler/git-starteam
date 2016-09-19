@@ -24,6 +24,7 @@ import org.ossnoize.fakestarteam.builder.CheckInInstruction;
 
 import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
+import com.starbase.starteam.Label;
 import com.starbase.starteam.View;
 import com.starbase.util.OLEDate;
 
@@ -52,6 +53,9 @@ public class Id5 extends CheckInInstruction {
 				"", 0);
 
 		view.createViewLabel("Check-in Id 5", "Check Id 5 description", new OLEDate(getTimeOfCheckIn() + 1000), true, true);
+		Label wineSrc = view.createRevisionLabel("Wine 1", "First check-in from wine", true);
+		wineSrc.attachToFolder(wine, Label.SCOPE_ITEM_AND_CONTENTS);
+		wineSrc.update();
 	}
 
 	@Override

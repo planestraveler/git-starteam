@@ -24,17 +24,23 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Vector;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import org.sync.commitstrategy.BasePopulationStrategy;
+import org.sync.commitstrategy.ChangeRequestPopulationStrategy;
+import org.sync.commitstrategy.RevisionPopulationStrategy;
 
 import com.starbase.starteam.ClientApplication;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
 import com.starbase.starteam.vts.comm.NetMonitor;
+
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public class MainEntry {
 
@@ -67,11 +73,12 @@ public class MainEntry {
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
 		CmdLineParser.Option isCheckpoint = parser.addBooleanOption("checkpoint");
 		CmdLineParser.Option selectSkipViewsPattern = parser.addStringOption("skip-views");
-        CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs-size");
-        CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
-        CmdLineParser.Option filteringViewLabel = parser.addStringOption("view-label-pattern");
-        CmdLineParser.Option filteringRevisionLabel = parser.addStringOption("revision-label-pattern");
-        CmdLineParser.Option selectChangeRequestImport = parser.addStringOption("change-request");
+		CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs-size");
+		CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
+		CmdLineParser.Option filteringViewLabel = parser.addStringOption("view-label-pattern");
+		CmdLineParser.Option filteringRevisionLabel = parser.addStringOption("revision-label-pattern");
+		CmdLineParser.Option selectChangeRequestImport = parser.addStringOption("change-request");
+		CmdLineParser.Option excludeLabel = parser.addStringOption("exclude-label");
         
 		//TODO: Add a label creation at tip before starting the importation
 
@@ -120,6 +127,9 @@ public class MainEntry {
     
     String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
     String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
+
+		@SuppressWarnings("rawtypes")
+		Vector excludedLabels = parser.getOptionValues(excludeLabel);
 		
 		if(host == null || port == null || project == null || (view == null && !allViews)) {
 			printHelp();
@@ -267,8 +277,9 @@ public class MainEntry {
 						importer.setVerbose(verbose);
 						importer.setCreateCheckpoints(createCheckpoints);
 						importer.setDomain(domain);
-                        importer.setMinimumLFSSize(startTrackingAtSize);
-                        importer.setLFSPattern(lfsRegexPattern);
+						importer.setMinimumLFSSize(startTrackingAtSize);
+						importer.setLFSPattern(lfsRegexPattern);
+						importer.setLabelExclusion(excludedLabels);
 
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
@@ -282,10 +293,17 @@ public class MainEntry {
 									if(allViews) {
 										importer.generateAllViewsImport(p, v, folder, skipViewsPattern);
 									} else if(null != timeBased && timeBased) {
+										importer.setCheckoutStrategy(new BasePopulationStrategy(v));
 										importer.generateDayByDayImport(v, date, folder);
 									} else if (null != labelBased && labelBased) {
+										if (changeRequestFilePattern != null) {
+											importer.setCheckoutStrategy(new ChangeRequestPopulationStrategy(v, changeRequestFilePattern));
+										} else {
+											importer.setCheckoutStrategy(new BasePopulationStrategy(v));
+										}
 										importer.generateByLabelImport(v, date, folder, viewLabelPattern, changeRequestFilePattern);
 									} else if(revisionLabelBased != null && revisionLabelBased){
+										importer.setCheckoutStrategy(new RevisionPopulationStrategy(v));
 										importer.generateByRevisionLabelImport(v, date, folder, revisionLabelPattern);
 									} else {
 										importer.generateFastImportStream(v, folder);
@@ -310,6 +328,7 @@ public class MainEntry {
 			if (!projectFound) {
 				System.err.println("Project not found: " + project);
 			}
+			starteam.disconnect();
 		} else {
 			System.err.println("Could not log in user: " + user);
 		}

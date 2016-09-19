@@ -26,12 +26,14 @@ public class StarteamFileInfo implements Serializable {
 	private static final long serialVersionUID = -2131516984987259692L;
 	private int id;
 	private int version;
+	private int contentVersion;
 	private String filename;
 
-	public StarteamFileInfo(String filename, int id, int version) {
+	public StarteamFileInfo(String filename, int id, int version, int content) {
 		this.filename = filename;
 		this.id = id;
 		this.version = version;
+		this.contentVersion = content;
 	}
 	
 	public int getId() {
@@ -42,6 +44,10 @@ public class StarteamFileInfo implements Serializable {
 		return version;
 	}
 	
+	public int getContentVersion() {
+		return contentVersion;
+	}
+
 	public String getFilename() {
 		return filename;
 	}
@@ -53,8 +59,13 @@ public class StarteamFileInfo implements Serializable {
 	public void setVersion(int version) {
 		this.version = version;
 	}
+
+	public void setContentVersion(int version) {
+		this.contentVersion = version;
+	}
 	
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
+
 }

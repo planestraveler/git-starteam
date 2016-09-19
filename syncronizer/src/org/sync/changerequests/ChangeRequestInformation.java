@@ -1,3 +1,19 @@
+/*****************************************************************************
+    This file is part of Git-Starteam.
+
+    Git-Starteam is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Git-Starteam is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Git-Starteam.  If not, see <http://www.gnu.org/licenses/>.
+******************************************************************************/
 package org.sync.changerequests;
 
 import java.util.regex.Pattern;
@@ -17,10 +33,14 @@ public class ChangeRequestInformation {
 	private ChangeRequest changeRequest;
 	
 	private String associatedFilePattern;
+	private String CachedString;
+	private boolean CachingIsDone;
 
 	public ChangeRequestInformation(ChangeRequest changeRequest, String associatedFilePattern){
 		this.changeRequest = changeRequest;
 		this.associatedFilePattern = associatedFilePattern;
+		CachedString = null;
+		CachingIsDone = false;
 	}
 
 	public int getNumber(){
@@ -100,6 +120,9 @@ public class ChangeRequestInformation {
 
 	@Override
 	public String toString(){
+		if (CachingIsDone) {
+			return CachedString;
+		}
 		StringBuilder stringBuilder = new StringBuilder();
 		
 		stringBuilder.append("[CR");
@@ -163,6 +186,8 @@ public class ChangeRequestInformation {
 		stringBuilder.append("JiraIssue: ");
 		stringBuilder.append(getJiraIssue());
 		
-		return stringBuilder.toString();
+		CachedString = stringBuilder.toString();
+		CachingIsDone = true;
+		return CachedString;
 	}
 }
