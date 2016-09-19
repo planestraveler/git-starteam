@@ -16,7 +16,7 @@
 ******************************************************************************/
 package org.sync.util.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,8 +30,8 @@ public class StarteamFileInformationTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		file1 = new StarteamFileInfo("test1.txt", 1, 0);
-		file2 = new StarteamFileInfo("test2.txt", 2, 0);
+		file1 = new StarteamFileInfo("test1.txt", 1, 0, 0);
+		file2 = new StarteamFileInfo("test2.txt", 2, 0, 0);
 	}
 
 	@After
@@ -47,12 +47,14 @@ public class StarteamFileInformationTest {
 		assertEquals(1, file1.getId());
 		assertEquals(2, file2.getId());
 		assertEquals(0, file1.getVersion());
+		assertEquals(0, file1.getContentVersion());
 		
 		file1.setId(4);
 		assertEquals(4, file1.getId());
 		
 		file2.setVersion(2);
 		assertEquals(2, file2.getVersion());
+		assertEquals(0, file2.getContentVersion());
 		
 		file1.setFilename("renameTest1.txt");
 		assertEquals("renameTest1.txt", file1.getFilename());
