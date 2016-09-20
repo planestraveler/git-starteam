@@ -16,16 +16,27 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
-public class UserAccount
-  extends CacheRef
+import org.ossnoize.fakestarteam.SerializableUser;
+
+public class UserAccount extends CacheRef
 {
+	private SerializableUser aUser;
+	public UserAccount(Server server) {
+		aUser = null;
+	}
+
+	protected UserAccount(SerializableUser internal) {
+		aUser = internal;
+	}
+
   public String getName()
   {
-    return "unknown";
+		return aUser.getName();
   }
   
   public String getEmailAddress()
   {
-    return "unknown@example.com";
+		return aUser.getEMail();
   }
+
 }
