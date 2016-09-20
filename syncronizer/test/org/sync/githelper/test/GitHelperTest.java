@@ -18,6 +18,7 @@ package org.sync.githelper.test;
 
 import java.io.ByteArrayOutputStream;
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,8 +103,17 @@ public class GitHelperTest {
 		assertEquals(true, test.isBareRepository());
 	}
 	
+	/** 
+	 * 
+	 * @return true if OS is a *nix based system (Unix, Linux, AIX) 
+	 */
+	private static boolean isNix() {
+		String osName = System.getProperty("os.name").toLowerCase();
+		return (osName.indexOf("nix") >= 0 || osName.indexOf("nux") >= 0 || osName.indexOf("aix") > 0 );
+	}
 	@Test
 	public void testAlternateDirectory() throws Exception {
+		assumeTrue(isNix());
 		GitHelper helper = new GitHelper("/usr/bin", false, null);
 		helper.dispose();
 	}

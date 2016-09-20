@@ -56,7 +56,12 @@ public class DataTest {
 	
 	@Test
 	public void testOuput2() throws IOException {
-		Pattern tester = Pattern.compile("data 3527\n[a-zA-Z \n\\p{Punct}]{3527}\n");
+		int len = 3527;
+		if (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
+		{
+			len += 11; // account for end-of-line char difference
+		}
+		Pattern tester = Pattern.compile("data " + len + "\n[a-zA-Z \r\n\\p{Punct}]{" + len + "}\n");
 		ByteArrayOutputStream byout = new ByteArrayOutputStream();
 		data2.writeTo(byout);
 		String bigString = new String(byout.toByteArray(),0,byout.size());
