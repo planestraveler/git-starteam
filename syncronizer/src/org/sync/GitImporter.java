@@ -61,13 +61,11 @@ import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Label;
-import com.starbase.starteam.NoSuchPropertyException;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.PropertyNames;
 import com.starbase.starteam.Server;
-import com.starbase.starteam.ServerAdministration;
-import com.starbase.starteam.UserAccount;
 import com.starbase.starteam.ServerException;
+import com.starbase.starteam.UserAccount;
 import com.starbase.starteam.View;
 import com.starbase.starteam.ViewConfiguration;
 import com.starbase.util.OLEDate;
@@ -294,10 +292,10 @@ public class GitImporter {
 					try	{
 						if (f.get(propNames.FILE_EXECUTABLE) != null)
 						{
-						  executable = (boolean) f.get(propNames.FILE_EXECUTABLE);
+							executable = (Boolean) f.get(propNames.FILE_EXECUTABLE);
 						}
 					}
-					catch (Exception ex) {				
+					catch (Exception ex) {
 					}
 					if(executable) {
 						fm.setFileType(GitFileType.Executable);
