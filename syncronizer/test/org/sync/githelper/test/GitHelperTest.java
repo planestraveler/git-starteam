@@ -16,10 +16,14 @@
 ******************************************************************************/
 package org.sync.githelper.test;
 
-import java.io.ByteArrayOutputStream;
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -162,13 +166,14 @@ public class GitHelperTest {
 		assertNull(test.getRegisteredFileId("master", "test/path/of/non/existing/file.txt"));
 		assertNull(test.getRegisteredFileVersion("master", "test/path/of/non/existing/file.txt"));
 		
-		test.updateFileVersion("master", "test/path/of/file.txt", 3);
+		test.updateFileVersion("master", "test/path/of/file.txt", 3, 3);
 		assertEquals(new Integer(3), test.getRegisteredFileVersion("master", "test/path/of/file.txt"));
+		assertEquals(new Integer(3), test.getRegisteredFileContentVersion("master", "test/path/of/file.txt"));
 		
 		test.unregisterFileId("master", "test/path/of/another/file.txt");
 		assertNull(test.getRegisteredFileId("master", "test/path/of/another/file.txt"));
 		
-		assertFalse(test.updateFileVersion("master", "unexistingFile.txt", 4));
+		assertFalse(test.updateFileVersion("master", "unexistingFile.txt", 4, 4));
 		assertFalse(test.registerFileId("master", "test/path/of/file.txt", 12356, 6));
 	}
 	

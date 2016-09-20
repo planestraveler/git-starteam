@@ -155,7 +155,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "First version of glsl mesa lexer");
 		assertEquals(entry.getKey().getPath(), "src/cpp/mesa/glsl/glsl_lexer.ll");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/mesa/glsl/glsl_lexer.ll"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -163,7 +164,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "The initial version of the sconstruct file of mesa");
 		assertEquals(entry.getKey().getPath(), "src/scons/SConstruct");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/scons/SConstruct"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -171,7 +173,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "This class represent the File class exist in starteam");
 		assertEquals(entry.getKey().getPath(), "src/java/starteam/File.java");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/java/starteam/File.java"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -179,7 +182,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "This class represent the Item class exist in starteam");
 		assertEquals(entry.getKey().getPath(), "src/java/starteam/Item.java");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/java/starteam/Item.java"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -187,7 +191,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "This class represent the Project class exist in starteam");
 		assertEquals(entry.getKey().getPath(), "src/java/starteam/Project.java");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/java/starteam/Project.java"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertFalse(it.hasNext());
 	}
@@ -209,7 +214,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "Readme file for the project");
 		assertEquals(entry.getKey().getPath(), "doc/README");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "doc/README"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -218,7 +224,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/java/starteam/File.java");
 		assertEquals(new Integer(1), Helper.getRegisteredFileVersion("MAIN", "src/java/starteam/File.java"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -226,7 +233,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/java/starteam/Folder.java");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/java/starteam/Folder.java"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -234,7 +242,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/java/starteam/Item.java");
 		assertEquals(new Integer(1), Helper.getRegisteredFileVersion("MAIN", "src/java/starteam/Item.java"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertFalse(it.hasNext());
 	}
@@ -256,7 +265,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "Parser should always be with lexer");
 		assertEquals(entry.getKey().getPath(), "src/cpp/mesa/glsl/glsl_parser.yy");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/mesa/glsl/glsl_parser.yy"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -264,7 +274,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "Updated lexer");
 		assertEquals(entry.getKey().getPath(), "src/cpp/mesa/glsl/glsl_lexer.ll");
 		assertEquals(new Integer(1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/mesa/glsl/glsl_lexer.ll"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertFalse(it.hasNext());
 	}
@@ -286,7 +297,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "Basic construction file");
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/Makefile.in");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/Makefile.in"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -294,7 +306,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), "Stub of msvcp100 dlls");
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/msvcp100.c");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/msvcp100.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertFalse(it.hasNext());
 	}
@@ -317,7 +330,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/Makefile.in");
 		assertEquals(new Integer(1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/Makefile.in"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -325,7 +339,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/cxx.h");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/cxx.h"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -333,7 +348,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/exception.c");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/exception.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -341,7 +357,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/ios.c");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/ios.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -349,7 +366,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/locale.c");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/locale.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -357,7 +375,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/math.c");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/math.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -365,7 +384,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/memory.c");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/memory.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -373,7 +393,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/misc.c");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/misc.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -381,7 +402,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/msvcp.h");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/msvcp.h"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -389,7 +411,8 @@ public class BasePopulationTest {
 		assertEquals(entry.getKey().getComment(), nextComment);
 		assertEquals(entry.getKey().getPath(), "src/cpp/wine/msvcp100/string.c");
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/string.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertFalse(it.hasNext());
 	}
@@ -413,7 +436,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/Makefile.in", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/Makefile.in"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -421,7 +445,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/cxx.h", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/cxx.h"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -429,7 +454,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/exception.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/exception.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -437,7 +463,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/ios.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/ios.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -445,7 +472,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/locale.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/locale.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -453,7 +481,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/math.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/math.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -461,7 +490,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/memory.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/memory.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -469,7 +499,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/misc.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/misc.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -477,7 +508,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/msvcp.h", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/msvcp.h"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -485,7 +517,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/msvcp100.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/msvcp100.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -493,7 +526,8 @@ public class BasePopulationTest {
 		assertEquals(nextComment, entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/string.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/string.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -550,7 +584,8 @@ public class BasePopulationTest {
 		assertEquals("Fixed stream-off size definition", entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/ios.c", entry.getKey().getPath());
 		assertEquals(new Integer(1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/ios.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
@@ -558,7 +593,8 @@ public class BasePopulationTest {
 		assertEquals("Fixed stream-off size definition", entry.getKey().getComment());
 		assertEquals("src/c/wine/msvcp100/msvcp.h", entry.getKey().getPath());
 		assertEquals(new Integer(1), Helper.getRegisteredFileVersion("MAIN", "src/c/wine/msvcp100/msvcp.h"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getContentVersion()));
+		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 
