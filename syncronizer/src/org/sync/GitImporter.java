@@ -61,7 +61,9 @@ import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Label;
+import com.starbase.starteam.NoSuchPropertyException;
 import com.starbase.starteam.Project;
+import com.starbase.starteam.PropertyNames;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.View;
 import com.starbase.starteam.ViewConfiguration;
@@ -147,6 +149,9 @@ public class GitImporter {
 	}
 
 	public void generateFastImportStream(View view, String folderPath) {
+        PropertyNames propNames = folder.getPropertyNames();
+
+		
 		// http://techpubs.borland.com/starteam/2009/en/sdk_documentation/api/com/starbase/starteam/CheckoutManager.html
 		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."
 		CheckoutManager cm = new CheckoutManager(view);
@@ -273,7 +278,16 @@ public class GitImporter {
 					}
 
 					FileModification fm = new FileModification(fileToStage);
-					if(aFile.canExecute()) {
+					boolean executable = false;
+					try	{
+						if (f.get(propNames.FILE_EXECUTABLE) != null)
+						{
+						  executable = (boolean) f.get(propNames.FILE_EXECUTABLE);
+						}
+					}
+					catch (Exception ex) {				
+					}
+					if(executable) {
 						fm.setFileType(GitFileType.Executable);
 					} else {
 						fm.setFileType(GitFileType.Normal);

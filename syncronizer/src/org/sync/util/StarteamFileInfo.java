@@ -29,6 +29,13 @@ public class StarteamFileInfo implements Serializable {
 	private int contentVersion;
 	private String filename;
 
+	public StarteamFileInfo(String filename, int id, int version) {
+		this.filename = filename;
+		this.id = id;
+		this.version = version;
+		this.contentVersion = version;
+	}
+	
 	public StarteamFileInfo(String filename, int id, int version, int content) {
 		this.filename = filename;
 		this.id = id;

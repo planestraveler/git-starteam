@@ -125,6 +125,21 @@ public abstract class RepositoryHelper {
 	 *          the full path of the file and its name inside the repository
 	 * @param fileVersion
 	 *          the Starteam version of this file.
+	 */
+	public boolean updateFileVersion(String head, String filename, int fileVersion) {
+		return updateFileVersion(head, filename, fileVersion, fileVersion);
+	}
+
+	/**
+	 * Save in file hidden inside the repository (.git, .bazaar, ...) the version
+	 * of an already registered file existing inside the repository.
+	 * 
+	 * @param head
+	 *          the reference name
+	 * @param filename
+	 *          the full path of the file and its name inside the repository
+	 * @param fileVersion
+	 *          the Starteam version of this file.
 	 * @param contentVersion
 	 *          The Starteam File Content version.
 	 */

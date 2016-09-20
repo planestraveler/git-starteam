@@ -1,6 +1,7 @@
 package fakestarteam.util.test;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,6 +55,9 @@ public class TestMD5 {
 
 	@Test
 	public void testComputeStreamMD5Ex() throws IOException {
+		// eol chars have an effect on stream size and computed MD5 hash 
+		assumeTrue(isNix());
+		
 		MD5 test = new MD5();
 		long size = test.computeStreamMD5Ex(md5IpsumStream);
 		assertEquals(7075, size);
@@ -62,6 +66,9 @@ public class TestMD5 {
 
 	@Test
 	public void testComputeFileMD5Ex() throws IOException {
+		// eol chars have an effect on file size and computed MD5 hash 
+		assumeTrue(isNix());
+
 		File ftest = File.createTempFile("md5testcase", "ipsum");
 		ftest.deleteOnExit();
 		
@@ -103,4 +110,12 @@ public class TestMD5 {
 		assertEquals("0000000000000000000000123456789a", almostEmpty.toString());
 	}
 
+	/** 
+	 * 
+	 * @return true if OS is a *nix based system (Unix, Linux, AIX) 
+	 */
+	private static boolean isNix() {
+		String osName = System.getProperty("os.name").toLowerCase();
+		return (osName.indexOf("nix") >= 0 || osName.indexOf("nux") >= 0 || osName.indexOf("aix") > 0 );
+	}
 }

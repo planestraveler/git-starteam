@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -106,8 +107,17 @@ public class GitHelperTest {
 		assertEquals(true, test.isBareRepository());
 	}
 	
+	/** 
+	 * 
+	 * @return true if OS is a *nix based system (Unix, Linux, AIX) 
+	 */
+	private static boolean isNix() {
+		String osName = System.getProperty("os.name").toLowerCase();
+		return (osName.indexOf("nix") >= 0 || osName.indexOf("nux") >= 0 || osName.indexOf("aix") > 0 );
+	}
 	@Test
 	public void testAlternateDirectory() throws Exception {
+		assumeTrue(isNix());
 		GitHelper helper = new GitHelper("/usr/bin", false, null);
 		helper.dispose();
 	}
