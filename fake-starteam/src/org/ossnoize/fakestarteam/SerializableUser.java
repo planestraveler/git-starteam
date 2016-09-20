@@ -30,6 +30,7 @@ public class SerializableUser extends User implements Serializable {
 	private int id;
 	private String name;
 	private String passwd;
+	private String email;
 
 	public SerializableUser(String uid, int id) {
 		this.uid = uid;
@@ -54,6 +55,10 @@ public class SerializableUser extends User implements Serializable {
 		this.name = name;
 	}
 	
+	public String getEMail() {
+		return this.email;
+	}
+
 	public boolean isCorrectPassword(String passwd) {
 		if(null == passwd && null == this.passwd) {
 			return true;
@@ -65,5 +70,9 @@ public class SerializableUser extends User implements Serializable {
 	
 	public void setPassword(String passwd) {
 		this.passwd = passwd;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

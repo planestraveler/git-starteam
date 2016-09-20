@@ -22,6 +22,7 @@ import org.ossnoize.fakestarteam.SerializableUser;
 import org.ossnoize.fakestarteam.UserProvider;
 
 import com.starbase.util.OLEDate;
+import com.starbase.starteam.ServerAdministration;
 
 public class Server {
 
@@ -37,6 +38,10 @@ public class Server {
 		Address = address;
 		Port = port;
 		InternalPropertiesProvider.getInstance().setCurrentServer(this);
+	}
+	
+	public ServerAdministration getAdministration()	{
+		return new ServerAdministration();
 	}
 	
 	public int getPort() {

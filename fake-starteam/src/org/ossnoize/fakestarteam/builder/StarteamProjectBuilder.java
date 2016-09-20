@@ -98,7 +98,7 @@ public class StarteamProjectBuilder {
 	 * @param uid User id to use
 	 * @param password The set password
 	 */
-	private void createTestUser(String uid, String password) {
+	private void createTestUser(String uid, String password, String email) {
 		this.username = uid;
 		this.password = password;
 		SerializableUser userObject = UserProvider.getInstance().findUser(uid);
@@ -109,6 +109,7 @@ public class StarteamProjectBuilder {
 		if(null != userObject) {
 			userObject.setPassword(password);
 			userObject.setName(uid);
+			userObject.setEmail(email);
 			UserProvider.getInstance().applyChanges();
 		} else {
 			throw new NullPointerException("Could not create find the user in the database");
@@ -122,7 +123,7 @@ public class StarteamProjectBuilder {
 	private final static int last = 12;
 	public static void main(String[] args) {
 		StarteamProjectBuilder builder = StarteamProjectBuilder.createBuilder();
-		builder.createTestUser("Test", "passw0rd");
+		builder.createTestUser("Test", "passw0rd", "Test@test.com");
 		builder.connectToServer();
 		builder.createProject(args[0]);
 		int from = first;

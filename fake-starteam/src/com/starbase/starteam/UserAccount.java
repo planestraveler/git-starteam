@@ -16,6 +16,27 @@
  *****************************************************************************/
 package com.starbase.starteam;
 
-public class ServerException extends RuntimeException {
+import org.ossnoize.fakestarteam.SerializableUser;
+
+public class UserAccount extends CacheRef
+{
+	private SerializableUser aUser;
+	public UserAccount(Server server) {
+		aUser = null;
+	}
+
+	protected UserAccount(SerializableUser internal) {
+		aUser = internal;
+	}
+
+  public String getName()
+  {
+		return aUser.getName();
+  }
+  
+  public String getEmailAddress()
+  {
+		return aUser.getEMail();
+  }
 
 }

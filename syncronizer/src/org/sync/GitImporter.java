@@ -61,10 +61,11 @@ import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Label;
-import com.starbase.starteam.NoSuchPropertyException;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.PropertyNames;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.ServerException;
+import com.starbase.starteam.UserAccount;
 import com.starbase.starteam.View;
 import com.starbase.starteam.ViewConfiguration;
 import com.starbase.util.OLEDate;
@@ -196,8 +197,17 @@ public class GitImporter {
 		for (Map.Entry<CommitInformation, File> e : commitList.entrySet()) {
 			File f = e.getValue();
 			CommitInformation current = e.getKey();
-			String userName = server.getUser(current.getUid()).getName();
-			String userEmail = userName.replaceAll(" ", ".") + "@" + domain;
+			UserAccount userAccount = server.getAdministration().findUserAccount(current.getUid());
+			String userName = userAccount.getName();
+			String userEmail;
+			try {
+				userEmail = userAccount.getEmailAddress();
+			}
+			catch(ServerException ex) {
+				Log.log("Could not retrieve e-mail for " + userName + " from Administration Server. "
+                                        + "You probably do not have the right");
+				userEmail = userName.replaceAll(" ", ".") + "@" + domain;
+			}
 			String path = current.getPath();
 
 			try {
@@ -282,10 +292,10 @@ public class GitImporter {
 					try	{
 						if (f.get(propNames.FILE_EXECUTABLE) != null)
 						{
-						  executable = (boolean) f.get(propNames.FILE_EXECUTABLE);
+							executable = (Boolean) f.get(propNames.FILE_EXECUTABLE);
 						}
 					}
-					catch (Exception ex) {				
+					catch (Exception ex) {
 					}
 					if(executable) {
 						fm.setFileType(GitFileType.Executable);
