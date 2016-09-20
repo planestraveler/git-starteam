@@ -158,7 +158,7 @@ public class RevisionPopulationTest {
 		assertEquals("src/cpp/wine/msvcp100/Makefile.in", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/Makefile.in"));
 		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
-		    entry.getValue().getViewVersion()));
+		    entry.getValue().getContentVersion()));
 
 		assertTrue(it.hasNext());
 		entry = it.next();
@@ -167,14 +167,14 @@ public class RevisionPopulationTest {
 		assertEquals("src/cpp/wine/msvcp100/msvcp100.c", entry.getKey().getPath());
 		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/msvcp100.c"));
 		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
-		    entry.getValue().getViewVersion()));
+		    entry.getValue().getContentVersion()));
 
 		assertFalse(it.hasNext());
 	}
 
 	@Test
 	public void revisionLabel1() {
-		CommitBuilder.setCurrentLabel(SelectedViewLabels[0]);
+		CommitBuilder.setCurrentLabel(SelectedViewLabels[1]);
 		View selected = new View(SelectedView, ViewConfiguration.createFromTime(SelectedViewLabels[0].getRevisionTime()));
 		Folder root = selected.getRootFolder();
 
@@ -188,21 +188,9 @@ public class RevisionPopulationTest {
 		Entry<CommitInformation, com.starbase.starteam.File> entry = it.next();
 
 		assertEquals(nextComment, entry.getKey().getComment());
-		assertEquals("src/cpp/wine/msvcp100/cxx.h", entry.getKey().getPath());
-		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/cxx.h"));
+		assertEquals("src/cpp/wine/msvcp100/Makefile.in", entry.getKey().getPath());
+		assertEquals(new Integer(1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/Makefile.in"));
 		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
-		    entry.getValue().getViewVersion()));
-
-		assertTrue(it.hasNext());
-		entry = it.next();
-
-		assertEquals(nextComment, entry.getKey().getComment());
-		assertEquals("src/cpp/wine/msvcp100/exception.c", entry.getKey().getPath());
-		assertEquals(new Integer(-1), Helper.getRegisteredFileVersion("MAIN", "src/cpp/wine/msvcp100/exception.c"));
-		assertTrue(Helper.updateFileVersion("MAIN", entry.getKey().getPath(), entry.getValue().getViewVersion(),
-		    entry.getValue().getViewVersion()));
-
-		assertTrue(it.hasNext());
-		entry = it.next();
+		    entry.getValue().getContentVersion()));
 	}
 }
