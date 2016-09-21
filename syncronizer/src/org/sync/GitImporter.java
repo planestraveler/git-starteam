@@ -65,6 +65,7 @@ import com.starbase.starteam.Project;
 import com.starbase.starteam.PropertyNames;
 import com.starbase.starteam.Server;
 import com.starbase.starteam.ServerException;
+import com.starbase.starteam.User;
 import com.starbase.starteam.UserAccount;
 import com.starbase.starteam.View;
 import com.starbase.starteam.ViewConfiguration;
@@ -149,6 +150,7 @@ public class GitImporter {
 		this.domain = domain;
 	}
 
+	private boolean dontTryServerAdministrationAgain = false;
 	public void generateFastImportStream(View view, String folderPath) {
         PropertyNames propNames = folder.getPropertyNames();
 
@@ -197,15 +199,21 @@ public class GitImporter {
 		for (Map.Entry<CommitInformation, File> e : commitList.entrySet()) {
 			File f = e.getValue();
 			CommitInformation current = e.getKey();
-			UserAccount userAccount = server.getAdministration().findUserAccount(current.getUid());
-			String userName = userAccount.getName();
-			String userEmail;
-			try {
-				userEmail = userAccount.getEmailAddress();
+			String userName = "";
+			String userEmail = "";
+			if (!dontTryServerAdministrationAgain) {
+				try {
+					UserAccount userAccount = server.getAdministration().findUserAccount(current.getUid());
+					userName = userAccount.getName();
+					userEmail = userAccount.getEmailAddress();
+				} catch (ServerException ex) {
+					Log.log("Could not retrieve user from Administration Server. You probably do not have the right");
+					dontTryServerAdministrationAgain = true;
+				}
 			}
-			catch(ServerException ex) {
-				Log.log("Could not retrieve e-mail for " + userName + " from Administration Server. "
-                                        + "You probably do not have the right");
+			if (dontTryServerAdministrationAgain) {
+				User userAccount = server.getUser(current.getUid());
+				userName = userAccount.getName();
 				userEmail = userName.replaceAll(" ", ".") + "@" + domain;
 			}
 			String path = current.getPath();
