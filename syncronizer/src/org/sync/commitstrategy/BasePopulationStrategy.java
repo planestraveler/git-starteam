@@ -240,10 +240,10 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	 **/
 	protected boolean isChildOf(File aFile, Folder aPotentialParent) {
 		Folder parent = aFile.getParentFolder();
+		int searchedVersion = aPotentialParent.getViewVersion();
 		while (parent != null) {
-			if (parent.getObjectID() == aPotentialParent.getObjectID()
-			    && parent.getViewVersion() == aPotentialParent.getViewVersion()) {
-				return true;
+			if (parent.getObjectID() == aPotentialParent.getObjectID()) {
+				return parent.getViewVersion() == searchedVersion;
 			}
 			parent = parent.getParentFolder();
 		}
