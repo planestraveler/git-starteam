@@ -152,9 +152,8 @@ public class GitImporter {
 
 	private boolean dontTryServerAdministrationAgain = false;
 	public void generateFastImportStream(View view, String folderPath) {
-        PropertyNames propNames = folder.getPropertyNames();
+		PropertyNames propNames = view.getPropertyNames();
 
-		
 		// http://techpubs.borland.com/starteam/2009/en/sdk_documentation/api/com/starbase/starteam/CheckoutManager.html
 		// said old version (passed in /opt/StarTeamCP_2005r2/lib/starteam80.jar) "Deprecated. Use View.createCheckoutManager() instead."
 		CheckoutManager cm = new CheckoutManager(view);
