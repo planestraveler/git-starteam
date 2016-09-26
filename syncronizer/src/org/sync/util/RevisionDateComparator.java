@@ -50,6 +50,7 @@ private static String buildDateFormat = "MM/dd/yy hh:mm a";
 		return Fallback.compare(arg0.getName(), arg1.getName());
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static OLEDate getLabelDate(Label revisionLabel) throws ParseException{
 		String labelDescription = revisionLabel.getDescription();
 		int buildDateDescriptionIndex = labelDescription.indexOf(buildDateToken);
@@ -62,7 +63,10 @@ private static String buildDateFormat = "MM/dd/yy hh:mm a";
 
 			DateFormat dateFormat = new java.text.SimpleDateFormat(buildDateFormat);
 
-			return new OLEDate(dateFormat.parse(date.trim()));
+			java.util.Date buildDate = dateFormat.parse(date.trim());
+			buildDate.setSeconds(59); // TODO: Find a better way to initialize the
+			                          // secondes in a more proper way.
+			return new OLEDate(buildDate);
 		}
 		return revisionLabel.getRevisionTime();
 	}
