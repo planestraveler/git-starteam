@@ -66,6 +66,10 @@ public class UserProvider {
 			if(userFile.exists()) {
 				in = new ObjectInputStream(new FileInputStream(userFile));
 				users = (Map<Integer, SerializableUser>) in.readObject();
+
+				for(Entry<Integer, SerializableUser> user : users.entrySet()) {
+					UserAccountProvider.getInstance().addUserAccount(user.getKey());
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -111,6 +115,7 @@ public class UserProvider {
 			lastUserID = Collections.max(users.keySet()) + 1;
 		}
 		users.put(lastUserID, new SerializableUser(uid, lastUserID));
+		UserAccountProvider.getInstance().addUserAccount(users.get(lastUserID).getID());
 		writeUserList();
 	}
 	

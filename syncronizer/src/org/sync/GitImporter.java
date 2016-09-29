@@ -90,6 +90,7 @@ public class GitImporter {
 	private Map<String, DataRef> tagMarks = new HashMap<String, DataRef>();
 	// email domain to use
 	private String domain;
+	private UserMapping userMapping;
 	private long lfsMinimumSize = Long.MAX_VALUE;
 	private Pattern lfsRegex;
 	private CommitPopulationStrategy CheckoutStrategy;
@@ -148,6 +149,16 @@ public class GitImporter {
 
 	public void setDomain(String domain) {
 		this.domain = domain;
+		if (this.userMapping != null) {
+			this.userMapping.setDefaultDomain(this.domain);
+		}
+	}
+
+	public void setUserMapping(UserMapping userDirectory) {
+		this.userMapping = userDirectory;
+		if (this.userMapping != null) {
+			this.userMapping.setDefaultDomain(this.domain);
+		}
 	}
 
 	private boolean dontTryServerAdministrationAgain = false;
@@ -213,7 +224,7 @@ public class GitImporter {
 			if (dontTryServerAdministrationAgain) {
 				User userAccount = server.getUser(current.getUid());
 				userName = userAccount.getName();
-				userEmail = userName.replaceAll(" ", ".") + "@" + domain;
+				userEmail = userMapping.getEmail(userName);
 			}
 			String path = current.getPath();
 

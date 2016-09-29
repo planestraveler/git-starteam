@@ -60,6 +60,7 @@ public class MainEntry {
 		CmdLineParser.Option selectTime = parser.addStringOption('t', "time");
 		CmdLineParser.Option selectFolder = parser.addStringOption('f', "folder");
 		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
+		CmdLineParser.Option mailMap = parser.addStringOption('m', "mailmap");
 		CmdLineParser.Option isExpandKeywords = parser.addBooleanOption('k', "keyword");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
@@ -107,6 +108,7 @@ public class MainEntry {
 		Boolean revisionLabelBased = (Boolean) parser.getOptionValue(selectRevisionLabelBasedImport);
 		String folder = (String) parser.getOptionValue(selectFolder);
 		String domain = (String) parser.getOptionValue(selectDomain);
+		String mailMapFilename = (String) parser.getOptionValue(mailMap);
 		Boolean keyword = (Boolean) parser.getOptionValue(isExpandKeywords);
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
@@ -277,6 +279,7 @@ public class MainEntry {
 						importer.setVerbose(verbose);
 						importer.setCreateCheckpoints(createCheckpoints);
 						importer.setDomain(domain);
+						importer.setUserMapping(new UserMapping(mailMapFilename));
 						importer.setMinimumLFSSize(startTrackingAtSize);
 						importer.setLFSPattern(lfsRegexPattern);
 						importer.setLabelExclusion(excludedLabels);
@@ -340,7 +343,8 @@ public class MainEntry {
 		System.out.println("-p <project>\t\tSelect the project to import from");
 		System.out.println("-v <view>\t\tSelect the view used for importation");
 		System.out.println("-A\t\tImport all views");
-		System.out.println("-d <domain>\t\tSelect the email domain (format like gmail.com) of the user");
+		System.out.println("[-d <domain>]\t\tSelect the email domain (format like gmail.com) of the user");
+		System.out.println("[-m <mailmap>]\t\tSelect the file which defines the user email mapping (format like user = user@gmail.com)");
 		System.out.println("[-t <time>]\t\tSelect the time (format like \"2012-07-11 23:59:59\") to import from");
 		System.out.println("[-f <folder regex>]\t\tSelect the folder (in Java regex format) to import from");
 		System.out.println("[-T]\t\t\tDo a day by day importation of the starteam view");

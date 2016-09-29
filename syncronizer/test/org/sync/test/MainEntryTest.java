@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ import org.junit.Test;
 import org.ossnoize.fakestarteam.InternalPropertiesProvider;
 import org.ossnoize.fakestarteam.ProjectProvider;
 import org.ossnoize.fakestarteam.SimpleTypedResourceIDProvider;
+import org.ossnoize.fakestarteam.UserAccountProvider;
 import org.ossnoize.fakestarteam.UserProvider;
 import org.ossnoize.fakestarteam.builder.StarteamProjectBuilder;
 import org.ossnoize.git.fastimport.GitAttributes;
@@ -45,6 +47,7 @@ public class MainEntryTest {
 		FileUtility.rmDir(importLocation);
 		SimpleTypedResourceIDProvider.deleteProvider();
 		UserProvider.deleteInstance();
+		UserAccountProvider.deleteInstance();
 		InternalPropertiesProvider.deleteInstace();
 		ProjectProvider.deleteInstance();
 		RepositoryHelperFactory.deleteFactory();
@@ -88,6 +91,55 @@ public class MainEntryTest {
 		assertFalse(i.hasNext());
     String repoInformation = importLocation.getAbsolutePath() + File.separator + "starteam" + File.separator + "StarteamFileInfo.gz";
     assertTrue(new File(repoInformation).exists());
+	}
+
+	@Test
+	public void testLabelImportRemappedEmail() throws IOException {
+		final String username  = "Test";
+		final String email     = "j.random.hacker@acme.com";
+		String newAuthor = username + " <" + email + ">";
+		
+		String mailMapFilename = Files.createTempFile("mailmap", null).toString();
+		try(  PrintWriter out = new PrintWriter( mailMapFilename )  ) {
+		    out.println( username + " = " + email);
+		}
+		
+		StarteamProjectBuilder.main(new String[] {"UnitTest", "1", "10"});		
+		MainEntry.main(new String[] {
+				"-h", "localhost", "-P", "23456", "-U", username, "--password=passw0rd", "-p", "UnitTest", "-v", "MAIN",
+				"-d", "test.com", "-m", mailMapFilename, "-c", "-L", "-W", importLocation.getAbsolutePath(), "--verbose"
+				});
+
+		RepositoryHelperFactory.getFactory().setCreateRepo(false);
+		RepositoryHelper helper = RepositoryHelperFactory.getFactory().createHelper();
+		
+		List<LogEntry> entries = helper.getCommitLog(new SmallRef("MAIN"));
+		Collections.reverse(entries);
+		Iterator<LogEntry> i = entries.iterator();
+		
+		assertCommit01(i.next(), newAuthor);
+		assertCommit02(i.next(), newAuthor);
+		assertCommit03(i.next(), newAuthor);
+		assertCommit04(i.next(), newAuthor);
+		assertCommit05(i.next(), newAuthor);
+		assertCommit06(i.next(), newAuthor);
+		assertCommit07(i.next(), newAuthor);
+		assertCommit08(i.next(), newAuthor);
+		assertCommit09(i.next(), newAuthor);
+		assertCommit10(i.next(), newAuthor);
+		assertCommit11(i.next(), newAuthor);
+		assertCommit12(i.next(), newAuthor);
+		assertCommit13(i.next(), newAuthor);
+		assertCommit14(i.next(), newAuthor);
+		assertCommit15(i.next(), newAuthor);
+		assertCommit16(i.next(), newAuthor);
+		assertCommit17(i.next(), newAuthor);
+		assertCommit18(i.next(), newAuthor);
+		assertCommit19(i.next(), newAuthor);
+		assertCommit20(i.next(), newAuthor);
+		assertFalse(i.hasNext());
+        String repoInformation = importLocation.getAbsolutePath() + File.separator + "starteam" + File.separator + "StarteamFileInfo.gz";
+        assertTrue(new File(repoInformation).exists());
 	}
 	
 	@Test
@@ -416,6 +468,10 @@ public class MainEntryTest {
   }
   
 	private void assertCommit20(LogEntry entry) {
+		assertCommit20(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit20(LogEntry entry, String author) {
 		int index;
 		assertEquals("Load from history and Return it",        entry.getComment());
 		assertEquals(1,                                        entry.getFilesEntry().size());
@@ -424,10 +480,14 @@ public class MainEntryTest {
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getFromType());
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getToType());
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(index).getTypeOfModification());
-		assertEquals("Test <Test@test.com>",                   entry.getAuthor());
+		assertEquals(author,                                   entry.getAuthor());
 	}
 
 	private void assertCommit19(LogEntry entry) {
+		assertCommit19(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit19(LogEntry entry, String author) {
 		int index;
 		assertEquals("Improve Logic of project creation",      entry.getComment());
 		assertEquals(1,                                        entry.getFilesEntry().size());
@@ -436,10 +496,14 @@ public class MainEntryTest {
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getFromType());
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getToType());
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(index).getTypeOfModification());
-		assertEquals("Test <Test@test.com>",                   entry.getAuthor());
+		assertEquals(author,                                   entry.getAuthor());
 	}
 
 	private void assertCommit18(LogEntry entry) {
+		assertCommit18(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit18(LogEntry entry, String author) {
 		int index;
 		assertEquals("Class reprensenting the view of starteam",
 				                                               entry.getComment());
@@ -449,10 +513,14 @@ public class MainEntryTest {
 		assertEquals(GitFileType.NullFile,                     entry.getFilesEntry().get(index).getFromType());
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition,     entry.getFilesEntry().get(index).getTypeOfModification());
-		assertEquals("Test <Test@test.com>",                   entry.getAuthor());
+		assertEquals(author,                                   entry.getAuthor());
 	}
 
 	private void assertCommit17(LogEntry entry) {
+		assertCommit17(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit17(LogEntry entry, String author) {
 		int index;
 		assertEquals("Added subfolder listing capacity",       entry.getComment());
 		assertEquals(1,                                        entry.getFilesEntry().size());
@@ -461,10 +529,14 @@ public class MainEntryTest {
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getFromType());
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getToType());
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(index).getTypeOfModification());
-		assertEquals("Test <Test@test.com>",                   entry.getAuthor());
+		assertEquals(author,                                   entry.getAuthor());
 	}
 
 	private void assertCommit16(LogEntry entry) {
+		assertCommit16(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit16(LogEntry entry, String author) {
 		int index;
 		assertEquals("Added getParentFolder property",         entry.getComment());
 		assertEquals(1,                                        entry.getFilesEntry().size());
@@ -473,10 +545,14 @@ public class MainEntryTest {
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getFromType());
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getToType());
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(index).getTypeOfModification());
-		assertEquals("Test <Test@test.com>",                   entry.getAuthor());
+		assertEquals(author,                                   entry.getAuthor());
 	}
 
 	private void assertCommit15(LogEntry entry) {
+		assertCommit15(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit15(LogEntry entry, String author) {
 		int index = 0;
 		assertEquals("",                                       entry.getComment());
 		assertEquals(1,                                        entry.getFilesEntry().size());
@@ -484,10 +560,14 @@ public class MainEntryTest {
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getFromType());
 		assertEquals(GitFileType.NullFile,                     entry.getFilesEntry().get(index).getToType());
 		assertEquals(LogEntry.TypeOfModification.Delete,       entry.getFilesEntry().get(index).getTypeOfModification());
-		assertEquals("Test <Test@test.com>",                   entry.getAuthor());
+		assertEquals(author,                                   entry.getAuthor());
 	}
 
 	private void assertCommit14(LogEntry entry) {
+		assertCommit14(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit14(LogEntry entry, String author) {
 		int index;
 		assertEquals("Fixed stream-off size definition",       entry.getComment());
 		assertEquals(2,                                        entry.getFilesEntry().size());
@@ -501,10 +581,14 @@ public class MainEntryTest {
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getFromType());
 		assertEquals(GitFileType.Normal,                       entry.getFilesEntry().get(index).getToType());
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(index).getTypeOfModification());
-		assertEquals("Test <Test@test.com>",                   entry.getAuthor());
+		assertEquals(author,                                   entry.getAuthor());
 	}
 
 	private void assertCommit13(LogEntry entry) {
+		assertCommit13(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit13(LogEntry entry, String author) {
 		assertEquals("Unexpected Move", entry.getComment());
 		assertEquals(11,                                  entry.getFilesEntry().size());
 		int index = 0;
@@ -585,10 +669,14 @@ public class MainEntryTest {
 		assertEquals(LogEntry.TypeOfModification.Rename,  entry.getFilesEntry().get(index).getTypeOfModification());
 		assertEquals(100,                                 entry.getFilesEntry().get(index).getDiffRatio());
 		index++;
-		assertEquals("Test <Test@test.com>",              entry.getAuthor());
+		assertEquals(author,                              entry.getAuthor());
 	}
 
 	private void assertCommit12(LogEntry entry) {
+		assertCommit12(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit12(LogEntry entry, String author) {
 		assertEquals("Copy files from msvcp90", entry.getComment());
 		assertEquals(10, entry.getFilesEntry().size());
 		assertEquals("src/cpp/wine/msvcp100/Makefile.in", entry.getFilesEntry().get(0).getPath());
@@ -631,37 +719,49 @@ public class MainEntryTest {
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(9).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(9).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(9).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit11(LogEntry entry) {
+		assertCommit11(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit11(LogEntry entry, String author) {
 		assertEquals("Stub of msvcp100 dlls", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/cpp/wine/msvcp100/msvcp100.c", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit10(LogEntry entry) {
+		assertCommit10(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit10(LogEntry entry, String author) {
 		assertEquals("Basic construction file", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/cpp/wine/msvcp100/Makefile.in", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit09(LogEntry entry) {
+		assertCommit09(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit09(LogEntry entry, String author) {
 		assertEquals("Updated lexer", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/cpp/mesa/glsl/glsl_lexer.ll", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
   
 	private void assertCommit09Alt(LogEntry entry) {
@@ -675,16 +775,24 @@ public class MainEntryTest {
 	}
 
 	private void assertCommit08(LogEntry entry) {
+		assertCommit08(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit08(LogEntry entry, String author) {
 		assertEquals("Parser should always be with lexer", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/cpp/mesa/glsl/glsl_parser.yy", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit07(LogEntry entry) {
+		assertCommit07(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit07(LogEntry entry, String author) {
 		assertEquals("Upgrade the version", entry.getComment());
 		assertEquals(3, entry.getFilesEntry().size());
 		assertEquals("src/java/starteam/File.java", entry.getFilesEntry().get(0).getPath());
@@ -699,7 +807,7 @@ public class MainEntryTest {
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(2).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(2).getToType());
 		assertEquals(LogEntry.TypeOfModification.Modification, entry.getFilesEntry().get(2).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
   
 	private void assertCommit07Alt(LogEntry entry) {
@@ -721,63 +829,87 @@ public class MainEntryTest {
 	}
 
 	private void assertCommit06(LogEntry entry) {
+		assertCommit06(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit06(LogEntry entry, String author) {
 		assertEquals("Readme file for the project", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("doc/README", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit05(LogEntry entry) {
+		assertCommit05(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit05(LogEntry entry, String author) {
 		assertEquals("This class represent the Project class exist in starteam", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/java/starteam/Project.java", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit04(LogEntry entry) {
+		assertCommit04(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit04(LogEntry entry, String author) {
 		assertEquals("This class represent the Item class exist in starteam", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/java/starteam/Item.java", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit03(LogEntry entry) {
+		assertCommit03(entry, "Test <Test@test.com>");
+	}
+
+	private void assertCommit03(LogEntry entry, String author) {
 		assertEquals("This class represent the File class exist in starteam", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/java/starteam/File.java", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit02(LogEntry entry) {
+		assertCommit02(entry, "Test <Test@test.com>");
+	}
+	
+	private void assertCommit02(LogEntry entry, String author) {
 		assertEquals("The initial version of the sconstruct file of mesa", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/scons/SConstruct", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 
 	private void assertCommit01(LogEntry entry) {
+		assertCommit01(entry, "Test <Test@test.com>");
+	}
+	
+	private void assertCommit01(LogEntry entry, String author) {
 		assertEquals("First version of glsl mesa lexer", entry.getComment());
 		assertEquals(1, entry.getFilesEntry().size());
 		assertEquals("src/cpp/mesa/glsl/glsl_lexer.ll", entry.getFilesEntry().get(0).getPath());
 		assertEquals(GitFileType.NullFile, entry.getFilesEntry().get(0).getFromType());
 		assertEquals(GitFileType.Normal, entry.getFilesEntry().get(0).getToType());
 		assertEquals(LogEntry.TypeOfModification.Addition, entry.getFilesEntry().get(0).getTypeOfModification());
-		assertEquals("Test <Test@test.com>", entry.getAuthor());
+		assertEquals(author, entry.getAuthor());
 	}
 	
   private void assertSubCommit30(LogEntry entry) {
