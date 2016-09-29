@@ -16,50 +16,22 @@
  *****************************************************************************/
 package org.ossnoize.fakestarteam;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
+import org.ossnoize.fakestarteam.exception.ObjectIdNotFoundError;
+
+import com.starbase.starteam.Folder;
+import com.starbase.starteam.Item;
 import com.starbase.starteam.UserAccount;
+import com.starbase.starteam.View;
 
-public class UserAccountProvider {
-
-	private static UserAccountProvider Reference = null;
+public class FakeUserAccount extends UserAccount {
 	
-	public static UserAccountProvider getInstance() {
-		if(Reference == null) {
-			Reference = new UserAccountProvider();
-		}
-		return Reference;
-	}
-	
-	public static void deleteInstance() {
-		Reference = null;
-	}
-	
-	private Map<Integer, UserAccount> accounts = new HashMap<Integer, UserAccount>();
-	
-	private UserAccountProvider() {
-	}
-	
-
-	public void addUserAccount(Integer uid) {
-		if (accounts.containsKey(uid)) {
-			throw new Error("Duplicate user id " + uid);
-		}
-		accounts.put(uid, new FakeUserAccount(uid));
-	}
-	
-	public boolean deleteUserAccount(int id) {
-		if (accounts.containsKey(id)) {
-			accounts.remove(id);
-			return true;
-		}
-		return false;
-	}
-
-	public UserAccount getUserAccount(Integer uid) {
-		if(null == uid)
-			return null;
-		return accounts.get(uid);
-	}
+	public FakeUserAccount(int uid) {
+		super(uid);
+	}	
 }

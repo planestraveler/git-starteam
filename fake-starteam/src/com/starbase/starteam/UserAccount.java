@@ -29,7 +29,7 @@ public class UserAccount extends CacheRef
 		aGroup[0] = new GroupAccount();
 	}
 
-	public UserAccount(int uid) {
+	protected UserAccount(int uid) {
 		aUser = (SerializableUser) UserProvider.getInstance().getUser(uid);
 		aGroup = new GroupAccount[1];
 		aGroup[0] = new GroupAccount();

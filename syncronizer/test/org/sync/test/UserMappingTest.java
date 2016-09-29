@@ -38,31 +38,44 @@ public class UserMappingTest {
 
 	@Test
 	public void testInvalidEntry() {
-		String cases = "John Smith\n";
+		String cases = "John Smith\n"
+				+ "1 Invalid User - = \"1w@\"@1.-\n"
+				+ "Another Invalid_User = 1w@1._\n"
+				+ "=\n"
+				+ "John = 1.\n"
+				;
 		ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 	    System.setErr(new PrintStream(outContent));
 
 		UserMapping directory = new UserMapping(new ByteArrayInputStream(cases.getBytes()));
 		assertTrue(outContent.toString().contains("Invalid email mapping at line 1: John Smith"));		
+		assertTrue(outContent.toString().contains("Invalid email mapping at line 2: 1 Invalid User - = \"1w@\"@1.-"));		
+		assertTrue(outContent.toString().contains("Invalid email mapping at line 3: Another Invalid_User = 1w@1._"));		
+		assertTrue(outContent.toString().contains("Invalid email mapping at line 4: ="));		
+		assertTrue(outContent.toString().contains("Invalid email mapping at line 5: John = 1."));		
 	}
 	
 	@Test
 	public void testGetEmail() {
 		String cases = "# Email mapping\n" 
 				+ "John Smith = jsmith@email.com\n"
-	            + "Jane Doe = jdoe@users.email.com # some user\n"
+	            + "Jane Doe = jdoe@users.email.com\n"
+				+ "1 Weird User _ = \"w@\"@[1.2.3.4]\n"
+	            + "Another Weird User = #{`@1.2\n"
 				;
 		UserMapping directory = new UserMapping(new ByteArrayInputStream(cases.getBytes()));
 		assertEquals("jsmith@email.com", directory.getEmail("John Smith"));
 		assertEquals("jdoe@users.email.com", directory.getEmail("Jane Doe"));
+		assertEquals("\"w@\"@[1.2.3.4]", directory.getEmail("1 Weird User _"));
+		assertEquals("#{`@1.2", directory.getEmail("Another Weird User"));
 		assertEquals("unknown@noreply.com", directory.getEmail("John Doe"));
 	}
 
 	@Test
 	public void testGetEmailDefaultDomain() {
-		String cases = "# Email mapping\n" 
+		String cases = " # Email mapping\n" 
 				+ "John Smith = jsmith@email.com\n"
-	            + "Jane Doe = jdoe@users.email.com # some user\n"
+	            + "Jane Doe = jdoe@users.email.com\n"
 		        ;
 		UserMapping directory = new UserMapping(new ByteArrayInputStream(cases.getBytes()));
 		directory.setDefaultDomain("acme.com");
