@@ -4,7 +4,7 @@
     <property name="jargs.jar" value="${basedir}/lib/jargs.jar"/>
     <property name="junit.jar" value="/usr/share/java/junit.jar:/usr/share/java/junit4.jar:${basedir}/lib/junit-4.12.jar"/>
     <property name="starteam.jar" value="starteam110.jar"/>
-    <property name="hamcrest.jar" value="/usr/share/java/hamcrest/core.jar:${basedir}/lib/hamcrest-core-1.3.jar"/>
+    <property name="hamcrest.jar" value="${basedir}/lib/hamcrest-core-1.3.jar:/usr/share/java/hamcrest/core.jar"/>
   </target>
 
   <target name="clean">
