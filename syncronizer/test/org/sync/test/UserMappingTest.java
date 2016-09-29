@@ -8,7 +8,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 public class UserMappingTest {
@@ -35,7 +34,7 @@ public class UserMappingTest {
 
 	    final String filename = "some inexistant file.txt";
 		UserMapping directory = new UserMapping(filename);
-	    assertThat(outContent.toString(), CoreMatchers.containsString("Email mapping file \"" + filename + "\" not found."));		
+	    assertThat(outContent.toString(), containsString("Email mapping file \"" + filename + "\" not found."));		
 	}
 
 	@Test
@@ -45,7 +44,7 @@ public class UserMappingTest {
 	    System.setErr(new PrintStream(outContent));
 
 		UserMapping directory = new UserMapping(new ByteArrayInputStream(cases.getBytes()));
-	    assertThat(outContent.toString(), CoreMatchers.containsString("Invalid email mapping at line 1: John Smith"));		
+	    assertThat(outContent.toString(), containsString("Invalid email mapping at line 1: John Smith"));		
 	}
 	
 	@Test
