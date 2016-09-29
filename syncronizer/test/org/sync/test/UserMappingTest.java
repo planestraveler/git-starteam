@@ -1,7 +1,6 @@
 package org.sync.test;
 
 import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.containsString;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,7 +33,7 @@ public class UserMappingTest {
 
 	    final String filename = "some inexistant file.txt";
 		UserMapping directory = new UserMapping(filename);
-	    assertThat(outContent.toString(), containsString("Email mapping file \"" + filename + "\" not found."));		
+	    assertTrue(outContent.toString().contains("Email mapping file \"" + filename + "\" not found."));		
 	}
 
 	@Test
@@ -44,7 +43,7 @@ public class UserMappingTest {
 	    System.setErr(new PrintStream(outContent));
 
 		UserMapping directory = new UserMapping(new ByteArrayInputStream(cases.getBytes()));
-	    assertThat(outContent.toString(), containsString("Invalid email mapping at line 1: John Smith"));		
+		assertTrue(outContent.toString().contains("Invalid email mapping at line 1: John Smith"));		
 	}
 	
 	@Test
