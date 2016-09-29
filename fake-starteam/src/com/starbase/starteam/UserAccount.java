@@ -17,18 +17,30 @@
 package com.starbase.starteam;
 
 import org.ossnoize.fakestarteam.SerializableUser;
+import org.ossnoize.fakestarteam.UserProvider;
 
 public class UserAccount extends CacheRef
 {
 	private SerializableUser aUser;
+	private GroupAccount[]   aGroup;
 	public UserAccount(Server server) {
 		aUser = null;
+		aGroup = new GroupAccount[1];
+		aGroup[0] = new GroupAccount();
+	}
+
+	public UserAccount(int uid) {
+		aUser = (SerializableUser) UserProvider.getInstance().getUser(uid);
+		aGroup = new GroupAccount[1];
+		aGroup[0] = new GroupAccount();
 	}
 
 	protected UserAccount(SerializableUser internal) {
 		aUser = internal;
+		aGroup = new GroupAccount[1];
+		aGroup[0] = new GroupAccount();
 	}
-
+	
   public String getName()
   {
 		return aUser.getName();
@@ -37,6 +49,11 @@ public class UserAccount extends CacheRef
   public String getEmailAddress()
   {
 		return aUser.getEMail();
+  }
+  
+  public GroupAccount[] getGroupAccounts()
+  {
+	  return aGroup;
   }
 
 }

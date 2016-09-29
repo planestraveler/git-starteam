@@ -54,7 +54,6 @@ These options must be set for all runs:
 * `-P <port>` StarTeam server port
 * `-p <project>` StarTeam project
 * `-v <view>` StarTeam view
-* `-d <domain>` Email domain to append to StarTeam user names
 
 ### Import Modes
 
@@ -75,6 +74,14 @@ All four modes can:
 * Automatically create the Git repository (as a bare repo) with the `-c` option.
 * Expand StarTeam keywords with the `-k` option.
 * Select the StarTeam user and password with the `-U <user>` and `--password` options.
+* Specify a file containing a mapping of user names to emails with `-m <mailMappingFile>`.
+  This mapping will be used in case the user performing the conversion does not have the
+  required administrator access to extract email addresses from the StarTeam server.
+* Specify the domain to append to StarTeam user names with `-d <domain>`. This mapping will
+  be used in case the user performing the conversion does not have the
+  required administrator access to extract email addresses from the StarTeam server, and
+  an explicit mapping cannot be found in the mail mapping file if one is provided 
+  with the `-m <mailMappingFile>` command line option.
 
 The first three modes can:
 
@@ -191,6 +198,20 @@ Examples
               -W $REPO \
               --verbose &
         ) >vlc2android-all.log 2>&1 </dev/null
+
+### Add mapping of user names to actual email address
+
+In case the user performing the conversion does not have StarTeam user account admin access,
+the emails can be specified using a mapping file as follow:
+
+1.  Create mapping file:
+
+          echo "John Smith = jsmith@acme.com"               >  mailmap
+          echo "J. Random Hacker = jrhacker@hackersoft.com" >> mailmap
+          ...
+          
+2.  Execute importation with additional `-m <mailmap>` command line option. If the `-d <domain>` is
+    also provided, users which are not found in `mailmap` will get an email using the default domain provided. 
 
 ### Latest Revisions Mode
 
