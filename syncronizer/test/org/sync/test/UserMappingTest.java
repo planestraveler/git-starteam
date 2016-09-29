@@ -1,6 +1,7 @@
 package org.sync.test;
 
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.containsString;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
