@@ -842,7 +842,9 @@ public class GitImporter {
 				// Sanitize trailing dot
 				.replaceFirst("\\.$", "_")
 				// Sanitize "
-				.replaceAll("\"", "_");
+		    .replaceAll("\"", "_")
+		    // Remove Starting dot
+		    .replaceAll("^\\.", "_");
 	}
 
 	private void writeLabelTag(View view, Label label) {

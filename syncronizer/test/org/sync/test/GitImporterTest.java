@@ -16,9 +16,9 @@
 ******************************************************************************/
 package org.sync.test;
 
-import static org.junit.Assert.*;
-
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
+
 import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
@@ -64,6 +64,7 @@ public class GitImporterTest {
 			// real label test
 			{"119_ BootesOchre.114.00", "119__BootesOchre.114.00"},
 			{"\"This is a quoted String\"", "_This_is_a_quoted_String_"},
+		    { ".something/else", "_something/else" },
 		};
     for (String[] test1 : tests) {
       String test = test1[0];
