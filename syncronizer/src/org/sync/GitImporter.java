@@ -615,9 +615,14 @@ public class GitImporter {
 			
 			if(i == fromLabel && isResume) {
 				SmallRef targettedHead = new SmallRef(head);
-				List<LogEntry> oldCommits = repositoryHelper.getCommitLog(targettedHead, targettedHead);
+				List<LogEntry> oldCommits = repositoryHelper.getCommitLog(targettedHead);
 				if (oldCommits.size() > 0) {
 					CheckoutStrategy.setLastCommitTime(oldCommits.get(0).getTimeOfCommit());
+				}
+				else {
+					if (verbose) {
+						Log.log("No parent commit found while resuming importation for <" + head + ">");
+					}					
 				}
 				CheckoutStrategy.setInitialPathList(repositoryHelper.getListOfTrackedFile(head));
 			}

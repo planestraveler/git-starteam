@@ -487,7 +487,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 		String comment = correctedComment(fileToCommit);
 		// This is a patchup time to prevent commit jumping up in time between view labels
 		long timeOfCommit = fileToCommit.getModifiedTime().getLongValue();
-		if (earliestTime != null && earliestTime.getTime() > timeOfCommit) {
+		if (earliestTime != null && earliestTime.getTime() >= timeOfCommit) {
 			// add offset with last commit to keep order. Based on the last commit
 			// from the previous pass + 1 second by counter
 			long newTime = earliestTime.getTime() + (1000 * iterationCounter);

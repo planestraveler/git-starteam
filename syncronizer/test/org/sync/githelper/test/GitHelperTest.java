@@ -180,7 +180,7 @@ public class GitHelperTest {
 	@Test
 	public void testLogEntry() {
 		List<LogEntry> renamedLog = test.getCommitLog(new SmallRef("e09d507"));
-    assertTrue(renamedLog.size() > 0);
+		assertTrue(renamedLog.size() > 0);
 		assertEquals("Steve Tousignant <s.tousignant@gmail.com>", renamedLog.get(0).getAuthor());
 		assertEquals("MD5Builder is better placed in the util package.", renamedLog.get(0).getComment());
 		assertEquals(new Sha1Ref("e09d5071e480a2f4906dd8fae05afdbdf3492415"), renamedLog.get(0).getCommitRef());
@@ -196,6 +196,28 @@ public class GitHelperTest {
 		assertEquals(98, renamedLog.get(0).getFilesEntry().get(1).getDiffRatio());
 	}
   
+	@Test
+	public void testEmptyRangeLogEntry() {
+		SmallRef ref = new SmallRef("e09d507");
+		List<LogEntry> renamedLog = test.getCommitLog(ref, ref);
+		assertEquals(0, renamedLog.size());
+	}
+
+	@Test
+	public void testFirstLogEntry() {
+		SmallRef ref = new SmallRef("2e53773");
+		List<LogEntry> renamedLog = test.getCommitLog(ref);
+		assertEquals(1, renamedLog.size());
+	}
+
+	@Test
+	public void testBeforeFirstLogEntry() {
+		SmallRef ref = new SmallRef("2e53773");
+		// Invalid ref trying to go earlier than first commit
+		List<LogEntry> renamedLog = test.getCommitLog(ref.back(1), ref);
+		assertEquals(0, renamedLog.size());
+	}
+	
   @Test
   public void testCatBlob() throws NoSuchAlgorithmException {
     ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
