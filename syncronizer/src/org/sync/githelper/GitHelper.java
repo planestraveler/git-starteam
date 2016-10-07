@@ -384,7 +384,11 @@ public class GitHelper extends RepositoryHelper {
 	@Override
 	public Date getLastCommitOfBranch(String branchName) {
 		SmallRef to = new SmallRef(branchName);
-		return getCommitLog(to.back(1), to).get(0).getTimeOfCommit();
+		List<LogEntry> commits = getCommitLog(to.back(1), to);
+		if (commits.size() <= 0) {
+			commits = getCommitLog(to);
+		}
+		return commits.get(0).getTimeOfCommit();
 	}
 	
 	@Override
