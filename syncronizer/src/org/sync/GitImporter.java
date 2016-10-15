@@ -199,8 +199,8 @@ public class GitImporter {
 			if (!commitList.isEmpty()) {
 				CommitInformation earliest = commitList.firstKey();
 				CommitInformation latest = commitList.lastKey();
-				Log.log("Earliest file: " + earliest.getPath() + " @ " + new java.util.Date(earliest.getTime()));
-				Log.log("Latest file: " + latest.getPath() + " @ " + new java.util.Date(latest.getTime()));
+				Log.log("Earliest file: " + earliest.getPath() + " @ " + earliest.getCommitDate().getTime());
+				Log.log("Latest file: " + latest.getPath() + " @ " + latest.getCommitDate().getTime());
 			}
 		}
 
@@ -338,9 +338,9 @@ public class GitImporter {
 						lastCommit.setAttributes(fattributes);
 					}
 				} else {
-					java.util.Date commitDate = new java.util.Date(current.getTime());
+					java.util.Date commitDate = current.getCommitDate();
 					// validate that the last commit done wasn't newer than the commit we will be doing
-					if (null != lastCommit && lastCommit.getCommitDate().getTime() >= current.getTime()) {
+					if (null != lastCommit && !current.getCommitDate().after(lastCommit.getCommitDate())) {
 						// we add a seconds for each time we see a commit that is newer or same as the previous commit.
 						commitDate = new java.util.Date(lastCommit.getCommitDate().getTime() + 1000);
 					}
@@ -807,7 +807,7 @@ public class GitImporter {
 				CommitPopulationStrategy baseStrategy = new BasePopulationStrategy(baseView);
 				baseStrategy.filePopulation(alternateHead, folder);
 				lastFiles.addAll(baseStrategy.getLastFiles());
-				startDate = new java.util.Date(baseStrategy.getListOfCommit().lastKey().getTime());
+				startDate = baseStrategy.getListOfCommit().lastKey().getCommitDate();
 				baseView.close();
 			}
 			lastCommit = null;

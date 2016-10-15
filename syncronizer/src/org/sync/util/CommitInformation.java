@@ -27,25 +27,12 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 
 	private Date commitDate;
 	private Date authorDate;
-	private long time;
 	private int uid;
 	private String comment;
 	private String path;
 	private boolean fileDelete;
 
-	@Deprecated
-	public CommitInformation(long time, int uid, String comment, String path) {
-		this.time = time;
-		this.commitDate = new java.util.Date(time);
-		this.authorDate = this.commitDate;
-		this.uid = uid;
-		this.comment = comment.trim();
-		this.path = path;
-		this.fileDelete = false;
-	}
-	
 	public CommitInformation(Date date, int uid, String comment, String path) {
-		this.time = date.getTime();
 		this.commitDate = date;
 		this.authorDate = this.commitDate;
 		this.uid = uid;
@@ -54,11 +41,6 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 		this.fileDelete = false;
 	}
 	
-	@Deprecated
-	public long getTime() {
-		return time;
-	}
-
 	public Date getCommitDate() {
 		return commitDate;
 	}
