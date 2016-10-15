@@ -385,6 +385,9 @@ public class GitImporter {
 				java.util.Date janitorTime;
 				if(view.getConfiguration().isTimeBased()) {
 					janitorTime = new java.util.Date(view.getConfiguration().getTime().getLongValue());
+					if (janitorTime.before(lastCommit.getCommitDate())) {
+						janitorTime = new java.util.Date(lastCommit.getCommitDate().getTime() + 1000);
+					}
 				} else {
 					janitorTime = lastCommit.getCommitDate(); //At this stage, there should always be a last commit
 				}
@@ -413,6 +416,7 @@ public class GitImporter {
 						} catch (InvalidPathException e1) {
 							e1.printStackTrace();
 						}
+						repositoryHelper.unregisterFileId(head, path);
 					}
 				}
 				lastCommit = commit;
