@@ -413,6 +413,7 @@ public class GitImporter {
 						} catch (InvalidPathException e1) {
 							e1.printStackTrace();
 						}
+						repositoryHelper.unregisterFileId(head, path);
 					}
 				}
 				lastCommit = commit;
