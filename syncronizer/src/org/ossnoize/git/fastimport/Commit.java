@@ -35,6 +35,7 @@ public class Commit implements Markable {
 	private DataRef fromRef;
 	private Map<String, FileOperation> listOfOperation;
 	private Date commitDate;
+	private Date authorDate;
 	private boolean resumeFastImport;
 	private boolean written;
   private GitAttributes filesAttributes;
@@ -56,6 +57,10 @@ public class Commit implements Markable {
 	public void setAuthor(String name, String email) {
 		authorName = name;
 		authorEmail = email;
+	}
+	
+	public void setAuthorDate(Date date) {
+		authorDate = date;
 	}
 	
 	public void setFromCommit(Commit previous) {
@@ -111,10 +116,19 @@ public class Commit implements Markable {
 		mark.writeTo(out);
 		commitMsg.setLength(0);
 		if(null != authorName  && null != authorEmail) {
+			Date date = commitDate;
+			if (null != authorDate) {
+				date = authorDate;
+			}
 			commitMsg.append(AUTHOR).append(' ').append(authorName).append(' ')
 					 .append('<').append(authorEmail).append('>').append(' ')
-					 .append(commitDate.getTime() / 1000).append(' ').append(DATEFORMAT.format(commitDate))
+					 .append(date.getTime() / 1000).append(' ').append(DATEFORMAT.format(date))
 					 .append('\n');
+		} else if (null != authorDate) {
+			commitMsg.append(AUTHOR).append(' ').append(commiterName).append(' ')
+			 .append('<').append(commiterEmail).append('>').append(' ')
+			 .append(authorDate.getTime() / 1000).append(' ').append(DATEFORMAT.format(authorDate))
+			 .append('\n');			
 		}
 		commitMsg.append(COMMITTER).append(' ').append(commiterName).append(' ')
 				 .append('<').append(commiterEmail).append('>').append(' ')

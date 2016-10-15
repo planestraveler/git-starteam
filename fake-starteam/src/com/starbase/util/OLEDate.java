@@ -50,4 +50,8 @@ public class OLEDate {
 			return System.currentTimeMillis();
 		}
 	}
+	
+	public java.util.Date createDate() {
+		return new java.util.Date(javaTime);
+	}
 }
