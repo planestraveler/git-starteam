@@ -16,6 +16,8 @@
 ******************************************************************************/
 package org.sync.util;
 
+import java.util.Date;
+
 /**
  * Note: this class has a natural ordering that is inconsistent with equals.
  * @author Steve Tousignant <s.tousignant@gmail.com>
@@ -23,23 +25,41 @@ package org.sync.util;
  */
 public final class CommitInformation implements Comparable<CommitInformation> {
 
+	private Date commitDate;
 	private long time;
 	private int uid;
 	private String comment;
 	private String path;
 	private boolean fileDelete;
 
+	@Deprecated
 	public CommitInformation(long time, int uid, String comment, String path) {
 		this.time = time;
+		this.commitDate = new java.util.Date(time);
 		this.uid = uid;
 		this.comment = comment.trim();
 		this.path = path;
 		this.fileDelete = false;
 	}
 	
+	public CommitInformation(Date date, int uid, String comment, String path) {
+		this.time = date.getTime();
+		this.commitDate = date;
+		this.uid = uid;
+		this.comment = comment.trim();
+		this.path = path;
+		this.fileDelete = false;
+	}
+	
+	@Deprecated
 	public long getTime() {
 		return time;
 	}
+
+	public Date getCommitDate() {
+		return commitDate;
+	}
+
 	
 	public int getUid() {
 		return uid;
@@ -71,14 +91,14 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 	public boolean equals(Object obj) {
 		if(obj instanceof CommitInformation) {
 			CommitInformation info = (CommitInformation) obj;
-			return time == info.getTime() && uid == info.getUid() && comment.equalsIgnoreCase(info.getComment());
+			return getCommitDate().equals(info.getCommitDate()) && uid == info.getUid() && comment.equalsIgnoreCase(info.getComment());
 		}
 		return false;
 	}
 
 	@Override
 	public int compareTo(CommitInformation o) {
-		if(time == o.time) {
+		if(getCommitDate().equals(o.getCommitDate())) {
 			if(uid == o.uid) {
 				if(comment.length() == 0) {
 					return path.compareTo(o.getPath());
@@ -92,7 +112,7 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 				return 1;
 			}
 			return -1;
-		} else if (time > o.time) {
+		} else if (getCommitDate().after(o.getCommitDate())) {
 			return 1;
 		}
 		return -1;

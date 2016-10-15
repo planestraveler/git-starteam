@@ -92,7 +92,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 		lastFiles.removeAll(deletedFiles); // clean files that was never seen from the last files.
 		recoverDeleteInformation(head, root);
 		if (currentCommitList.size() > 0) {
-			setLastCommitTime(new java.util.Date(currentCommitList.lastKey().getTime()));
+			setLastCommitTime(currentCommitList.lastKey().getCommitDate());
 		}
 	}
 
@@ -331,7 +331,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 								    path, newPath,
 										renameEventItem.getModifiedTime());
 							}
-							deleteInfo = new CommitInformation(renameEventItem.getModifiedTime().getLongValue(),
+							deleteInfo = new CommitInformation(renameEventItem.getModifiedTime().createDate(),
 									renameEventItem.getModifiedBy(),
 									"",
 									path);
@@ -345,7 +345,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 							// Not sure how this happens, but fill in with the
 							// only information we have: the last view time
 							// and the last person to modify the item.
-							deleteInfo = new CommitInformation(earliestTime.getTime(), item.getModifiedBy(), "", path);
+							deleteInfo = new CommitInformation(earliestTime, item.getModifiedBy(), "", path);
 						}
 						deleteInfo.setFileDelete(true);
 						ith.remove();
@@ -353,7 +353,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 
 						currentCommitList.put(deleteInfo, item);
 						// Replace the existing entries for item if they have an earlier timestamp.
-						CommitInformation info = new CommitInformation(deleteInfo.getTime(), deleteInfo.getUid(), "", newPath);
+						CommitInformation info = new CommitInformation(deleteInfo.getCommitDate(), deleteInfo.getUid(), "", newPath);
 						replaceEarlierCommitInfo(info, item, root);
 					}
 				}
@@ -380,7 +380,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 			}
 			for (int i = 0; i < deletedpaths.size(); i++) {
 				File item = deletedpaths.get(i).getSecond();
-				CommitInformation info = new CommitInformation(item.getDeletedTime().getLongValue(),
+				CommitInformation info = new CommitInformation(item.getDeletedTime().createDate(),
 						item.getDeletedUserID(),
 						"",
 						deletedpaths.get(i).getFirst());
@@ -412,7 +412,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 				originalValue = entry.getValue();
 				// Time need to match with the delete instruction to be combined
 				// together
-				replacement = new CommitInformation(earliestTime.getTime(), entry.getKey().getUid(), "Unexpected Move",
+				replacement = new CommitInformation(earliestTime, entry.getKey().getUid(), "Unexpected Move",
 				    newPath);
 				it.remove();
 				break;
@@ -441,7 +441,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 		// TODO: a better data structure for fileList would make this more efficient.
 		for(Iterator<Map.Entry<CommitInformation, File>> ith = currentCommitList.entrySet().iterator(); ith.hasNext(); ) {
 			CommitInformation info2 = ith.next().getKey();
-			if (path.equals(info2.getPath()) && info2.getTime() < info.getTime()) {
+			if (path.equals(info2.getPath()) && info2.getCommitDate().before(info.getCommitDate())) {
 				ith.remove();
 				return;
 			}
@@ -496,8 +496,9 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 			}
 			timeOfCommit = newTime;
 		}
+		Date commitDate = new java.util.Date(timeOfCommit);
 
-		CommitInformation info = new CommitInformation(timeOfCommit, fileToCommit.getModifiedBy(), comment, path);
+		CommitInformation info = new CommitInformation(commitDate, fileToCommit.getModifiedBy(), comment, path);
 		if (verbose) {
 			Log.log("Discovered commit <" + info + ">");
 		}

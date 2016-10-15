@@ -171,7 +171,7 @@ public class GitImporter {
 		cm.getOptions().setEOLConversionEnabled(false);
 		// Disabling status update leads to a large performance increase.
 		cm.getOptions().setUpdateStatus(false);
-		lastInformation = new CommitInformation(Long.MIN_VALUE, Integer.MIN_VALUE, "", "");
+		lastInformation = new CommitInformation(new java.util.Date(0), Integer.MIN_VALUE, "", "");
 
 		folder = null;
 		setFolder(view, folderPath);
