@@ -1,0 +1,6 @@
+# ignore all the sources files and test files
+syncronizer/
+synchronizer/
+fake-starteam/
+testfiles/
+
