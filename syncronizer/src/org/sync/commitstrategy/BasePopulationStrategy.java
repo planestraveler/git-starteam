@@ -486,7 +486,8 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	protected void createCommitInformation(String path, File fileToCommit, int iterationCounter) {
 		String comment = correctedComment(fileToCommit);
 		// This is a patchup time to prevent commit jumping up in time between view labels
-		long timeOfCommit = fileToCommit.getModifiedTime().getLongValue();
+		Date authorDate = new java.util.Date(fileToCommit.getModifiedTime().getLongValue());
+		long timeOfCommit = authorDate.getTime();
 		if (earliestTime != null && earliestTime.getTime() >= timeOfCommit) {
 			// add offset with last commit to keep order. Based on the last commit
 			// from the previous pass + 1 second by counter
@@ -499,6 +500,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 		Date commitDate = new java.util.Date(timeOfCommit);
 
 		CommitInformation info = new CommitInformation(commitDate, fileToCommit.getModifiedBy(), comment, path);
+		info.setAuthorDate(authorDate);
 		if (verbose) {
 			Log.log("Discovered commit <" + info + ">");
 		}

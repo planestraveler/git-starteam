@@ -345,6 +345,7 @@ public class GitImporter {
 						commitDate = new java.util.Date(lastCommit.getCommitDate().getTime() + 1000);
 					}
 					commit = new Commit(userName, userEmail, current.getComment(), head, commitDate);
+					commit.setAuthorDate(current.getAuthorDate());
 					
 					commit.addFileOperation(fo);
 					if (fattributes != null) {

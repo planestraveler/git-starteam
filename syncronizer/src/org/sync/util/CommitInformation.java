@@ -26,6 +26,7 @@ import java.util.Date;
 public final class CommitInformation implements Comparable<CommitInformation> {
 
 	private Date commitDate;
+	private Date authorDate;
 	private long time;
 	private int uid;
 	private String comment;
@@ -36,6 +37,7 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 	public CommitInformation(long time, int uid, String comment, String path) {
 		this.time = time;
 		this.commitDate = new java.util.Date(time);
+		this.authorDate = this.commitDate;
 		this.uid = uid;
 		this.comment = comment.trim();
 		this.path = path;
@@ -45,6 +47,7 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 	public CommitInformation(Date date, int uid, String comment, String path) {
 		this.time = date.getTime();
 		this.commitDate = date;
+		this.authorDate = this.commitDate;
 		this.uid = uid;
 		this.comment = comment.trim();
 		this.path = path;
@@ -60,6 +63,13 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 		return commitDate;
 	}
 
+	public void setAuthorDate(Date date) {
+		authorDate = date;
+	}
+
+	public Date getAuthorDate() {
+		return authorDate;
+	}
 	
 	public int getUid() {
 		return uid;
@@ -84,7 +94,13 @@ public final class CommitInformation implements Comparable<CommitInformation> {
 	
 	@Override
 	public String toString() {
-		return "CommitInfo: " + getTime() + " - " + getUid() + " - " + getComment() + " - " + getPath();
+		StringBuilder builder = new StringBuilder();
+		builder.append("CommitInfo: " + getCommitDate().getTime());
+		if (null != getAuthorDate() && !getAuthorDate().equals(getCommitDate())) {
+			builder.append("/" + getAuthorDate().getTime());
+		}
+		builder.append(" - " + getUid() + " - " + getComment() + " - " + getPath());
+		return builder.toString();
 	}
 
 	@Override
