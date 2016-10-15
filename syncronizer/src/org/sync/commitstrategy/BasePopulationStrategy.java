@@ -187,7 +187,10 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 		}
 		// prefer content version as it is cached in the File object
 		int itemViewVersion = historyFile.getContentVersion();
-		if (previousContentVersion < 0) {
+		if (fileid != null && fileid != historyFile.getItemID()) {
+			Log.logf("File %s was replaced", path);			
+			createCommitInformation(path, historyFile, 1);
+		} else if (previousContentVersion < 0) {
 			createCommitInformation(path, historyFile, 1);
 		} else if (previousContentVersion > itemViewVersion) {
 			Log.logf("File %s was reverted from version %d to %d was skipped", path, previousContentVersion,
