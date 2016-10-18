@@ -44,6 +44,7 @@ import jargs.gnu.CmdLineParser.UnknownOptionException;
 
 public class MainEntry {
 
+	private static String versionString = "v0.2-beta";
 	/**
 	 * @param args
 	 */
@@ -80,6 +81,7 @@ public class MainEntry {
 		CmdLineParser.Option filteringRevisionLabel = parser.addStringOption("revision-label-pattern");
 		CmdLineParser.Option selectChangeRequestImport = parser.addStringOption("change-request");
 		CmdLineParser.Option excludeLabel = parser.addStringOption("exclude-label");
+		CmdLineParser.Option versionRequest = parser.addBooleanOption("version");
         
 		//TODO: Add a label creation at tip before starting the importation
 
@@ -133,6 +135,13 @@ public class MainEntry {
 		@SuppressWarnings("rawtypes")
 		Vector excludedLabels = parser.getOptionValues(excludeLabel);
 		
+		Boolean versionPrint = (Boolean) parser.getOptionValue(versionRequest);
+		boolean printVersion = versionPrint != null && versionPrint;
+
+		if (printVersion) {
+			System.out.println("Git-starteam version " + versionString);
+			System.exit(0);
+		}
 		if(host == null || port == null || project == null || (view == null && !allViews)) {
 			printHelp();
 			System.exit(3);
