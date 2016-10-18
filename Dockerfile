@@ -12,6 +12,7 @@ MAINTAINER s.tousignant@gmail.com
 RUN echo "http://nl.alpinelinux.org/alpine/latest-stable/community" >> /etc/apk/repositories
 
 RUN apk add --no-cache openjdk8 && java -version
+RUN apk add --no-cache git && git --version
 
 COPY ["bin/syncronizer.jar", "lib/jargs.jar", "/opt/git-starteam/"]
 
