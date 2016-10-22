@@ -374,6 +374,7 @@ public class MainEntry {
     System.out.println("[--lfs-pattern <regex>\tRegular expression on filename.");
         System.out.println("[--view-label-pattern <regex>\tRegular expression to filter which view label to keep.");
         System.out.println("[--revision-label-pattern <regex>\tRegular expression on to filter which revision label to keep.");
+		System.out.println("[--version]\t\tProvide the version of the software");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		
 	}

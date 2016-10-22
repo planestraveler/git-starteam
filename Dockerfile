@@ -20,5 +20,6 @@ RUN ls /opt/git-starteam
 
 ENV CLASSPATH=/opt/git-starteam/syncronizer.jar:/opt/git-starteam/jargs.jar
 
-ENTRYPOINT java org.sync.MainEntry
+ENTRYPOINT ["java", "org.sync.MainEntry"]
 CMD ["--help"]
+
