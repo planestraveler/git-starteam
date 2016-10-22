@@ -7,6 +7,16 @@
     <property name="hamcrest.jar" value="${basedir}/lib/hamcrest-core-1.3.jar:/usr/share/java/hamcrest/core.jar"/>
   </target>
 
+  <target name="set-version">
+    <exec executable="git" outputproperty="version.describe">
+      <arg line="describe --tags" />
+    </exec>
+  </target>
+
+  <target name="replace-version" depends="set-version">
+    <replaceregexp file="syncronizer/src/org/sync/VersionInfo.java" match="v0.2-beta" replace="${version.describe}" />
+  </target>
+
   <target name="clean">
     <delete dir="syncronizer/classes"/>
     <delete dir="syncronizer/testclasses"/>
@@ -14,7 +24,7 @@
     <delete file="bin/syncronizer.jar"/>
   </target>
 
-  <target name="compile" depends="init,fake-starteam">
+  <target name="compile" depends="init,fake-starteam,replace-version">
     <mkdir dir="syncronizer/classes"/>
     <javac srcdir="syncronizer/src" destdir="syncronizer/classes"
            deprecation="on" debug="on" extdirs="/usr/share/java"
