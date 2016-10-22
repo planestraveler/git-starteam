@@ -43,8 +43,6 @@ import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
 
 public class MainEntry {
-
-	private static String versionString = "v0.2-beta";
 	/**
 	 * @param args
 	 */
@@ -139,7 +137,7 @@ public class MainEntry {
 		boolean printVersion = versionPrint != null && versionPrint;
 
 		if (printVersion) {
-			System.out.println("Git-starteam version " + versionString);
+			System.out.println("Git-starteam version " + VersionInfo.versionString);
 			System.exit(0);
 		}
 		if(host == null || port == null || project == null || (view == null && !allViews)) {
