@@ -32,7 +32,7 @@ public class FileDelete extends FileOperation {
 		builder.append(Path);
 		builder.append('\n');
 		
-		out.write(builder.toString().getBytes());
+		out.write(builder.toString().getBytes("UTF-8"));
 	}
 
 	@Override

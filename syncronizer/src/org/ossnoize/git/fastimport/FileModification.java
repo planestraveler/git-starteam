@@ -56,7 +56,7 @@ public class FileModification extends FileOperation {
 		case Inline:
 			builder.append(' ').append("inline");
 			builder.append(' ').append(Path).append("\n");
-			out.write(builder.toString().getBytes());
+			out.write(builder.toString().getBytes("UTF-8"));
 			Content.writeTo(out);
 			break;
 		case Referenced:
@@ -64,7 +64,7 @@ public class FileModification extends FileOperation {
 				Markable marked = (Markable)Content;
 				builder.append(' ').append(marked.getMarkID());
 				builder.append(' ').append(Path).append("\n");
-				out.write(builder.toString().getBytes());
+				out.write(builder.toString().getBytes("UTF-8"));
 			} else {
 				throw new IOException("The content is not a Blob or a markable Git object");
 			}
