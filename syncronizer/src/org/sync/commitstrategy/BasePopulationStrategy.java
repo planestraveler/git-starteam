@@ -303,9 +303,17 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	 *          base root folder we are importing from
 	 */
 	private void recoverDeleteInformation(String head, Folder root) {
-		RecycleBin recycleBin = root.getView().getRecycleBin();
-		recycleBin.setIncludeDeletedItems(true);
-		Type fileType = currentView.getServer().typeForName(recycleBin.getTypeNames().FILE);
+		RecycleBin recycleBin = null;
+		Type fileType = currentView.getServer().typeForName(currentView.getTypeNames().FILE);
+		try {
+			recycleBin = root.getView().getRecycleBin();
+			recycleBin.setIncludeDeletedItems(true);
+			fileType = currentView.getServer().typeForName(recycleBin.getTypeNames().FILE);
+		} catch (java.lang.UnsupportedOperationException e) {
+			recycleBin = null;
+			fileType = currentView.getServer().typeForName(currentView.getTypeNames().FILE);
+		}
+
 		RenameFinder renameFinder = new RenameFinder();
 		
 		ArrayList<Pair<String, File>> deletedpaths = new ArrayList<Pair<String, File>>(deletedFiles.size());
@@ -317,7 +325,12 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 			String path = ith.next();
 			Integer fileID = helper.getRegisteredFileId(head, path);
 			if(null != fileID) {
-				File item = (File) recycleBin.findItem(fileType, fileID);
+				File item = null;
+				if (null == recycleBin ) {
+					item = null;
+				} else {
+					item = (File) recycleBin.findItem(fileType, fileID);
+				}
 				if(null != item && item.isDeleted()) {
 					deletedpaths.add(new Pair<String, File>(path, item));
 					ith.remove();
