@@ -40,7 +40,7 @@ public class Tag implements FastImportObject {
 		this.taggerName = taggerName;
 		this.taggerEmail = taggerEmail;
 		this.tagDate = tagDate;
-		this.comment.writeData(comment.getBytes());
+		this.comment.writeData(comment.getBytes("UTF-8"));
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class Tag implements FastImportObject {
 			.append(" <").append(taggerEmail).append("> ")
 			.append(tagDate.getTime() / 1000).append(' ').append(DATEFORMAT.format(tagDate))
 			.append('\n');
-		out.write(tagMsg.toString().getBytes());
+		out.write(tagMsg.toString().getBytes("UTF-8"));
 		comment.writeTo(out);
 	}
 

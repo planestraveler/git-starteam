@@ -31,11 +31,11 @@ public class Reset implements FastImportObject {
 
 	@Override
 	public void writeTo(OutputStream out) throws IOException {
-		out.write("reset ".getBytes());
-        out.write(ref.getBytes());
+		out.write("reset ".getBytes("UTF-8"));
+        out.write(ref.getBytes("UTF-8"));
         out.write('\n');
         if(null != committish) {
-            out.write("from ".getBytes());
+            out.write("from ".getBytes("UTF-8"));
             committish.writeTo(out);
             out.write('\n');
         }

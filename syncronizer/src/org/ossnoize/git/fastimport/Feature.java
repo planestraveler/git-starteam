@@ -43,7 +43,7 @@ public class Feature implements FastImportObject {
 			feature.append('=').append(arguments);
 		}
 		feature.append('\n');
-		out.write(feature.toString().getBytes());
+		out.write(feature.toString().getBytes("UTF-8"));
 		out.flush();
 	}
 

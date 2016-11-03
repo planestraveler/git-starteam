@@ -38,7 +38,7 @@ public class Commit implements Markable {
 	private Date authorDate;
 	private boolean resumeFastImport;
 	private boolean written;
-  private GitAttributes filesAttributes;
+	private GitAttributes filesAttributes;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -51,7 +51,7 @@ public class Commit implements Markable {
 		this.commitDate = commitDate;
 		mark = new Mark();
 		listOfOperation = new TreeMap<String, FileOperation>();
-    filesAttributes = null;
+		filesAttributes = null;
 	}
 
 	public void setAuthor(String name, String email) {
@@ -77,7 +77,7 @@ public class Commit implements Markable {
 	
 	public void setComment(String message) throws IOException {
 		comment = new Data();
-		comment.writeData(message.getBytes());
+		comment.writeData(message.getBytes("UTF-8"));
 	}
 	
 	public void setMergeCommit(Commit previous) {
@@ -96,23 +96,23 @@ public class Commit implements Markable {
 	public void writeTo(OutputStream out) throws IOException {
 		if(written) {
 			return;
-    }
-    if (null != filesAttributes) {
-      try {
-        Data attributeFile = new Data();
-        attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
-        Blob aMarkedBlob = new Blob(attributeFile);
-        aMarkedBlob.writeTo(out);
-        FileModification attributes = new FileModification(aMarkedBlob);
-        attributes.setFileType(GitFileType.Normal);
-        attributes.setPath(".gitattributes");
-        this.addFileOperation(attributes);
-      } catch (InvalidPathException ex) {
-      }
-    }
+		}
+		if (null != filesAttributes) {
+			try {
+				Data attributeFile = new Data();
+				attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
+				Blob aMarkedBlob = new Blob(attributeFile);
+				aMarkedBlob.writeTo(out);
+				FileModification attributes = new FileModification(aMarkedBlob);
+				attributes.setFileType(GitFileType.Normal);
+				attributes.setPath(".gitattributes");
+				this.addFileOperation(attributes);
+			} catch (InvalidPathException ex) {
+			}
+		}
 		StringBuilder commitMsg = new StringBuilder();
 		commitMsg.append(COMMIT).append(" ").append(MessageFormat.format(headFormat, reference, "")).append('\n');
-		out.write(commitMsg.toString().getBytes());
+		out.write(commitMsg.toString().getBytes("UTF-8"));
 		mark.writeTo(out);
 		commitMsg.setLength(0);
 		if(null != authorName  && null != authorEmail) {
@@ -134,23 +134,23 @@ public class Commit implements Markable {
 				 .append('<').append(commiterEmail).append('>').append(' ')
 				 .append(commitDate.getTime() / 1000).append(' ').append(DATEFORMAT.format(commitDate))
 				 .append('\n');
-		out.write(commitMsg.toString().getBytes());
+		out.write(commitMsg.toString().getBytes("UTF-8"));
 		comment.writeTo(out);
 		if(null != fromRef) {
-			out.write(FROM_SP.getBytes());
+			out.write(FROM_SP.getBytes("UTF-8"));
 			fromRef.writeTo(out);
 			out.write('\n');
 		} else if(null != from) {
-			out.write(FROM_SP.getBytes());
+			out.write(FROM_SP.getBytes("UTF-8"));
 			from.writeTo(out);
 			out.write('\n');
 		} else if(resumeFastImport) {
-			out.write(FROM_SP.getBytes());
-			out.write(MessageFormat.format(headFormat, reference, "^0").getBytes());
+			out.write(FROM_SP.getBytes("UTF-8"));
+			out.write(MessageFormat.format(headFormat, reference, "^0").getBytes("UTF-8"));
 			out.write('\n');
 		}
 		if(null != merge) {
-			out.write(MERGE_SP.getBytes());
+			out.write(MERGE_SP.getBytes("UTF-8"));
 			merge.writeTo(out);
 			out.write('\n');
 		}
@@ -177,22 +177,22 @@ public class Commit implements Markable {
 	public String getReference() {
 		return reference;
 	}
-  
-  public boolean isWritten() {
-    return written;
-  }
-  
-  public GitAttributes getAttributes() {
-    return filesAttributes;
-  }
-  
-  public void setAttributes(GitAttributes attr) {
-    filesAttributes = attr;
-  }
+	
+	public boolean isWritten() {
+		return written;
+	}
+	
+	public GitAttributes getAttributes() {
+		return filesAttributes;
+	}
+	
+	public void setAttributes(GitAttributes attr) {
+		filesAttributes = attr;
+	}
 
-  public Date getCommitDate() {
-    return commitDate;
-  }
-  
-  
+	public Date getCommitDate() {
+		return commitDate;
+	}
+	
+	
 }
