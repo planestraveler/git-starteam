@@ -61,6 +61,7 @@ public class MainEntry {
 		CmdLineParser.Option selectFolder = parser.addStringOption('f', "folder");
 		CmdLineParser.Option selectDomain = parser.addStringOption('d', "domain");
 		CmdLineParser.Option isExpandKeywords = parser.addBooleanOption('k', "keyword");
+		CmdLineParser.Option setEOLAttribute = parser.addBooleanOption('s', "set-eol-attribute");
 		CmdLineParser.Option selectUser = parser.addStringOption('U', "user");
 		CmdLineParser.Option isResume = parser.addBooleanOption('R', "resume");
 		CmdLineParser.Option selectHead = parser.addStringOption('H', "head");
@@ -108,6 +109,7 @@ public class MainEntry {
 		String folder = (String) parser.getOptionValue(selectFolder);
 		String domain = (String) parser.getOptionValue(selectDomain);
 		Boolean keyword = (Boolean) parser.getOptionValue(isExpandKeywords);
+		Boolean eolAttribute = (Boolean) parser.getOptionValue(setEOLAttribute);
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
@@ -125,8 +127,8 @@ public class MainEntry {
 		String revisionLabelPattern = (String) parser.getOptionValue(filteringRevisionLabel);
 		String changeRequestFilePattern = (String) parser.getOptionValue(selectChangeRequestImport);
     
-    String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
-    String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
+        String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
+        String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
 
 		@SuppressWarnings("rawtypes")
 		Vector excludedLabels = parser.getOptionValues(excludeLabel);
@@ -280,7 +282,8 @@ public class MainEntry {
 						importer.setMinimumLFSSize(startTrackingAtSize);
 						importer.setLFSPattern(lfsRegexPattern);
 						importer.setLabelExclusion(excludedLabels);
-
+						importer.setEOLAttribute(eolAttribute);
+						
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
 						if(allViews && view == null) {

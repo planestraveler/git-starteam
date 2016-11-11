@@ -54,6 +54,7 @@ import org.sync.util.LabelDateComparator;
 import org.sync.util.LogEntry;
 import org.sync.util.RevisionDateComparator;
 import org.sync.util.SmallRef;
+import org.sync.util.StarteamEOL;
 import org.sync.util.TempFileManager;
 
 import com.starbase.starteam.CheckoutManager;
@@ -61,8 +62,11 @@ import com.starbase.starteam.File;
 import com.starbase.starteam.Folder;
 import com.starbase.starteam.Item;
 import com.starbase.starteam.Label;
+import com.starbase.starteam.NoSuchPropertyException;
 import com.starbase.starteam.Project;
+import com.starbase.starteam.PropertyNames;
 import com.starbase.starteam.Server;
+import com.starbase.starteam.Type;
 import com.starbase.starteam.View;
 import com.starbase.starteam.ViewConfiguration;
 import com.starbase.util.OLEDate;
@@ -79,6 +83,7 @@ public class GitImporter {
 	private DataRef fromRef = null;
 	private boolean verbose = false;
 	private boolean createCheckpoints = false;
+	private boolean setEOLAttribute = false;
 	private RepositoryHelper repositoryHelper;
 	// Use these sets to find all the deleted files.
 	private Set<String> lastFiles = new HashSet<String>();
@@ -233,6 +238,32 @@ public class GitImporter {
 					}
 					if(aFile.length() < lfsMinimumSize && !matchPattern) {
 						fileData = new Data(aFile);
+					
+						if(setEOLAttribute){
+							try{
+								if (null != lastCommit) {
+									fattributes = lastCommit.getAttributes();
+								}
+								if (null == fattributes) {
+									fattributes = readAttributes(head);
+								}
+								
+								Object propertyValue = f.get(f.getPropertyNames().FILE_EOL_CHARACTER);
+								if(StarteamEOL.CLIENTDEFINE.value() == (int) propertyValue){
+									fattributes.removeAttributeFromPath(path, GitAttributeKind.CRLF, GitAttributeKind.LF);
+								}
+								else if(StarteamEOL.CRLF.value() == (int) propertyValue){
+									fattributes.removeAttributeFromPath(path, GitAttributeKind.CRLF, GitAttributeKind.LF);
+									fattributes.addAttributeToPath(current.getPath(), GitAttributeKind.CRLF);
+								}
+								else if(StarteamEOL.LF.value() == (int) propertyValue){
+									fattributes.removeAttributeFromPath(path, GitAttributeKind.CRLF, GitAttributeKind.LF);
+									fattributes.addAttributeToPath(current.getPath(), GitAttributeKind.LF);
+								}
+							}catch(NoSuchPropertyException ex){
+								//Unable to get the end of line property. Leave it client define.
+							}
+						}
 					} else {
 						try {
 							fileData = new LFSFilePointer(repositoryHelper.getWorkingDirectory(), aFile);
@@ -1000,5 +1031,14 @@ public class GitImporter {
 				excludedLabelSet.add(label);
 			}
 		}
+	}
+	
+	/**
+	 * Set the option to keep the OEL settings from StarTeam to Git (via the .gitattributes).
+	 * @param EOLAttribute true to keep the OEL property
+	 * 				  false to leave it client base
+	 */
+	public void setEOLAttribute(boolean EOLAttribute){
+		this.setEOLAttribute = EOLAttribute;
 	}
 }
