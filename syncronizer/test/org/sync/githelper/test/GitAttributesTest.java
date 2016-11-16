@@ -100,6 +100,17 @@ public class GitAttributesTest {
   }
   
   @Test
+  public void testRemoveAttributesFromPath(){
+	  test.removeAttributeFromPath("UnixScript.sh", GitAttributeKind.LF);
+	  assertEquals("# some comment that need to be kept\n"
+		      + "# which are multiline\n"
+		      + "path/to/file.bin filter=lfs diff=lfs merge=lfs -text\n"
+		      + "UnixScript.sh\n"
+		      + "WindowsScript.bat eol=crlf",
+		      test.toString());
+  }
+  
+  @Test
   public void testIsPathPartOfAttributes() {
     assertEquals(true, test.pathHasAttributes("UnixScript.sh"));
   }
