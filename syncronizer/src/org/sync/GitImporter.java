@@ -340,7 +340,7 @@ public class GitImporter {
 					try	{
 						if (f.get(propNames.FILE_EXECUTABLE) != null)
 						{
-							executable = (Boolean) f.get(propNames.FILE_EXECUTABLE);
+							executable = (int) f.get(propNames.FILE_EXECUTABLE) != 0;
 						}
 					}
 					catch (Exception ex) {
