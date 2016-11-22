@@ -75,15 +75,26 @@ public class GitAttributes {
 	String newPath = path.replace(" ", "[[:space:]]");
 	return newPath;
   }
+  
   public void addAttributeToPath(String path, GitAttributeKind ... allAttributes) {
 	String cleanPath = escapeSpace(path);
 	  
     if(!fileContent.containsKey(cleanPath)) {
       fileContent.put(cleanPath, new ArrayList<GitAttributeKind>());
     }
-    ArrayList<GitAttributeKind> tempList = new ArrayList(Arrays.asList(allAttributes));
+    ArrayList<GitAttributeKind> tempList = new ArrayList<>(Arrays.asList(allAttributes));
     tempList.removeAll(fileContent.get(cleanPath));
     fileContent.get(cleanPath).addAll(tempList);
+  }
+  
+  public void removeAttributeFromPath(String path, GitAttributeKind ... allAttributes){
+	  String cleanPath = escapeSpace(path);
+	  
+	  if(!fileContent.containsKey(cleanPath)){
+		  return;
+	  }
+	  
+	  fileContent.get(cleanPath).removeAll(Arrays.asList(allAttributes));
   }
   
   @Override
