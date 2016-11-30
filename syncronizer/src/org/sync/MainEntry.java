@@ -112,6 +112,7 @@ public class MainEntry {
 		String mailMapFilename = (String) parser.getOptionValue(mailMap);
 		Boolean keyword = (Boolean) parser.getOptionValue(isExpandKeywords);
 		Boolean eolAttribute = (Boolean) parser.getOptionValue(setEOLAttribute);
+		if (null == eolAttribute) eolAttribute = false;
 		String user = (String) parser.getOptionValue(selectUser);
 		Boolean resume = (Boolean) parser.getOptionValue(isResume);
 		String head = (String) parser.getOptionValue(selectHead);
@@ -286,7 +287,6 @@ public class MainEntry {
 						importer.setLFSPattern(lfsRegexPattern);
 						importer.setLabelExclusion(excludedLabels);
 						importer.setEOLAttribute(eolAttribute);
-						
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
 						if(allViews && view == null) {
