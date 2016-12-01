@@ -221,7 +221,8 @@ public class GitImporter {
 					userName = userAccount.getName();
 					userEmail = userAccount.getEmailAddress();
 				} catch (ServerException ex) {
-					Log.log("Could not retrieve user from Administration Server. You probably do not have the right");
+					Log.log("Could not retrieve user from Administration Server. You probably do not have the right.");
+					Log.log("Will use a Name.Surname@domain strategy to guess the e-mail address");
 					dontTryServerAdministrationAgain = true;
 				}
 			}
