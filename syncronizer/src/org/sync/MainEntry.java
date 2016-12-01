@@ -312,6 +312,7 @@ public class MainEntry {
 										importer.setCheckoutStrategy(new RevisionPopulationStrategy(v));
 										importer.generateByRevisionLabelImport(v, date, folder, revisionLabelPattern);
 									} else {
+										importer.setCheckoutStrategy(new BasePopulationStrategy(v));
 										importer.generateFastImportStream(v, folder);
 									}
 									break;
