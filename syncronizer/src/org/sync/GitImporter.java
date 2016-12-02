@@ -840,6 +840,7 @@ public class GitImporter {
 				View baseView = new View(view.getParentView(), view.getBaseConfiguration());
 				setFolder(baseView, baseFolder);
 				CommitPopulationStrategy baseStrategy = new BasePopulationStrategy(baseView);
+				setCheckoutStrategy(baseStrategy);
 				baseStrategy.filePopulation(alternateHead, folder);
 				lastFiles.addAll(baseStrategy.getLastFiles());
 				startDate = new java.util.Date(baseStrategy.getListOfCommit().lastKey().getTime());
