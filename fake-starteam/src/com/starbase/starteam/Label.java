@@ -96,11 +96,15 @@ public class Label extends CacheRef {
 	protected static Label[] getLabelList(int viewId, boolean onlyActive) {
 		File dir = buildStoragePath(viewId);
 		ArrayList<Label> list = new ArrayList<Label>();
-		for(String labelid : dir.list()) {
-			Label l = new Label(viewId, Integer.parseInt(labelid));
-			if(onlyActive && l.deleted)
-				continue;
-			list.add(l);
+		String[] dirList = dir.list();
+
+		if (dirList != null) {
+			for(String labelid : dir.list()) {
+				Label l = new Label(viewId, Integer.parseInt(labelid));
+				if(onlyActive && l.deleted)
+					continue;
+				list.add(l);
+			}
 		}
 		Label[] LabelList = new Label[list.size()];
 		return list.toArray(LabelList);
