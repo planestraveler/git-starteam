@@ -218,8 +218,14 @@ public class GitImporter {
 			if (!dontTryServerAdministrationAgain) {
 				try {
 					UserAccount userAccount = server.getAdministration().findUserAccount(current.getUid());
-					userName = userAccount.getName();
-					userEmail = userAccount.getEmailAddress();
+					if (userAccount != null) { // It is sometime possible that the user account would be null
+						userName = userAccount.getName();
+						userEmail = userAccount.getEmailAddress();
+					} else {
+						User fallback = server.getUser(current.getUid());
+						userName = fallback.getName();
+						userEmail = userMapping.getEmail(userName);
+					}
 				} catch (ServerException ex) {
 					Log.log("Could not retrieve user from Administration Server. You probably do not have the right.");
 					Log.log("Will use a Name.Surname@domain strategy to guess the e-mail address");
@@ -282,14 +288,14 @@ public class GitImporter {
 								}
 								
 								Object propertyValue = f.get(f.getPropertyNames().FILE_EOL_CHARACTER);
-								if(StarteamEOL.CLIENTDEFINE.value() == (int) propertyValue){
+								if(StarteamEOL.CLIENTDEFINE.value() == (Integer) propertyValue){
 									fattributes.removeAttributeFromPath(path, GitAttributeKind.CRLF, GitAttributeKind.LF);
 								}
-								else if(StarteamEOL.CRLF.value() == (int) propertyValue){
+								else if(StarteamEOL.CRLF.value() == (Integer) propertyValue){
 									fattributes.removeAttributeFromPath(path, GitAttributeKind.CRLF, GitAttributeKind.LF);
 									fattributes.addAttributeToPath(current.getPath(), GitAttributeKind.CRLF);
 								}
-								else if(StarteamEOL.LF.value() == (int) propertyValue){
+								else if(StarteamEOL.LF.value() == (Integer) propertyValue){
 									fattributes.removeAttributeFromPath(path, GitAttributeKind.CRLF, GitAttributeKind.LF);
 									fattributes.addAttributeToPath(current.getPath(), GitAttributeKind.LF);
 								}
@@ -341,7 +347,7 @@ public class GitImporter {
 					try	{
 						if (f.get(propNames.FILE_EXECUTABLE) != null)
 						{
-							executable = (int) f.get(propNames.FILE_EXECUTABLE) != 0;
+							executable = (Integer) f.get(propNames.FILE_EXECUTABLE) != 0;
 						}
 					}
 					catch (Exception ex) {
