@@ -27,23 +27,13 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.starbase.starteam.*;
 import org.sync.CommitPopulationStrategy;
 import org.sync.Log;
 import org.sync.RenameFinder;
 import org.sync.RepositoryHelper;
 import org.sync.util.CommitInformation;
 import org.sync.util.Pair;
-
-import com.starbase.starteam.File;
-import com.starbase.starteam.Folder;
-import com.starbase.starteam.Item;
-import com.starbase.starteam.ItemList;
-import com.starbase.starteam.Label;
-import com.starbase.starteam.PropertyNames;
-import com.starbase.starteam.RecycleBin;
-import com.starbase.starteam.ServerException;
-import com.starbase.starteam.Type;
-import com.starbase.starteam.View;
 
 public class BasePopulationStrategy implements CommitPopulationStrategy {
 
@@ -329,7 +319,11 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 				if (null == recycleBin ) {
 					item = null;
 				} else {
-					item = (File) recycleBin.findItem(fileType, fileID);
+					try {
+						item = (File) recycleBin.findItem(fileType, fileID);
+					} catch (ServerException e) {
+						Log.logf("Coulfd not find deleted files <%s> ID: %d [%s]", path, fileID, e.getMessage());
+					}
 				}
 				if(null != item && item.isDeleted()) {
 					deletedpaths.add(new Pair<String, File>(path, item));
