@@ -81,6 +81,7 @@ public class MainEntry {
 		CmdLineParser.Option filteringRevisionLabel = parser.addStringOption("revision-label-pattern");
 		CmdLineParser.Option selectChangeRequestImport = parser.addStringOption("change-request");
 		CmdLineParser.Option excludeLabel = parser.addStringOption("exclude-label");
+		CmdLineParser.Option disableRecycleBinLookup = parser.addBooleanOption("disable-extended-removal-lookup");
         
 		//TODO: Add a label creation at tip before starting the importation
 
@@ -107,6 +108,7 @@ public class MainEntry {
 		Boolean timeBased = (Boolean) parser.getOptionValue(selectTimeBasedImport);
 		Boolean labelBased = (Boolean) parser.getOptionValue(selectLabelBasedImport);
 		Boolean revisionLabelBased = (Boolean) parser.getOptionValue(selectRevisionLabelBasedImport);
+		boolean revisionBasedFlag = revisionLabelBased != null && revisionLabelBased;
 		String folder = (String) parser.getOptionValue(selectFolder);
 		String domain = (String) parser.getOptionValue(selectDomain);
 		String mailMapFilename = (String) parser.getOptionValue(mailMap);
@@ -129,6 +131,8 @@ public class MainEntry {
 		String viewLabelPattern = (String) parser.getOptionValue(filteringViewLabel);
 		String revisionLabelPattern = (String) parser.getOptionValue(filteringRevisionLabel);
 		String changeRequestFilePattern = (String) parser.getOptionValue(selectChangeRequestImport);
+		Boolean recycleBinLookupFlag = (Boolean) parser.getOptionValue(disableRecycleBinLookup);
+		boolean doNotUseRycleBin = recycleBinLookupFlag != null && recycleBinLookupFlag;
     
         String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
         String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
@@ -298,23 +302,27 @@ public class MainEntry {
 									viewFound = true;
 									if(allViews) {
 										importer.generateAllViewsImport(p, v, folder, skipViewsPattern);
-									} else if(null != timeBased && timeBased) {
-										importer.setCheckoutStrategy(new BasePopulationStrategy(v));
-										importer.generateDayByDayImport(v, date, folder);
-									} else if (null != labelBased && labelBased) {
-										if (changeRequestFilePattern != null) {
-											importer.setCheckoutStrategy(new ChangeRequestPopulationStrategy(v, changeRequestFilePattern));
-										} else {
-											importer.setCheckoutStrategy(new BasePopulationStrategy(v));
-										}
-										importer.generateByLabelImport(v, date, folder, viewLabelPattern, changeRequestFilePattern);
-									} else if(revisionLabelBased != null && revisionLabelBased){
-										importer.setCheckoutStrategy(new RevisionPopulationStrategy(v));
-										importer.generateByRevisionLabelImport(v, date, folder, revisionLabelPattern);
 									} else {
-										importer.setCheckoutStrategy(new BasePopulationStrategy(v));
-										importer.generateFastImportStream(v, folder);
-									}
+									    CommitPopulationStrategy strategy = null;
+									    if (changeRequestFilePattern != null) {
+                                            strategy = new ChangeRequestPopulationStrategy(v, changeRequestFilePattern);
+                                        } else if (revisionBasedFlag) {
+									        strategy = new RevisionPopulationStrategy(v);
+                                        } else {
+									        strategy = new BasePopulationStrategy(v);
+                                        }
+                                        strategy.setFileRemoveExtendedInformation(!doNotUseRycleBin);
+                                        importer.setCheckoutStrategy(strategy);
+                                        if(null != timeBased && timeBased) {
+                                            importer.generateDayByDayImport(v, date, folder);
+                                        } else if (null != labelBased && labelBased) {
+                                            importer.generateByLabelImport(v, date, folder, viewLabelPattern, changeRequestFilePattern);
+                                        } else if(revisionLabelBased != null && revisionLabelBased){
+                                            importer.generateByRevisionLabelImport(v, date, folder, revisionLabelPattern);
+                                        } else {
+                                            importer.generateFastImportStream(v, folder);
+                                        }
+                                    }
 									break;
 								} else if(verbose) {
 									System.err.println("Not view: " + v.getName());
@@ -367,10 +375,11 @@ public class MainEntry {
 		System.out.println("[--checkpoint]\t\tCreate git fast-import checkpoints after each label");
 		System.out.println("[--skip-views <regex>]\t\tSkip views matching regex when using -A");
 		System.out.println("[--verbose]\t\tVerbose output");
-    System.out.println("[--lfs-size <size>[KMG]\tMinimum size to consider using LFS (disabled by default)");
-    System.out.println("[--lfs-pattern <regex>\tRegular expression on filename.");
+        System.out.println("[--lfs-size <size>[KMG]\tMinimum size to consider using LFS (disabled by default)");
+        System.out.println("[--lfs-pattern <regex>\tRegular expression on filename.");
         System.out.println("[--view-label-pattern <regex>\tRegular expression to filter which view label to keep.");
         System.out.println("[--revision-label-pattern <regex>\tRegular expression on to filter which revision label to keep.");
+        System.out.println("[--disable-extended-removal-lookup]\tDisable extended file removal lookup");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 		
 	}

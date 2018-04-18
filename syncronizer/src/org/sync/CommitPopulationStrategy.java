@@ -121,4 +121,13 @@ public interface CommitPopulationStrategy {
 	 * @return true if a tag should be created false otherwise
 	 */
 	boolean isTagRequired();
+
+	/**
+	 * Tell the strategy to look into the RecycleBin to discover more inforamtion
+	 * about removal of a file to properly give ownership.
+	 *
+	 * This feature is enabled by default.
+	 */
+	void setFileRemoveExtendedInformation(boolean enable);
+
 }

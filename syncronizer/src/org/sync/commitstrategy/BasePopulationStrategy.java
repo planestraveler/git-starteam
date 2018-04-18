@@ -48,6 +48,8 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	protected java.util.Date earliestTime;
 	
 	protected boolean verbose;
+
+	protected boolean lookIntoRecycleBin;
 	
 	/**
 	 * Base Population strategy constructor using a view as its base of operations
@@ -70,6 +72,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 		// make sure to get it's version 1. Setting the following value to 0 would
 		// grab all the version of the files since its creation
 		initialFileVersion = -1;
+		lookIntoRecycleBin = true;
 	}
 
 	@Override
@@ -294,15 +297,18 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	 */
 	private void recoverDeleteInformation(String head, Folder root) {
 		RecycleBin recycleBin = null;
-		Type fileType = currentView.getServer().typeForName(currentView.getTypeNames().FILE);
+		Type fileType = null;
 		try {
-			recycleBin = root.getView().getRecycleBin();
-			recycleBin.setIncludeDeletedItems(true);
-			fileType = currentView.getServer().typeForName(recycleBin.getTypeNames().FILE);
+			recycleBin = recoverRecycleBin(root);
 		} catch (java.lang.UnsupportedOperationException e) {
 			recycleBin = null;
+		}
+		if (recycleBin != null) {
+			fileType = currentView.getServer().typeForName(recycleBin.getTypeNames().FILE);
+		} else {
 			fileType = currentView.getServer().typeForName(currentView.getTypeNames().FILE);
 		}
+
 
 		RenameFinder renameFinder = new RenameFinder();
 		
@@ -403,7 +409,22 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 			}
 		}
 	}
-	
+
+	/**
+	 * Retrive the Recycle bin for use by the base strategy.
+	 * @param root The root folder from where we start searching for deleted items
+	 * @return The recycle Bin instance if supported.
+	 */
+	protected RecycleBin recoverRecycleBin(Folder root) {
+		if (lookIntoRecycleBin) {
+			RecycleBin recycleBin;
+			recycleBin = root.getView().getRecycleBin();
+			recycleBin.setIncludeDeletedItems(true);
+			return recycleBin;
+		}
+		return null;
+	}
+
 	/**
 	 * Find a earlier commit done that match with the given item and path to
 	 * declare it as an unexpected move operation
@@ -566,5 +587,10 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	public boolean isTagRequired() {
 		// Tag are always welcome with the base strategy
 		return true;
+	}
+
+	@Override
+	public void setFileRemoveExtendedInformation(boolean enable) {
+		lookIntoRecycleBin = enable;
 	}
 }
