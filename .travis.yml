@@ -8,3 +8,4 @@ addons:
     packages:
       - junit4
       - libhamcrest-java
+      - ant
