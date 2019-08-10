@@ -82,6 +82,7 @@ public class MainEntry {
 		CmdLineParser.Option selectChangeRequestImport = parser.addStringOption("change-request");
 		CmdLineParser.Option excludeLabel = parser.addStringOption("exclude-label");
 		CmdLineParser.Option disableRecycleBinLookup = parser.addBooleanOption("disable-extended-removal-lookup");
+		CmdLineParser.Option createMigrationViewLabel = parser.addBooleanOption("add-migrated-view-label");
         
 		//TODO: Add a label creation at tip before starting the importation
 
@@ -133,6 +134,7 @@ public class MainEntry {
 		String changeRequestFilePattern = (String) parser.getOptionValue(selectChangeRequestImport);
 		Boolean recycleBinLookupFlag = (Boolean) parser.getOptionValue(disableRecycleBinLookup);
 		boolean doNotUseRycleBin = recycleBinLookupFlag != null && recycleBinLookupFlag;
+		String migrationViewLabel = (String) parser.getOptionValue(createMigrationViewLabel);		
     
         String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
         String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
@@ -322,6 +324,9 @@ public class MainEntry {
                                         } else {
                                             importer.generateFastImportStream(v, folder);
                                         }
+										if(null!=migrationViewLabel){
+											v.createViewLabel(migrationViewLabel, "created by git-starteam", new OLEDate(), true, true);
+										}
                                     }
 									break;
 								} else if(verbose) {
