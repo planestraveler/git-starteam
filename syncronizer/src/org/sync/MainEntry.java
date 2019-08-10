@@ -83,7 +83,7 @@ public class MainEntry {
 		CmdLineParser.Option excludeLabel = parser.addStringOption("exclude-label");
 		CmdLineParser.Option disableRecycleBinLookup = parser.addBooleanOption("disable-extended-removal-lookup");
 		CmdLineParser.Option createMigrationViewLabel = parser.addBooleanOption("add-migrated-view-label");
-        
+
 		//TODO: Add a label creation at tip before starting the importation
 
 		try {
@@ -97,7 +97,7 @@ public class MainEntry {
 			printHelp();
 			System.exit(2);
 		}
-		
+
 		String host = (String) parser.getOptionValue(selectHost);
 		Integer port = (Integer) parser.getOptionValue(selectPort);
 		String project = (String) parser.getOptionValue(selectProject);
@@ -134,19 +134,19 @@ public class MainEntry {
 		String changeRequestFilePattern = (String) parser.getOptionValue(selectChangeRequestImport);
 		Boolean recycleBinLookupFlag = (Boolean) parser.getOptionValue(disableRecycleBinLookup);
 		boolean doNotUseRycleBin = recycleBinLookupFlag != null && recycleBinLookupFlag;
-		String migrationViewLabel = (String) parser.getOptionValue(createMigrationViewLabel);		
-    
+		String migrationViewLabel = (String) parser.getOptionValue(createMigrationViewLabel);
+
         String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
         String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
 
 		@SuppressWarnings("rawtypes")
 		Vector excludedLabels = parser.getOptionValues(excludeLabel);
-		
+
 		if(host == null || port == null || project == null || (view == null && !allViews)) {
 			printHelp();
 			System.exit(3);
 		}
-    
+
     long startTrackingAtSize = Long.MAX_VALUE;
     if (lfsSize != null)
     {
@@ -171,7 +171,7 @@ public class MainEntry {
         startTrackingAtSize = Long.parseLong(lfsSize);
       }
     }
-    
+
     Pattern lfsRegexPattern = null;
     if (lfsPattern != null)
     {
@@ -222,23 +222,23 @@ public class MainEntry {
 		if (passwordFilePath != null) {
 			//check if given file path exists as a file
 			File f = new File(passwordFilePath);
-			
+
 			if (f.exists() && !f.isDirectory()) {
 				//read file
 				List<String> lines = null;
 				try {
 					lines = Files.readAllLines(f.toPath(), Charset.defaultCharset());
-				
-					StringBuilder sb = new StringBuilder(); 
-					for (String line : lines) { 
-						sb.append(line); 
+
+					StringBuilder sb = new StringBuilder();
+					for (String line : lines) {
+						sb.append(line);
 					}
-					
+
 					password = sb.toString();
 				} catch (IOException e) {
 					e.printStackTrace();
-				} 
-				
+				}
+
 				//make sure password is not left on disk
 				f.delete();
 			}
@@ -386,6 +386,6 @@ public class MainEntry {
         System.out.println("[--revision-label-pattern <regex>\tRegular expression on to filter which revision label to keep.");
         System.out.println("[--disable-extended-removal-lookup]\tDisable extended file removal lookup");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
-		
+
 	}
 }
