@@ -386,6 +386,7 @@ public class MainEntry {
         System.out.println("[--view-label-pattern <regex>\tRegular expression to filter which view label to keep.");
         System.out.println("[--revision-label-pattern <regex>\tRegular expression on to filter which revision label to keep.");
         System.out.println("[--disable-extended-removal-lookup]\tDisable extended file removal lookup");
+		System.out.println("[--add-migrated-view-label]\tCreate a view label with given text as description.");
 		System.out.println("java org.sync.MainEntry -h localhost -P 23456 -p Alpha -v MAIN -d email.com -U you");
 
 	}
