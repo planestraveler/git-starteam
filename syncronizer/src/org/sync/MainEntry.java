@@ -35,6 +35,7 @@ import org.sync.commitstrategy.RevisionPopulationStrategy;
 import com.starbase.starteam.ClientApplication;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
+import com.starbase.util.OLEDate;
 import com.starbase.starteam.View;
 import com.starbase.starteam.vts.comm.NetMonitor;
 
@@ -82,7 +83,7 @@ public class MainEntry {
 		CmdLineParser.Option selectChangeRequestImport = parser.addStringOption("change-request");
 		CmdLineParser.Option excludeLabel = parser.addStringOption("exclude-label");
 		CmdLineParser.Option disableRecycleBinLookup = parser.addBooleanOption("disable-extended-removal-lookup");
-		CmdLineParser.Option createMigrationViewLabel = parser.addBooleanOption("add-migrated-view-label");
+		CmdLineParser.Option createMigrationViewLabel = parser.addStringOption("add-migrated-view-label");
 
 		//TODO: Add a label creation at tip before starting the importation
 
