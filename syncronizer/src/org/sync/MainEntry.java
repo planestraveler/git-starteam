@@ -326,7 +326,7 @@ public class MainEntry {
                                             importer.generateFastImportStream(v, folder);
                                         }
 										if(null!=migrationViewLabel){
-											v.createViewLabel(migrationViewLabel, "created by git-starteam", OLEDate.CURRENT_SERVER_TIME,, true, true);
+											v.createViewLabel(migrationViewLabel, "created by git-starteam", OLEDate.CURRENT_SERVER_TIME, true, true);
 										}
                                     }
 									break;
