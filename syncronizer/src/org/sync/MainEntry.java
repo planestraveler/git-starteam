@@ -268,7 +268,7 @@ public class MainEntry {
 
 			boolean projectFound = false;
 			for(Project p : starteam.getProjects()) {
-				if(p.getName().equalsIgnoreCase(project)) {
+				if(p.getName().trim().equalsIgnoreCase(project)) {
 					projectFound = true;
 					if(null == keyword) {
 						p.setExpandKeywords(false);
