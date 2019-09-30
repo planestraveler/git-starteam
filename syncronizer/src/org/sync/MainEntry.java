@@ -301,7 +301,7 @@ public class MainEntry {
 						} else {
 							boolean viewFound = false;
 							for(View v : p.getViews()) {
-								if(v.getName().equalsIgnoreCase(view)) {
+								if(v.getName().trim().equalsIgnoreCase(view)) {
 									viewFound = true;
 									if(allViews) {
 										importer.generateAllViewsImport(p, v, folder, skipViewsPattern);
