@@ -268,7 +268,7 @@ public class MainEntry {
 
 			boolean projectFound = false;
 			for(Project p : starteam.getProjects()) {
-				if(p.getName().equalsIgnoreCase(project)) {
+				if(p.getName().trim().equalsIgnoreCase(project)) {
 					projectFound = true;
 					if(null == keyword) {
 						p.setExpandKeywords(false);
@@ -301,7 +301,7 @@ public class MainEntry {
 						} else {
 							boolean viewFound = false;
 							for(View v : p.getViews()) {
-								if(v.getName().equalsIgnoreCase(view)) {
+								if(v.getName().trim().equalsIgnoreCase(view)) {
 									viewFound = true;
 									if(allViews) {
 										importer.generateAllViewsImport(p, v, folder, skipViewsPattern);
