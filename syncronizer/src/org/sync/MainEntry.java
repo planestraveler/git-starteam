@@ -84,6 +84,7 @@ public class MainEntry {
 		CmdLineParser.Option excludeLabel = parser.addStringOption("exclude-label");
 		CmdLineParser.Option disableRecycleBinLookup = parser.addBooleanOption("disable-extended-removal-lookup");
 		CmdLineParser.Option createMigrationViewLabel = parser.addStringOption("add-migrated-view-label");
+		CmdLineParser.Option selectLfsConfigUrl = parser.addStringOption("lfs-config-url");
 
 		//TODO: Add a label creation at tip before starting the importation
 
@@ -139,6 +140,7 @@ public class MainEntry {
 
         String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
         String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
+        String lfsConfigUrl = (String) parser.getOptionValue(selectLfsConfigUrl);
 
 		@SuppressWarnings("rawtypes")
 		Vector excludedLabels = parser.getOptionValues(excludeLabel);
@@ -286,6 +288,9 @@ public class MainEntry {
 						if(null != dumpTo) {
 							importer.setDumpFile(new File(dumpTo));
 						}
+						if(lfsConfigUrl != null){
+							importer.setLFSConfigUrl(lfsConfigUrl);
+						}
 						importer.setVerbose(verbose);
 						importer.setCreateCheckpoints(createCheckpoints);
 						importer.setDomain(domain);
@@ -294,6 +299,7 @@ public class MainEntry {
 						importer.setLFSPattern(lfsRegexPattern);
 						importer.setLabelExclusion(excludedLabels);
 						importer.setEOLAttribute(eolAttribute);
+
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
 						if(allViews && view == null) {

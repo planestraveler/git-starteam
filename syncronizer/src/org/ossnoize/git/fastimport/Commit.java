@@ -39,6 +39,7 @@ public class Commit implements Markable {
 	private boolean resumeFastImport;
 	private boolean written;
 	private GitAttributes filesAttributes;
+	private String lfsConfigUrl;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -52,6 +53,7 @@ public class Commit implements Markable {
 		mark = new Mark();
 		listOfOperation = new TreeMap<String, FileOperation>();
 		filesAttributes = null;
+		lfsConfigUrl = null;
 	}
 
 	public void setAuthor(String name, String email) {
@@ -99,6 +101,7 @@ public class Commit implements Markable {
 		}
 		if (null != filesAttributes) {
 			try {
+				//.gitattributes file generation
 				Data attributeFile = new Data();
 				attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
 				Blob aMarkedBlob = new Blob(attributeFile);
@@ -107,6 +110,22 @@ public class Commit implements Markable {
 				attributes.setFileType(GitFileType.Normal);
 				attributes.setPath(".gitattributes");
 				this.addFileOperation(attributes);
+
+			} catch (InvalidPathException ex) {
+			}
+
+		if (null != lfsConfigUrl) {
+			try {
+				//.lfsconfig file generation
+				Data lfsconfigFile = new Data();
+				lfsconfigFile.writeData("[lfs]\n");
+				lfsconfigFile.writeData("    url = "+ lfsConfigUrl);
+				Blob aLfsMarkedBlob = new Blob(lfsconfigFile);
+				aLfsMarkedBlob.writeTo(out);
+				FileModification lfsconfig = new FileModification(aLfsMarkedBlob);
+				lfsconfig.setFileType(GitFileType.Normal);
+				lfsconfig.setPath(".lfsconfig");
+				this.addFileOperation(lfsconfig);
 			} catch (InvalidPathException ex) {
 			}
 		}
@@ -193,6 +212,12 @@ public class Commit implements Markable {
 	public Date getCommitDate() {
 		return commitDate;
 	}
-	
-	
+
+	public String getLfsConfigUrl() {
+		return lfsConfigUrl;
+	}
+
+	public void setLfsConfigUrl(String url) {
+		lfsConfigUrl = url;
+	}
 }

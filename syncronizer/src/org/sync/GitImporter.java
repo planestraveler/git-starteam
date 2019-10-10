@@ -97,6 +97,7 @@ public class GitImporter {
 	private UserMapping userMapping;
 	private long lfsMinimumSize = Long.MAX_VALUE;
 	private Pattern lfsRegex;
+	private String lfsConfigUrl = null;
 	private CommitPopulationStrategy CheckoutStrategy;
 	
 	private String buildDateToken = "build.date=";
@@ -374,6 +375,9 @@ public class GitImporter {
 					if (fattributes != null) {
 						lastCommit.setAttributes(fattributes);
 					}
+					if(lfsConfigUrl != null){
+						commit.setLfsConfigUrl(lfsConfigUrl)
+					}
 				} else {
 					java.util.Date commitDate = new java.util.Date(current.getTime());
 					// validate that the last commit done wasn't newer than the commit we will be doing
@@ -387,6 +391,9 @@ public class GitImporter {
 					commit.addFileOperation(fo);
 					if (fattributes != null) {
 						commit.setAttributes(fattributes);
+					}
+					if(lfsConfigUrl != null){
+						commit.setLfsConfigUrl(lfsConfigUrl)
 					}
 					if(null == lastCommit) {
 						if(isResume) {
@@ -1069,6 +1076,10 @@ public class GitImporter {
 
 	public void setLFSPattern(Pattern lfsRegexPattern) {
 		lfsRegex = lfsRegexPattern;
+	}
+
+	public void setLFSConfigUrl(String lfsUrl){
+		lfsConfigUrl = lfsUrl;
 	}
 
 	public void setCheckoutStrategy(CommitPopulationStrategy strategy) {
