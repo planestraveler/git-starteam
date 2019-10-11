@@ -118,8 +118,10 @@ public class Commit implements Markable {
 			try {
 				//.lfsconfig file generation
 				Data lfsconfigFile = new Data();
-				lfsconfigFile.writeData("[lfs]\n");
-				lfsconfigFile.writeData("    url = "+ lfsConfigUrl);
+				String lfsString = "[lfs]\n";
+				lfsconfigFile.writeData(lfsString.getBytes("UTF-8"));
+				String urlString = "    url = " + lfsConfigUrl;
+				lfsconfigFile.writeData(urlString.getBytes("UTF-8"));
 				Blob aLfsMarkedBlob = new Blob(lfsconfigFile);
 				aLfsMarkedBlob.writeTo(out);
 				FileModification lfsconfig = new FileModification(aLfsMarkedBlob);
