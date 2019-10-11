@@ -376,7 +376,7 @@ public class GitImporter {
 						lastCommit.setAttributes(fattributes);
 					}
 					if(lfsConfigUrl != null){
-						commit.setLfsConfigUrl(lfsConfigUrl)
+						commit.setLfsConfigUrl(lfsConfigUrl);
 					}
 				} else {
 					java.util.Date commitDate = new java.util.Date(current.getTime());
@@ -393,7 +393,7 @@ public class GitImporter {
 						commit.setAttributes(fattributes);
 					}
 					if(lfsConfigUrl != null){
-						commit.setLfsConfigUrl(lfsConfigUrl)
+						commit.setLfsConfigUrl(lfsConfigUrl);
 					}
 					if(null == lastCommit) {
 						if(isResume) {
