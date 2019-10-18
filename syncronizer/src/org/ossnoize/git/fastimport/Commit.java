@@ -1,5 +1,6 @@
 package org.ossnoize.git.fastimport;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
@@ -114,7 +115,8 @@ public class Commit implements Markable {
 			} catch (InvalidPathException ex) {
 			}
 		}
-		if (null != lfsConfigUrl) {
+		File lfsConfigFile = new File(".lfconfig");
+		if (null != lfsConfigUrl && !lfsConfigFile.exists()) {
 			try {
 				//.lfsconfig file generation
 				Data lfsconfigFile = new Data();
