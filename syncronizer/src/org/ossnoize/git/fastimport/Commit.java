@@ -115,8 +115,8 @@ public class Commit implements Markable {
 			} catch (InvalidPathException ex) {
 			}
 		}
-		File lfsConfigFile = new File(".lfconfig");
-		if (null != lfsConfigUrl && !lfsConfigFile.exists()) {
+		
+		if (null != lfsConfigUrl) {
 			try {
 				//.lfsconfig file generation
 				Data lfsconfigFile = new Data();
