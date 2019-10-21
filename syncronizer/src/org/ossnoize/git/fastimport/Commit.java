@@ -115,7 +115,7 @@ public class Commit implements Markable {
 			} catch (InvalidPathException ex) {
 			}
 		}
-		
+
 		if (null != lfsConfigUrl) {
 			try {
 				//.lfsconfig file generation
