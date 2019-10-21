@@ -17,6 +17,8 @@ import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
 import org.sync.githelper.GitHelper;
+import org.sync.RepositoryHelper;
+import org.sync.RepositoryHelperFactory;
 
 public class Commit implements Markable {
 	private final static String COMMIT = "commit";
@@ -44,6 +46,7 @@ public class Commit implements Markable {
 	private boolean written;
 	private GitAttributes filesAttributes;
 	private String lfsConfigUrl;
+	private RepositoryHelper repositoryHelper;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -58,6 +61,7 @@ public class Commit implements Markable {
 		listOfOperation = new TreeMap<String, FileOperation>();
 		filesAttributes = null;
 		lfsConfigUrl = null;
+        repositoryHelper = RepositoryHelperFactory.getFactory().createHelper();
 	}
 
 	public void setAuthor(String name, String email) {
@@ -119,7 +123,7 @@ public class Commit implements Markable {
 			}
 		}
 
-		Set<String> listOfTrackedFiles = GitHelper.getListOfTrackedFile(reference);
+		Set<String> listOfTrackedFiles = repositoryHelper.getListOfTrackedFile(reference);
 		if (null != lfsConfigUrl && listOfTrackedFiles.contains(".lfsconfig")) {
 			try {
 				//.lfsconfig file generation
