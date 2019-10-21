@@ -118,7 +118,7 @@ public class Commit implements Markable {
 			}
 		}
 
-		List<String> listOfTrackedFiles = getListOfTrackedFile(reference);
+		Set<String> listOfTrackedFiles = getListOfTrackedFile(reference);
 		if (null != lfsConfigUrl && listOfTrackedFiles.contains(".lfsconfig")) {
 			try {
 				//.lfsconfig file generation
