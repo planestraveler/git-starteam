@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
+import org.sync.githelper.GitHelper;
+
 public class Commit implements Markable {
 	private final static String COMMIT = "commit";
 	private final static String AUTHOR = "author";
@@ -115,8 +117,9 @@ public class Commit implements Markable {
 			} catch (InvalidPathException ex) {
 			}
 		}
-		File lfsConfigFile = new File(".lfsconfig");
-		if (null != lfsConfigUrl && !lfsConfigFile.isFile()) {
+
+		List<String> listOfTrackedFiles = getListOfTrackedFile(reference)
+		if (null != lfsConfigUrl && listOfTrackedFiles.contains(".lfsconfig")) {
 			try {
 				//.lfsconfig file generation
 				Data lfsconfigFile = new Data();
