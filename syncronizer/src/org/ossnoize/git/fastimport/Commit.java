@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,7 +119,7 @@ public class Commit implements Markable {
 			}
 		}
 
-		Set<String> listOfTrackedFiles = getListOfTrackedFile(reference);
+		Set<String> listOfTrackedFiles = GitHelper.getListOfTrackedFile(reference);
 		if (null != lfsConfigUrl && listOfTrackedFiles.contains(".lfsconfig")) {
 			try {
 				//.lfsconfig file generation
