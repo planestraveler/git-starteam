@@ -116,7 +116,7 @@ public class Commit implements Markable {
 			}
 		}
 		File lfsConfigFile = new File(".lfsconfig");
-		if (null != lfsConfigUrl && !lfsConfigFile.exists()) {
+		if (null != lfsConfigUrl && !lfsConfigFile.isFile()) {
 			try {
 				//.lfsconfig file generation
 				Data lfsconfigFile = new Data();
