@@ -18,14 +18,21 @@ public class FastImportFile
             modification = new FileModification(blob);
             modification.setFileType(GitFileType.Normal);
             modification.setPath(fileName);
-        } catch (InvalidPathException ex) {}
+        } catch (InvalidPathException ex) {
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
-    public FastImportFile(OutputStream out, Data fileData, Blob fileBlob, FileModification fileModification){
-        data = fileData;
-        blob = fileBlob;
-        blob.writeTo(out);
-        modification = fileModification;
+    public FastImportFile(OutputStream out, Data fileData, Blob fileBlob, FileModification fileModification) {
+        try{
+            data = fileData;
+            blob = fileBlob;
+            blob.writeTo(out);
+            modification = fileModification;
+        } catch (IOException e){
+            e.printStackTrace();
+      }
     }
 
     public Blob getBlob(){
