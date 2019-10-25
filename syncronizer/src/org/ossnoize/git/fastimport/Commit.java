@@ -131,7 +131,7 @@ public class Commit implements Markable {
 				lfsconfigFile.writeData(lfsString.getBytes("UTF-8"));
 				String urlString = "    url = " + lfsConfigUrl;
 				lfsconfigFile.writeData(urlString.getBytes("UTF-8"));
-				File lfsconfigFile = new File(out, lfsconfigData, ".lfsconfig");
+				FastImportFile lfsconfigFile = new FastImportFile(out, lfsconfigData, ".lfsconfig");
 				this.addFileOperation(lfsconfigFile.getModification());
 
 			} catch (InvalidPathException ex) {
