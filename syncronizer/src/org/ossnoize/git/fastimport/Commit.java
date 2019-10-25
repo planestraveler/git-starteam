@@ -16,10 +16,6 @@ import org.ossnoize.git.fastimport.FastImportFile;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
-import org.sync.githelper.GitHelper;
-import org.sync.RepositoryHelper;
-import org.sync.RepositoryHelperFactory;
-
 public class Commit implements Markable {
 	private final static String COMMIT = "commit";
 	private final static String AUTHOR = "author";

@@ -32,6 +32,8 @@ import java.util.Set;
 import org.sync.commitstrategy.BasePopulationStrategy;
 import org.sync.commitstrategy.ChangeRequestPopulationStrategy;
 import org.sync.commitstrategy.RevisionPopulationStrategy;
+import org.sync.githelper.GitHelper;
+import org.sync.RepositoryHelper;
 import org.sync.RepositoryHelperFactory;
 
 import com.starbase.starteam.ClientApplication;
