@@ -1,5 +1,7 @@
 package org.ossnoize.git.fastimport;
 
+import java.io.IOException;
+
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 import java.io.OutputStream;
