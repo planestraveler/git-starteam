@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ossnoize.git.fastimport.enumeration.File;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
@@ -123,21 +124,17 @@ public class Commit implements Markable {
 			}
 		}
 
-		Set<String> listOfTrackedFiles = repositoryHelper.getListOfTrackedFile(reference);
-		if (null != lfsConfigUrl && !listOfTrackedFiles.contains(".lfsconfig")) {
+		if (null != lfsConfigUrl)) {
 			try {
 				//.lfsconfig file generation
-				Data lfsconfigFile = new Data();
+				Data lfsconfigData = new Data();
 				String lfsString = "[lfs]\n";
 				lfsconfigFile.writeData(lfsString.getBytes("UTF-8"));
 				String urlString = "    url = " + lfsConfigUrl;
 				lfsconfigFile.writeData(urlString.getBytes("UTF-8"));
-				Blob aLfsMarkedBlob = new Blob(lfsconfigFile);
-				aLfsMarkedBlob.writeTo(out);
-				FileModification lfsconfig = new FileModification(aLfsMarkedBlob);
-				lfsconfig.setFileType(GitFileType.Normal);
-				lfsconfig.setPath(".lfsconfig");
-				this.addFileOperation(lfsconfig);
+				File lfsconfigFile = new File(out, lfsconfigData, ".lfsconfig");
+				this.addFileOperation(lfsconfigFile.getModification());
+
 			} catch (InvalidPathException ex) {
 			}
 		}

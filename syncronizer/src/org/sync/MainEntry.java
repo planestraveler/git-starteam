@@ -288,7 +288,8 @@ public class MainEntry {
 						if(null != dumpTo) {
 							importer.setDumpFile(new File(dumpTo));
 						}
-						if(lfsConfigUrl != null){
+						Set<String> listOfTrackedFiles = repositoryHelper.getListOfTrackedFile(head);
+						if (null != lfsConfigUrl && !listOfTrackedFiles.contains(".lfsconfig")) {
 							importer.setLFSConfigUrl(lfsConfigUrl);
 						}
 						importer.setVerbose(verbose);
