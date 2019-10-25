@@ -128,9 +128,9 @@ public class Commit implements Markable {
 				//.lfsconfig file generation
 				Data lfsconfigData = new Data();
 				String lfsString = "[lfs]\n";
-				lfsconfigFile.writeData(lfsString.getBytes("UTF-8"));
+				lfsconfigData.writeData(lfsString.getBytes("UTF-8"));
 				String urlString = "    url = " + lfsConfigUrl;
-				lfsconfigFile.writeData(urlString.getBytes("UTF-8"));
+				lfsconfigData.writeData(urlString.getBytes("UTF-8"));
 				FastImportFile lfsconfigFile = new FastImportFile(out, lfsconfigData, ".lfsconfig");
 				this.addFileOperation(lfsconfigFile.getModification());
 
