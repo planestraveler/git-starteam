@@ -118,18 +118,14 @@ public class Commit implements Markable {
 		}
 
 		if (null != lfsConfigUrl) {
-			try {
-				//.lfsconfig file generation
-				Data lfsconfigData = new Data();
-				String lfsString = "[lfs]\n";
-				lfsconfigData.writeData(lfsString.getBytes("UTF-8"));
-				String urlString = "    url = " + lfsConfigUrl;
-				lfsconfigData.writeData(urlString.getBytes("UTF-8"));
-				FastImportFile lfsconfigFile = new FastImportFile(out, lfsconfigData, ".lfsconfig");
-				this.addFileOperation(lfsconfigFile.getModification());
-
-			} catch (InvalidPathException ex) {
-			}
+			//.lfsconfig file generation
+			Data lfsconfigData = new Data();
+			String lfsString = "[lfs]\n";
+			lfsconfigData.writeData(lfsString.getBytes("UTF-8"));
+			String urlString = "    url = " + lfsConfigUrl;
+			lfsconfigData.writeData(urlString.getBytes("UTF-8"));
+			FastImportFile lfsconfigFile = new FastImportFile(out, lfsconfigData, ".lfsconfig");
+			this.addFileOperation(lfsconfigFile.getModification());
 		}
 		StringBuilder commitMsg = new StringBuilder();
 		commitMsg.append(COMMIT).append(" ").append(MessageFormat.format(headFormat, reference, "")).append('\n');

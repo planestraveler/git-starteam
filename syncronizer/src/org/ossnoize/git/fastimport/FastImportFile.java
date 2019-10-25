@@ -10,12 +10,14 @@ public class FastImportFile
     private FileModification modification;
 
     public FastImportFile(OutputStream out, Data filedata, String fileName){
-        data = filedata;
-        blob = new Blob(filedata);
-        blob.writeTo(out);
-        modification = new FileModification(blob);
-        modification.setFileType(GitFileType.Normal);
-        modification.setPath(fileName);
+        try {
+            data = filedata;
+            blob = new Blob(filedata);
+            blob.writeTo(out);
+            modification = new FileModification(blob);
+            modification.setFileType(GitFileType.Normal);
+            modification.setPath(fileName);
+        } catch (InvalidPathException ex) {}
     }
 
     public FastImportFile(OutputStream out, Data fileData, Blob fileBlob, FileModification fileModification){
