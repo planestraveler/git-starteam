@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.Set;
 
 import org.sync.commitstrategy.BasePopulationStrategy;
 import org.sync.commitstrategy.ChangeRequestPopulationStrategy;

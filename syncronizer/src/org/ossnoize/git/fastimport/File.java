@@ -1,5 +1,6 @@
 package org.ossnoize.git.fastimport;
 
+import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import java.io.OutputStream;
 
 public class File
@@ -14,7 +15,7 @@ public class File
         blob.writeTo(out);
         modification = new FileModification(blob);
         modification.setFileType(GitFileType.Normal);
-        modification.setPath(filename);
+        modification.setPath(fileName);
     }
 
     public File(OutputStream out, Data fileData, Blob fileBlob, FileModification fileModification){
