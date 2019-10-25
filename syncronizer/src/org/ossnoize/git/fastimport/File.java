@@ -15,7 +15,7 @@ public class File
         modification.setPath(filename);
     }
 
-    public File(OutputStream out, Data fileData, Blob fileBlob; FileModification fileModification){
+    public File(OutputStream out, Data fileData, Blob fileBlob, FileModification fileModification){
         data = fileData;
         blob = fileBlob;
         blob.writeTo(out);

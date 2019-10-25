@@ -124,7 +124,7 @@ public class Commit implements Markable {
 			}
 		}
 
-		if (null != lfsConfigUrl)) {
+		if (null != lfsConfigUrl) {
 			try {
 				//.lfsconfig file generation
 				Data lfsconfigData = new Data();
