@@ -145,6 +145,7 @@ public class MainEntry {
         String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
         String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
         String lfsConfigUrl = (String) parser.getOptionValue(selectLfsConfigUrl);
+		RepositoryHelper repositoryHelper = RepositoryHelperFactory.getFactory().createHelper();
 
 		@SuppressWarnings("rawtypes")
 		Vector excludedLabels = parser.getOptionValues(excludeLabel);

@@ -42,7 +42,6 @@ public class Commit implements Markable {
 	private boolean written;
 	private GitAttributes filesAttributes;
 	private String lfsConfigUrl;
-	private RepositoryHelper repositoryHelper;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -57,7 +56,6 @@ public class Commit implements Markable {
 		listOfOperation = new TreeMap<String, FileOperation>();
 		filesAttributes = null;
 		lfsConfigUrl = null;
-        repositoryHelper = RepositoryHelperFactory.getFactory().createHelper();
 	}
 
 	public void setAuthor(String name, String email) {
