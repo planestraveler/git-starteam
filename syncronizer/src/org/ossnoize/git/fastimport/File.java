@@ -1,5 +1,7 @@
 package org.ossnoize.git.fastimport;
 
+import java.io.OutputStream;
+
 public class File
 {
     private Blob blob;
