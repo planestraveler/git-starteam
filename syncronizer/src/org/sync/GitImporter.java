@@ -377,10 +377,6 @@ public class GitImporter {
 						lastCommit.setAttributes(fattributes);
 					}
 				} else {
-					if(isFirstCommit && lfsConfigUrl != null){
-						commit.setLfsConfigUrl(lfsConfigUrl);
-						isFirstCommit=false;
-					}
 					java.util.Date commitDate = new java.util.Date(current.getTime());
 					// validate that the last commit done wasn't newer than the commit we will be doing
 					if (null != lastCommit && lastCommit.getCommitDate().getTime() >= current.getTime()) {
@@ -394,7 +390,10 @@ public class GitImporter {
 					if (fattributes != null) {
 						commit.setAttributes(fattributes);
 					}
-
+					if(lfsConfigUrl != null && isFirstCommit){
+						commit.setLfsConfigUrl(lfsConfigUrl);
+						isFirstCommit=false;
+					}
 					if(null == lastCommit) {
 						if(isResume) {
 							commit.resumeOnTopOfRef();
