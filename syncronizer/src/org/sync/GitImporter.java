@@ -78,7 +78,8 @@ public class GitImporter {
 	private Server server;
 	private Folder folder;
 	private long lastModifiedTime = 0;
-	private Commit lastCommit; 
+	private Commit lastCommit;
+	private boolean isFirstCommit = true;
 	// get the really old time as base information;
 	private CommitInformation lastInformation = null;
 	private String alternateHead = null;
@@ -375,9 +376,6 @@ public class GitImporter {
 					if (fattributes != null) {
 						lastCommit.setAttributes(fattributes);
 					}
-					if(lfsConfigUrl != null){
-						lastCommit.setLfsConfigUrl(lfsConfigUrl);
-					}
 				} else {
 					java.util.Date commitDate = new java.util.Date(current.getTime());
 					// validate that the last commit done wasn't newer than the commit we will be doing
@@ -392,8 +390,9 @@ public class GitImporter {
 					if (fattributes != null) {
 						commit.setAttributes(fattributes);
 					}
-					if(lfsConfigUrl != null){
+					if(lfsConfigUrl != null && isFirstCommit){
 						commit.setLfsConfigUrl(lfsConfigUrl);
+						isFirstCommit=false;
 					}
 					if(null == lastCommit) {
 						if(isResume) {

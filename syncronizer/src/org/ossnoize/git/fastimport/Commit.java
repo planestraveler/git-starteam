@@ -9,16 +9,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ossnoize.git.fastimport.FastImportFile;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
-
-import org.sync.githelper.GitHelper;
-import org.sync.RepositoryHelper;
-import org.sync.RepositoryHelperFactory;
 
 public class Commit implements Markable {
 	private final static String COMMIT = "commit";
@@ -46,7 +42,6 @@ public class Commit implements Markable {
 	private boolean written;
 	private GitAttributes filesAttributes;
 	private String lfsConfigUrl;
-	private RepositoryHelper repositoryHelper;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -61,7 +56,6 @@ public class Commit implements Markable {
 		listOfOperation = new TreeMap<String, FileOperation>();
 		filesAttributes = null;
 		lfsConfigUrl = null;
-        repositoryHelper = RepositoryHelperFactory.getFactory().createHelper();
 	}
 
 	public void setAuthor(String name, String email) {
@@ -108,38 +102,22 @@ public class Commit implements Markable {
 			return;
 		}
 		if (null != filesAttributes) {
-			try {
-				//.gitattributes file generation
-				Data attributeFile = new Data();
-				attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
-				Blob aMarkedBlob = new Blob(attributeFile);
-				aMarkedBlob.writeTo(out);
-				FileModification attributes = new FileModification(aMarkedBlob);
-				attributes.setFileType(GitFileType.Normal);
-				attributes.setPath(".gitattributes");
-				this.addFileOperation(attributes);
-
-			} catch (InvalidPathException ex) {
-			}
+			//.gitattributes file generation
+			Data attributeFile = new Data();
+			attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
+			FastImportFile attributes = new FastImportFile(out, attributeFile, ".gitattributes");
+			this.addFileOperation(attributes.getModification());
 		}
 
-		Set<String> listOfTrackedFiles = repositoryHelper.getListOfTrackedFile(reference);
-		if (null != lfsConfigUrl && !listOfTrackedFiles.contains(".lfsconfig")) {
-			try {
-				//.lfsconfig file generation
-				Data lfsconfigFile = new Data();
-				String lfsString = "[lfs]\n";
-				lfsconfigFile.writeData(lfsString.getBytes("UTF-8"));
-				String urlString = "    url = " + lfsConfigUrl;
-				lfsconfigFile.writeData(urlString.getBytes("UTF-8"));
-				Blob aLfsMarkedBlob = new Blob(lfsconfigFile);
-				aLfsMarkedBlob.writeTo(out);
-				FileModification lfsconfig = new FileModification(aLfsMarkedBlob);
-				lfsconfig.setFileType(GitFileType.Normal);
-				lfsconfig.setPath(".lfsconfig");
-				this.addFileOperation(lfsconfig);
-			} catch (InvalidPathException ex) {
-			}
+		if (null != lfsConfigUrl) {
+			//.lfsconfig file generation
+			Data lfsconfigData = new Data();
+			String lfsString = "[lfs]\n";
+			lfsconfigData.writeData(lfsString.getBytes("UTF-8"));
+			String urlString = "    url = " + lfsConfigUrl;
+			lfsconfigData.writeData(urlString.getBytes("UTF-8"));
+			FastImportFile lfsconfigFile = new FastImportFile(out, lfsconfigData, ".lfsconfig");
+			this.addFileOperation(lfsconfigFile.getModification());
 		}
 		StringBuilder commitMsg = new StringBuilder();
 		commitMsg.append(COMMIT).append(" ").append(MessageFormat.format(headFormat, reference, "")).append('\n');

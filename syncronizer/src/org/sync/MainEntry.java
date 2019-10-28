@@ -27,10 +27,14 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.Set;
 
 import org.sync.commitstrategy.BasePopulationStrategy;
 import org.sync.commitstrategy.ChangeRequestPopulationStrategy;
 import org.sync.commitstrategy.RevisionPopulationStrategy;
+import org.sync.githelper.GitHelper;
+import org.sync.RepositoryHelper;
+import org.sync.RepositoryHelperFactory;
 
 import com.starbase.starteam.ClientApplication;
 import com.starbase.starteam.Project;
@@ -141,6 +145,7 @@ public class MainEntry {
         String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
         String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
         String lfsConfigUrl = (String) parser.getOptionValue(selectLfsConfigUrl);
+		RepositoryHelper repositoryHelper = RepositoryHelperFactory.getFactory().createHelper();
 
 		@SuppressWarnings("rawtypes")
 		Vector excludedLabels = parser.getOptionValues(excludeLabel);
@@ -288,7 +293,8 @@ public class MainEntry {
 						if(null != dumpTo) {
 							importer.setDumpFile(new File(dumpTo));
 						}
-						if(lfsConfigUrl != null){
+						Set<String> listOfTrackedFiles = repositoryHelper.getListOfTrackedFile(head);
+						if (null != lfsConfigUrl && !listOfTrackedFiles.contains(".lfsconfig")) {
 							importer.setLFSConfigUrl(lfsConfigUrl);
 						}
 						importer.setVerbose(verbose);
