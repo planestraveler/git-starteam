@@ -102,15 +102,11 @@ public class Commit implements Markable {
 			return;
 		}
 		if (null != filesAttributes) {
-			try {
-				//.gitattributes file generation
-				Data attributeFile = new Data();
-				attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
-				FastImportFile attributes = new FastImportFile(out, attributeFile, ".gitattributes");
-				this.addFileOperation(attributes);
-
-			} catch (InvalidPathException ex) {
-			}
+			//.gitattributes file generation
+			Data attributeFile = new Data();
+			attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
+			FastImportFile attributes = new FastImportFile(out, attributeFile, ".gitattributes");
+			this.addFileOperation(attributes.getModification());
 		}
 
 		if (null != lfsConfigUrl) {
