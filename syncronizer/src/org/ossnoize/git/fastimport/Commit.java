@@ -106,11 +106,7 @@ public class Commit implements Markable {
 				//.gitattributes file generation
 				Data attributeFile = new Data();
 				attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
-				Blob aMarkedBlob = new Blob(attributeFile);
-				aMarkedBlob.writeTo(out);
-				FileModification attributes = new FileModification(aMarkedBlob);
-				attributes.setFileType(GitFileType.Normal);
-				attributes.setPath(".gitattributes");
+				FastImportFile attributes = new FastImportFile(out, attributeFile, ".gitattributes");
 				this.addFileOperation(attributes);
 
 			} catch (InvalidPathException ex) {
