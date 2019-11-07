@@ -272,7 +272,9 @@ public class GitHelper extends RepositoryHelper {
 			return true;
     } else if (testFile.getName().equalsIgnoreCase(".gitattributes")) {
 			return true;
-    }
+    } else if (testFile.getName().equalsIgnoreCase(".lfsconfig")) {
+			return true;
+		}
 		return false;
 	}
 	
