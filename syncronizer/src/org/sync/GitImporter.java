@@ -78,7 +78,8 @@ public class GitImporter {
 	private Server server;
 	private Folder folder;
 	private long lastModifiedTime = 0;
-	private Commit lastCommit; 
+	private Commit lastCommit;
+	private boolean isFirstCommit = true;
 	// get the really old time as base information;
 	private CommitInformation lastInformation = null;
 	private String alternateHead = null;
@@ -97,6 +98,7 @@ public class GitImporter {
 	private UserMapping userMapping;
 	private long lfsMinimumSize = Long.MAX_VALUE;
 	private Pattern lfsRegex;
+	private String lfsConfigUrl = null;
 	private CommitPopulationStrategy CheckoutStrategy;
 	
 	private String buildDateToken = "build.date=";
@@ -387,6 +389,10 @@ public class GitImporter {
 					commit.addFileOperation(fo);
 					if (fattributes != null) {
 						commit.setAttributes(fattributes);
+					}
+					if(lfsConfigUrl != null && isFirstCommit){
+						commit.setLfsConfigUrl(lfsConfigUrl);
+						isFirstCommit=false;
 					}
 					if(null == lastCommit) {
 						if(isResume) {
@@ -1069,6 +1075,10 @@ public class GitImporter {
 
 	public void setLFSPattern(Pattern lfsRegexPattern) {
 		lfsRegex = lfsRegexPattern;
+	}
+
+	public void setLFSConfigUrl(String lfsUrl){
+		lfsConfigUrl = lfsUrl;
 	}
 
 	public void setCheckoutStrategy(CommitPopulationStrategy strategy) {

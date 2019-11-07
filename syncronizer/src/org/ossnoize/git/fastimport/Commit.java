@@ -1,5 +1,6 @@
 package org.ossnoize.git.fastimport;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ossnoize.git.fastimport.FastImportFile;
 import org.ossnoize.git.fastimport.enumeration.GitFileType;
 import org.ossnoize.git.fastimport.exception.InvalidPathException;
 
@@ -39,6 +41,7 @@ public class Commit implements Markable {
 	private boolean resumeFastImport;
 	private boolean written;
 	private GitAttributes filesAttributes;
+	private String lfsConfigUrl;
 
 	public Commit(String name, String email, String message, String reference, java.util.Date commitDate) throws IOException {
 		if(null == message) {
@@ -52,6 +55,7 @@ public class Commit implements Markable {
 		mark = new Mark();
 		listOfOperation = new TreeMap<String, FileOperation>();
 		filesAttributes = null;
+		lfsConfigUrl = null;
 	}
 
 	public void setAuthor(String name, String email) {
@@ -98,17 +102,22 @@ public class Commit implements Markable {
 			return;
 		}
 		if (null != filesAttributes) {
-			try {
-				Data attributeFile = new Data();
-				attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
-				Blob aMarkedBlob = new Blob(attributeFile);
-				aMarkedBlob.writeTo(out);
-				FileModification attributes = new FileModification(aMarkedBlob);
-				attributes.setFileType(GitFileType.Normal);
-				attributes.setPath(".gitattributes");
-				this.addFileOperation(attributes);
-			} catch (InvalidPathException ex) {
-			}
+			//.gitattributes file generation
+			Data attributeFile = new Data();
+			attributeFile.writeData(filesAttributes.toString().getBytes("UTF-8"));
+			FastImportFile attributes = new FastImportFile(out, attributeFile, ".gitattributes");
+			this.addFileOperation(attributes.getModification());
+		}
+
+		if (null != lfsConfigUrl) {
+			//.lfsconfig file generation
+			Data lfsconfigData = new Data();
+			String lfsString = "[lfs]\n";
+			lfsconfigData.writeData(lfsString.getBytes("UTF-8"));
+			String urlString = "    url = " + lfsConfigUrl;
+			lfsconfigData.writeData(urlString.getBytes("UTF-8"));
+			FastImportFile lfsconfigFile = new FastImportFile(out, lfsconfigData, ".lfsconfig");
+			this.addFileOperation(lfsconfigFile.getModification());
 		}
 		StringBuilder commitMsg = new StringBuilder();
 		commitMsg.append(COMMIT).append(" ").append(MessageFormat.format(headFormat, reference, "")).append('\n');
@@ -193,6 +202,12 @@ public class Commit implements Markable {
 	public Date getCommitDate() {
 		return commitDate;
 	}
-	
-	
+
+	public String getLfsConfigUrl() {
+		return lfsConfigUrl;
+	}
+
+	public void setLfsConfigUrl(String url) {
+		lfsConfigUrl = url;
+	}
 }

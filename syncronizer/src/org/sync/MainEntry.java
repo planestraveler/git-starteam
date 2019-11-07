@@ -27,10 +27,14 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.Set;
 
 import org.sync.commitstrategy.BasePopulationStrategy;
 import org.sync.commitstrategy.ChangeRequestPopulationStrategy;
 import org.sync.commitstrategy.RevisionPopulationStrategy;
+import org.sync.githelper.GitHelper;
+import org.sync.RepositoryHelper;
+import org.sync.RepositoryHelperFactory;
 
 import com.starbase.starteam.ClientApplication;
 import com.starbase.starteam.Project;
@@ -84,6 +88,7 @@ public class MainEntry {
 		CmdLineParser.Option excludeLabel = parser.addStringOption("exclude-label");
 		CmdLineParser.Option disableRecycleBinLookup = parser.addBooleanOption("disable-extended-removal-lookup");
 		CmdLineParser.Option createMigrationViewLabel = parser.addStringOption("add-migrated-view-label");
+		CmdLineParser.Option selectLfsConfigUrl = parser.addStringOption("lfs-config-url");
 
 		//TODO: Add a label creation at tip before starting the importation
 
@@ -139,6 +144,8 @@ public class MainEntry {
 
         String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
         String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
+        String lfsConfigUrl = (String) parser.getOptionValue(selectLfsConfigUrl);
+		RepositoryHelper repositoryHelper = RepositoryHelperFactory.getFactory().createHelper();
 
 		@SuppressWarnings("rawtypes")
 		Vector excludedLabels = parser.getOptionValues(excludeLabel);
@@ -286,6 +293,10 @@ public class MainEntry {
 						if(null != dumpTo) {
 							importer.setDumpFile(new File(dumpTo));
 						}
+						Set<String> listOfTrackedFiles = repositoryHelper.getListOfTrackedFile(head);
+						if (null != lfsConfigUrl && !listOfTrackedFiles.contains(".lfsconfig")) {
+							importer.setLFSConfigUrl(lfsConfigUrl);
+						}
 						importer.setVerbose(verbose);
 						importer.setCreateCheckpoints(createCheckpoints);
 						importer.setDomain(domain);
@@ -294,6 +305,7 @@ public class MainEntry {
 						importer.setLFSPattern(lfsRegexPattern);
 						importer.setLabelExclusion(excludedLabels);
 						importer.setEOLAttribute(eolAttribute);
+
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
 						if(allViews && view == null) {
