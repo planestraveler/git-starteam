@@ -330,6 +330,7 @@ public class GitHelper extends RepositoryHelper {
       if(null == gitFastImport) {
         ProcessBuilder process = new ProcessBuilder();
         process.command(gitExecutable, "fast-import", "--done");
+        System.err.println("Writing to :" + repositoryDir);
         process.directory(new File(repositoryDir));
         try {
           gitFastImport = process.start();
