@@ -24,21 +24,24 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.Set;
 
 import org.sync.commitstrategy.BasePopulationStrategy;
 import org.sync.commitstrategy.ChangeRequestPopulationStrategy;
 import org.sync.commitstrategy.RevisionPopulationStrategy;
+import org.sync.githelper.GitHelper;
+import org.sync.RepositoryHelper;
+import org.sync.RepositoryHelperFactory;
 
 import com.starbase.starteam.ClientApplication;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
+import com.starbase.util.OLEDate;
 import com.starbase.starteam.View;
 import com.starbase.starteam.vts.comm.NetMonitor;
-import com.starbase.util.OLEDate;
 
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
