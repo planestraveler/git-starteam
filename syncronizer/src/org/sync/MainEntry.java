@@ -24,24 +24,21 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import java.util.Set;
 
 import org.sync.commitstrategy.BasePopulationStrategy;
 import org.sync.commitstrategy.ChangeRequestPopulationStrategy;
 import org.sync.commitstrategy.RevisionPopulationStrategy;
-import org.sync.githelper.GitHelper;
-import org.sync.RepositoryHelper;
-import org.sync.RepositoryHelperFactory;
 
 import com.starbase.starteam.ClientApplication;
 import com.starbase.starteam.Project;
 import com.starbase.starteam.Server;
-import com.starbase.util.OLEDate;
 import com.starbase.starteam.View;
 import com.starbase.starteam.vts.comm.NetMonitor;
+import com.starbase.util.OLEDate;
 
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
@@ -145,7 +142,6 @@ public class MainEntry {
         String lfsSize = (String) parser.getOptionValue(trackAsLfsFromSize);
         String lfsPattern = (String) parser.getOptionValue(trackAsLfsPattern);
         String lfsConfigUrl = (String) parser.getOptionValue(selectLfsConfigUrl);
-		RepositoryHelper repositoryHelper = RepositoryHelperFactory.getFactory().createHelper();
 
 		@SuppressWarnings("rawtypes")
 		Vector excludedLabels = parser.getOptionValues(excludeLabel);
@@ -218,6 +214,7 @@ public class MainEntry {
 		if(null != workingFolder) {
 			RepositoryHelperFactory.getFactory().setWorkingFolder(workingFolder);
 		}
+		RepositoryHelper repositoryHelper = RepositoryHelperFactory.getFactory().createHelper();
 
 		ClientApplication.setName("git-starteam");
 		Server starteam = new Server(host, port);
