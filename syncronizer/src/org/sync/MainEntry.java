@@ -80,6 +80,7 @@ public class MainEntry {
 		CmdLineParser.Option isVerbose = parser.addBooleanOption("verbose");
 		CmdLineParser.Option isCheckpoint = parser.addBooleanOption("checkpoint");
 		CmdLineParser.Option selectSkipViewsPattern = parser.addStringOption("skip-views");
+		CmdLineParser.Option selectSkipExtensionsPattern = parser.addStringOption('x',"skip-ext");
 		CmdLineParser.Option trackAsLfsFromSize = parser.addStringOption("lfs-size");
 		CmdLineParser.Option trackAsLfsPattern = parser.addStringOption("lfs-pattern");
 		CmdLineParser.Option filteringViewLabel = parser.addStringOption("view-label-pattern");
@@ -111,6 +112,7 @@ public class MainEntry {
 		Boolean allViewsFlag = (Boolean) parser.getOptionValue(isAllViews);
 		boolean allViews = allViewsFlag != null && allViewsFlag;
 		String skipViewsPattern = (String) parser.getOptionValue(selectSkipViewsPattern);
+		String skipExtensionsPattern = (String) parser.getOptionValue(selectSkipExtensionsPattern);
 		String time = (String) parser.getOptionValue(selectTime);
 		Boolean timeBased = (Boolean) parser.getOptionValue(selectTimeBasedImport);
 		Boolean labelBased = (Boolean) parser.getOptionValue(selectLabelBasedImport);
@@ -309,14 +311,14 @@ public class MainEntry {
 						NetMonitor.onFile(new java.io.File("netmon.out"));
 
 						if(allViews && view == null) {
-							importer.generateAllViewsImport(p, null, folder, skipViewsPattern);
+							importer.generateAllViewsImport(p, null, folder, skipViewsPattern, skipExtensionsPattern);
 						} else {
 							boolean viewFound = false;
 							for(View v : p.getViews()) {
 								if(v.getName().trim().equalsIgnoreCase(view)) {
 									viewFound = true;
 									if(allViews) {
-										importer.generateAllViewsImport(p, v, folder, skipViewsPattern);
+										importer.generateAllViewsImport(p, v, folder, skipViewsPattern, skipExtensionsPattern);
 									} else {
 									    CommitPopulationStrategy strategy = null;
 									    if (changeRequestFilePattern != null) {
@@ -326,6 +328,7 @@ public class MainEntry {
                                         } else {
 									        strategy = new BasePopulationStrategy(v);
                                         }
+									    strategy.setSkipExtensions(skipExtensionsPattern);
                                         strategy.setFileRemoveExtendedInformation(!doNotUseRycleBin);
                                         importer.setCheckoutStrategy(strategy);
                                         if(null != timeBased && timeBased) {

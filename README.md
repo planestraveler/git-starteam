@@ -82,6 +82,7 @@ All four modes can:
   required administrator access to extract email addresses from the StarTeam server, and
   an explicit mapping cannot be found in the mail mapping file if one is provided 
   with the `-m <mailMappingFile>` command line option.
+* Skip files with specific extensions using the `-x <extensions>` option.
 
 The first three modes can:
 
