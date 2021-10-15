@@ -50,6 +50,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	protected boolean verbose;
 
 	protected boolean lookIntoRecycleBin;
+	private String[] skipExtensions;
 	
 	/**
 	 * Base Population strategy constructor using a view as its base of operations
@@ -136,9 +137,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 		for(Item i : f.getItems(f.getTypeNames().FILE)) {
 			if(i instanceof File) {
 				File historyFile = (File) i;
-				String path = gitpath + (gitpath.length() > 0 ? "/" : "") + historyFile.getName();
-
-				processFileForCommit(head, historyFile, path);
+				processForCommitOrSkip(head, gitpath, f, historyFile);
 			} else {
 				Log.log("Item " + f + "/" + i + " is not a file");
 			}
@@ -146,6 +145,24 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 		for(Folder subfolder : f.getSubFolders()) {
 			String newGitPath = gitpath + (gitpath.length() > 0 ? "/" : "") + subfolder.getName();
 			doFilePopulation(head, newGitPath, subfolder);
+		}
+	}
+
+	private void processForCommitOrSkip(String head, String gitpath, Folder f, File historyFile) {
+		String name = historyFile.getName();
+		String path = gitpath + (gitpath.length() > 0 ? "/" : "") + name;
+		boolean skip = false;
+
+		for (int i = 0; !skip && (i < skipExtensions.length); i++) {
+			String skipExt = skipExtensions[i];
+			if (name.endsWith(skipExt)) {
+				skip = true;
+				Log.logf("Item " + f + "/" + historyFile + " is a %s, Skipping", skipExt);
+			}
+		}
+
+		if (!skip) {
+			processFileForCommit(head, historyFile, path);
 		}
 	}
 
@@ -592,5 +609,16 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	@Override
 	public void setFileRemoveExtendedInformation(boolean enable) {
 		lookIntoRecycleBin = enable;
+	}
+
+	@Override
+	public void setSkipExtensions(String skipExtensionsPattern) {
+		skipExtensions = skipExtensionsPattern.split(",");
+		for (int i = 0; i < skipExtensions.length; i++) {
+			String skipExt = skipExtensions[i];
+			if (!skipExt.startsWith(".")) {
+				skipExtensions[i] = "." + skipExt;
+			}
+		}
 	}
 }

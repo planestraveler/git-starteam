@@ -129,5 +129,14 @@ public interface CommitPopulationStrategy {
 	 * This feature is enabled by default.
 	 */
 	void setFileRemoveExtendedInformation(boolean enable);
+	
+	/**
+	 * Tell the strategy to skip files of a given extension.
+	 * 
+	 * @param skipExtensionsPattern 
+	 *          Comma separated list of extensions to exclude from commits (with no whitespace).
+	 *
+	 */
+	void setSkipExtensions(String skipExtensionsPattern);
 
 }
