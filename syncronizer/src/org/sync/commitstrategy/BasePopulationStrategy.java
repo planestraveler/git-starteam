@@ -50,6 +50,7 @@ public class BasePopulationStrategy implements CommitPopulationStrategy {
 	protected boolean verbose;
 
 	protected boolean lookIntoRecycleBin;
+	private String[] skipExtensions;
 	
 	/**
 	 * Base Population strategy constructor using a view as its base of operations
