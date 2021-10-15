@@ -517,13 +517,14 @@ public class GitImporter {
 	}
 
 	private Folder findFirstFolder(Folder f, String folderPattern) {
-		// Bread-first search queue
+		// Breadth-first search queue
 		Deque<Folder> deque = new ArrayDeque<Folder>();
 		deque.addLast(f);
 		while(!deque.isEmpty()) {
 			Folder folder = deque.removeFirst();
 			String path = folder.getFolderHierarchy();
 			path = path.replace('\\', '/');
+			folderPattern = folderPattern.replace('\\', '/');
 			int indexOfFirstPath = path.indexOf('/');
 
 			path = path.substring(indexOfFirstPath + 1);
