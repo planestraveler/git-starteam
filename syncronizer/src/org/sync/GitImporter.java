@@ -517,13 +517,14 @@ public class GitImporter {
 	}
 
 	private Folder findFirstFolder(Folder f, String folderPattern) {
-		// Bread-first search queue
+		// Breadth-first search queue
 		Deque<Folder> deque = new ArrayDeque<Folder>();
 		deque.addLast(f);
 		while(!deque.isEmpty()) {
 			Folder folder = deque.removeFirst();
 			String path = folder.getFolderHierarchy();
 			path = path.replace('\\', '/');
+			folderPattern = folderPattern.replace('\\', '/');
 			int indexOfFirstPath = path.indexOf('/');
 
 			path = path.substring(indexOfFirstPath + 1);
@@ -819,7 +820,7 @@ public class GitImporter {
 		return views;
 	}
 
-	public void generateAllViewsImport(Project project, View rootView, String baseFolder, String skipPattern) {
+	public void generateAllViewsImport(Project project, View rootView, String baseFolder, String skipPattern, String skipExtensionsPattern) {
 		List<View> views = getAllViews(project, rootView, skipPattern);
 		int count = 0;
 
@@ -855,6 +856,7 @@ public class GitImporter {
 				View baseView = new View(view.getParentView(), view.getBaseConfiguration());
 				setFolder(baseView, baseFolder);
 				CommitPopulationStrategy baseStrategy = new BasePopulationStrategy(baseView);
+				baseStrategy.setSkipExtensions(skipExtensionsPattern);
 				setCheckoutStrategy(baseStrategy);
 				baseStrategy.filePopulation(alternateHead, folder);
 				lastFiles.addAll(baseStrategy.getLastFiles());
@@ -864,7 +866,9 @@ public class GitImporter {
 			lastCommit = null;
 			isResume = false;
 
-			setCheckoutStrategy(new BasePopulationStrategy(view));
+			CommitPopulationStrategy strategy = new BasePopulationStrategy(view);
+			strategy.setSkipExtensions(skipExtensionsPattern);
+			setCheckoutStrategy(strategy);
 			CheckoutStrategy.setInitialPathList(lastFiles);
 			CheckoutStrategy.setLastCommitTime(startDate);
 			generateAllLabelImport(view, baseFolder);
